@@ -2,13 +2,14 @@ import { OverviewChart } from "@/components/dashboard/overview-chart";
 import { RecentSales } from "@/components/dashboard/recent-sales";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowUpRight, DollarSign, Users, CreditCard, Activity } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export default function DashboardPage() {
   return (
-    <div className="space-y-8">
+    <div className="space-y-10">
       {/* Header */}
-      <div className="flex flex-col gap-1">
-        <h1 className="font-medium text-2xl tracking-tight">Overview</h1>
+      <div className="flex flex-col gap-1.5">
+        <h1 className="font-semibold text-2xl tracking-tight text-foreground">Overview</h1>
         <p className="text-muted-foreground text-sm">
           Welcome back, Josh. Here's what's happening today.
         </p>
@@ -21,63 +22,62 @@ export default function DashboardPage() {
             title: "Total Revenue",
             value: "$45,231.89",
             trend: "+20.1%",
-            icon: DollarSign,
+            subtext: "from last month"
           },
           {
             title: "Subscriptions",
             value: "+2350",
             trend: "+180.1%",
-            icon: Users,
+            subtext: "from last month"
           },
           {
             title: "Sales",
             value: "+12,234",
             trend: "+19%",
-            icon: CreditCard,
+            subtext: "from last month"
           },
           {
             title: "Active Now",
             value: "+573",
             trend: "+201",
-            icon: Activity,
-          },
+            subtext: "since last hour"
+          }
         ].map((item) => (
-          <div key={item.title} className="group relative overflow-hidden rounded-xl border border-border/50 bg-card p-6 transition-all hover:bg-muted/50">
-            <div className="flex items-center justify-between">
-              <span className="font-medium text-muted-foreground text-sm">{item.title}</span>
-              <item.icon className="h-4 w-4 text-muted-foreground/50 transition-colors group-hover:text-foreground" />
-            </div>
-            <div className="mt-4 flex items-baseline gap-2">
-              <span className="font-semibold text-2xl tracking-tight">{item.value}</span>
-              <span className="flex items-center text-xs text-emerald-500 font-medium">
-                 {item.trend}
-                 <ArrowUpRight className="ml-0.5 h-3 w-3" />
-              </span>
-            </div>
-          </div>
+             <div key={item.title} className="relative overflow-hidden rounded-xl bg-card p-6 shadow-[0_1px_3px_0_rgba(0,0,0,0.02)] transition-all hover:-translate-y-0.5 hover:shadow-[0_4px_12px_0_rgba(0,0,0,0.02)] border border-transparent hover:border-border/40">
+               <div className="flex items-center justify-between">
+                 <h3 className="text-xs font-medium uppercase tracking-widest text-muted-foreground/80">{item.title}</h3>
+                 <span className={cn(
+                    "flex items-center text-xs font-semibold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-400"
+                  )}>
+                    {item.trend}
+                 </span>
+               </div>
+               <div className="mt-4">
+                 <div className="text-4xl font-bold tracking-tighter text-foreground tabular-nums">
+                    {item.value}
+                 </div>
+                 <p className="mt-2 text-xs text-muted-foreground font-medium">
+                    {item.subtext}
+                 </p>
+               </div>
+             </div>
         ))}
       </div>
 
       {/* Main Content Grid */}
-      <div className="grid gap-6 lg:grid-cols-7">
-        {/* Chart Section */}
-        <div className="col-span-1 min-h-[400px] rounded-xl border border-border/50 bg-card p-6 lg:col-span-4">
-           <div className="mb-6 flex items-center justify-between">
-            <h3 className="font-medium text-sm">Revenue Over Time</h3>
-            <select className="bg-transparent text-xs text-muted-foreground outline-none">
-                <option>Monthly</option>
-                <option>Weekly</option>
-            </select>
-           </div>
-           <OverviewChart />
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-7">
+        <div className="col-span-1 lg:col-span-4 rounded-2xl bg-card p-8 shadow-[0_1px_3px_0_rgba(0,0,0,0.02)]">
+          <div className="mb-8">
+            <h3 className="font-semibold text-base text-foreground tracking-tight">Revenue Overview</h3>
+            <p className="text-sm text-muted-foreground mt-1 font-medium">Monthly revenue performance for the current year.</p>
+          </div>
+          <OverviewChart />
         </div>
-
-        {/* Recent Sales Section */}
-        <div className="col-span-1 rounded-xl border border-border/50 bg-card p-6 lg:col-span-3">
-           <div className="mb-6">
-            <h3 className="font-medium text-sm">Recent Sales</h3>
-            <p className="text-muted-foreground text-xs">You made 265 sales this month.</p>
-           </div>
+        <div className="col-span-1 lg:col-span-3 rounded-2xl bg-card p-8 shadow-[0_1px_3px_0_rgba(0,0,0,0.02)]">
+            <div className="mb-8">
+                <h3 className="font-semibold text-base text-foreground tracking-tight">Recent Sales</h3>
+                <p className="text-sm text-muted-foreground mt-1 font-medium">Latest transactions from your store.</p>
+            </div>
           <RecentSales />
         </div>
       </div>

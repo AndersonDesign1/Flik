@@ -31,38 +31,42 @@ export function AnalyticsChart() {
         <XAxis
           axisLine={false}
           dataKey="name"
-          fontSize={12}
-          stroke="#888888"
+          fontSize={10}
+          stroke="var(--muted-foreground)"
           tickLine={false}
+          tickMargin={15}
+          fontWeight={500}
         />
         <YAxis
           axisLine={false}
-          fontSize={12}
-          stroke="#888888"
+          fontSize={10}
+          stroke="var(--muted-foreground)"
           tickFormatter={(value) => `$${value}`}
           tickLine={false}
+          width={40}
+          fontWeight={500}
         />
         <Tooltip
           content={({ active, payload }) => {
             if (active && payload && payload.length) {
               return (
-                <div className="rounded-lg border border-border bg-popover p-2 shadow-md">
-                  <div className="flex flex-col gap-1">
-                    <span className="text-[0.70rem] text-muted-foreground uppercase">
-                      Volume
-                    </span>
-                    <span className="font-bold text-foreground">
-                      ${payload[0].value}
-                    </span>
-                  </div>
+                <div className="rounded-lg bg-foreground text-background px-3 py-1.5 shadow-xl">
+                  <span className="font-bold font-mono text-xs">
+                    ${payload[0].value?.toLocaleString()}
+                  </span>
                 </div>
               );
             }
             return null;
           }}
-          cursor={{ fill: "var(--muted)" }}
+          cursor={{ fill: "var(--foreground)", opacity: 0.05 }}
         />
-        <Bar dataKey="total" fill="var(--foreground)" radius={[4, 4, 0, 0]} />
+        <Bar
+            dataKey="total"
+            fill="var(--primary)"
+            radius={[4, 4, 4, 4]} // Fully rounded top and bottom for a "pill" look
+            fillOpacity={0.9}
+        />
       </BarChart>
     </ResponsiveContainer>
   );

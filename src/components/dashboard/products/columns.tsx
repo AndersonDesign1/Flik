@@ -35,6 +35,7 @@ export const columns: ColumnDef<DashboardProduct>[] = [
           table.getIsAllPageRowsSelected() ||
           (table.getIsSomePageRowsSelected() && "indeterminate")
         }
+        className="translate-y-[2px]"
         onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
       />
     ),
@@ -42,6 +43,7 @@ export const columns: ColumnDef<DashboardProduct>[] = [
       <Checkbox
         aria-label="Select row"
         checked={row.getIsSelected()}
+        className="translate-y-[2px]"
         onCheckedChange={(value) => row.toggleSelected(!!value)}
       />
     ),
@@ -50,11 +52,11 @@ export const columns: ColumnDef<DashboardProduct>[] = [
   },
   {
     accessorKey: "image",
-    header: "Image",
+    header: "Product",
     cell: ({ row }) => {
       const image = row.getValue("image") as string;
       return (
-        <div className="relative h-10 w-10 overflow-hidden rounded-md border border-border bg-muted">
+        <div className="relative h-10 w-10 overflow-hidden rounded-lg border border-border/50 bg-muted/50">
           {image ? (
             <Image
               alt={row.getValue("name")}
@@ -63,7 +65,7 @@ export const columns: ColumnDef<DashboardProduct>[] = [
               src={image}
             />
           ) : (
-            <div className="flex h-full w-full items-center justify-center bg-secondary text-muted-foreground text-xs">
+            <div className="flex h-full w-full items-center justify-center text-muted-foreground/40 text-xs font-medium uppercase tracking-wider">
               Img
             </div>
           )}
@@ -76,17 +78,17 @@ export const columns: ColumnDef<DashboardProduct>[] = [
     header: ({ column }) => {
       return (
         <Button
-          className="-ml-3 h-8"
+          className="-ml-3 h-8 text-xs font-medium uppercase tracking-wider text-muted-foreground hover:text-foreground"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           variant="ghost"
         >
           Name
-          <ArrowUpDown className="ml-2 h-4 w-4" />
+          <ArrowUpDown className="ml-2 h-3 w-3" />
         </Button>
       );
     },
     cell: ({ row }) => (
-      <div className="font-medium">{row.getValue("name")}</div>
+      <div className="font-medium text-foreground text-sm">{row.getValue("name")}</div>
     ),
   },
   {
@@ -96,8 +98,8 @@ export const columns: ColumnDef<DashboardProduct>[] = [
       const status = row.getValue("status") as string;
       return (
         <Badge
-          className="capitalize"
-          variant={status === "active" ? "default" : "outline"}
+          className="capitalize font-normal text-xs px-2 py-0.5"
+          variant={status === "active" ? "default" : "secondary"}
         >
           {status}
         </Badge>
@@ -106,21 +108,21 @@ export const columns: ColumnDef<DashboardProduct>[] = [
   },
   {
     accessorKey: "price",
-    header: () => <div className="text-right">Price</div>,
+    header: () => <div className="text-right text-xs font-medium uppercase tracking-wider text-muted-foreground">Price</div>,
     cell: ({ row }) => {
       const amount = Number.parseFloat(row.getValue("price"));
       const formatted = new Intl.NumberFormat("en-US", {
         style: "currency",
         currency: "USD",
       }).format(amount);
-      return <div className="text-right font-medium">{formatted}</div>;
+      return <div className="text-right font-medium tabular-nums text-foreground">{formatted}</div>;
     },
   },
   {
     accessorKey: "inventory",
-    header: () => <div className="text-right">Inventory</div>,
+    header: () => <div className="text-right text-xs font-medium uppercase tracking-wider text-muted-foreground">Inventory</div>,
     cell: ({ row }) => (
-      <div className="text-right">{row.getValue("inventory")}</div>
+      <div className="text-right tabular-nums text-muted-foreground">{row.getValue("inventory")}</div>
     ),
   },
   {
@@ -128,17 +130,17 @@ export const columns: ColumnDef<DashboardProduct>[] = [
     header: ({ column }) => {
       return (
         <Button
-          className="w-full justify-end px-0 hover:bg-transparent"
+          className="w-full justify-end px-0 hover:bg-transparent text-xs font-medium uppercase tracking-wider text-muted-foreground hover:text-foreground"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           variant="ghost"
         >
           Sales
-          <ArrowUpDown className="ml-2 h-4 w-4" />
+          <ArrowUpDown className="ml-2 h-3 w-3" />
         </Button>
       );
     },
     cell: ({ row }) => (
-      <div className="text-right">{row.getValue("sales")}</div>
+      <div className="text-right tabular-nums text-muted-foreground">{row.getValue("sales")}</div>
     ),
   },
   {
@@ -149,21 +151,22 @@ export const columns: ColumnDef<DashboardProduct>[] = [
       return (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button className="h-8 w-8 p-0" variant="ghost">
+            <Button className="h-8 w-8 p-0 hover:bg-muted/50" variant="ghost">
               <span className="sr-only">Open menu</span>
-              <MoreHorizontal className="h-4 w-4" />
+              <MoreHorizontal className="h-4 w-4 text-muted-foreground" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+            <DropdownMenuLabel className="font-normal text-xs text-muted-foreground">Actions</DropdownMenuLabel>
             <DropdownMenuItem
+              className="text-sm"
               onClick={() => navigator.clipboard.writeText(payment.id)}
             >
               Copy product ID
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>View details</DropdownMenuItem>
-            <DropdownMenuItem>Edit product</DropdownMenuItem>
+            <DropdownMenuItem className="text-sm">View details</DropdownMenuItem>
+            <DropdownMenuItem className="text-sm">Edit product</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       );

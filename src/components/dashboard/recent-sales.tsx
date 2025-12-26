@@ -48,26 +48,28 @@ const recentSalesData = [
 
 export function RecentSales() {
   return (
-    <div className="space-y-6">
+    <div className="space-y-7">
       {recentSalesData.map((sale) => (
-        <div key={sale.email} className="flex items-center group">
-          <Avatar className="h-8 w-8 border border-border/50">
-            <AvatarImage alt={sale.name} src={sale.avatar} />
-            <AvatarFallback className="text-[10px] text-muted-foreground bg-muted/50">{sale.initials}</AvatarFallback>
-          </Avatar>
-          <div className="ml-4 space-y-0.5">
-            <p className="font-medium text-sm leading-none tracking-tight">{sale.name}</p>
-            <p className="text-muted-foreground text-xs font-normal">
-              {sale.email}
-            </p>
+        <div key={sale.email} className="flex items-center group justify-between">
+          <div className="flex items-center gap-4">
+             <Avatar className="h-9 w-9 border border-border/40 sm:h-9 sm:w-9">
+                <AvatarImage alt={sale.name} src={sale.avatar} />
+                <AvatarFallback className="text-[10px] text-muted-foreground bg-muted/30">{sale.initials}</AvatarFallback>
+             </Avatar>
+             <div className="space-y-1">
+                <p className="font-medium text-sm leading-none text-foreground tracking-tight">{sale.name}</p>
+                <p className="text-muted-foreground text-xs font-normal">
+                {sale.email}
+                </p>
+             </div>
           </div>
-          <div className="ml-auto flex items-center gap-2 font-medium">
-            <span className="text-sm font-medium tabular-nums">{sale.amount}</span>
+          <div className="flex items-center gap-4">
+            <span className="text-sm font-medium tabular-nums text-foreground">{sale.amount}</span>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button className="h-6 w-6 p-0 opacity-0 transition-opacity group-hover:opacity-100 data-[state=open]:opacity-100" variant="ghost">
+                <Button className="h-7 w-7 p-0 opacity-0 transition-opacity group-hover:opacity-100 data-[state=open]:opacity-100 ring-offset-background focus-visible:ring-1 focus-visible:ring-ring" variant="ghost">
                   <span className="sr-only">Open menu</span>
-                  <MoreHorizontal className="h-3 w-3 text-muted-foreground" />
+                  <MoreHorizontal className="h-4 w-4 text-muted-foreground" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-[160px]">

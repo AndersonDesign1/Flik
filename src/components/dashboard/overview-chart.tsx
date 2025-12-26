@@ -27,62 +27,84 @@ const data = [
 
 export function OverviewChart() {
   return (
-    <ResponsiveContainer height={300} width="100%">
-      <AreaChart data={data} margin={{ top: 10, right: 0, left: -20, bottom: 0 }}>
+    <ResponsiveContainer height={350} width="100%">
+      <AreaChart data={data}>
         <defs>
-          <linearGradient id="colorTotal" x1="0" x2="0" y1="0" y2="1">
-            <stop offset="5%" stopColor="var(--foreground)" stopOpacity={0.1} />
-            <stop offset="95%" stopColor="var(--foreground)" stopOpacity={0} />
+          <linearGradient id="colorTotal" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="5%" stopColor="var(--primary)" stopOpacity={0.15} />
+            <stop offset="95%" stopColor="var(--primary)" stopOpacity={0} />
           </linearGradient>
         </defs>
         <CartesianGrid
-          opacity={0.1}
-          stroke="var(--foreground)"
-          strokeDasharray="4 4"
+          strokeDasharray="3 3"
           vertical={false}
+          stroke="var(--foreground)"
+          opacity={0.06}
         />
         <XAxis
-          axisLine={false}
           dataKey="name"
-          fontSize={11}
           stroke="var(--muted-foreground)"
+          fontSize={10}
           tickLine={false}
-          tickMargin={10}
+          axisLine={false}
+          tickMargin={15}
+          fontWeight={500}
         />
         <YAxis
-          axisLine={false}
-          fontSize={11}
           stroke="var(--muted-foreground)"
-          tickFormatter={(value) => `$${value}`}
+          fontSize={10}
           tickLine={false}
+          axisLine={false}
+          tickFormatter={(value) => `$${value}`}
+          fontWeight={500}
+          width={40}
         />
         <Tooltip
-          content={({ active, payload }) => {
-            if (active && payload && payload.length) {
-              return (
-                <div className="rounded-md border border-border bg-popover px-3 py-1.5 shadow-sm">
-                  <div className="flex flex-col gap-0.5">
-                    <span className="text-[0.65rem] text-muted-foreground uppercase tracking-wider">
-                      Revenue
-                    </span>
-                    <span className="font-bold text-foreground font-mono">
-                      ${payload[0].value}
-                    </span>
-                  </div>
-                </div>
-              );
-            }
-            return null;
-          }}
-          cursor={{ stroke: "var(--muted-foreground)", strokeWidth: 1, strokeDasharray: "4 4" }}
+            content={({ active, payload }) => {
+                if (active && payload && payload.length) {
+                return (
+                    <div className="rounded-lg bg-foreground text-background px-3 py-1.5 shadow-xl">
+                        <span className="font-bold font-mono text-xs">
+                            ${payload[0].value?.toLocaleString()}
+                        </span>
+                    </div>
+                );
+                }
+                return null;
+            }}
+            cursor={{
+                stroke: "var(--foreground)",
+                strokeWidth: 1,
+                strokeDasharray: "4 4",
+                opacity: 0.2
+            }}
         />
         <Area
-          dataKey="total"
-          fill="url(#colorTotal)"
-          fillOpacity={1}
-          stroke="var(--foreground)"
-          strokeWidth={1.5}
           type="monotone"
+          dataKey="total"
+          stroke="var(--primary)"
+          strokeWidth={2.5}
+          fillOpacity={1}
+          fill="url(#colorTotal)"
+          activeDot={{
+            r: 4,
+            strokeWidth: 0,
+            fill: "var(--primary)",
+            className: "animate-ping" // Optional: adds a pulse effect if tailwind animate is set, otherwise just a solid dot
+          }}
+        />
+        {/* Secondary Halo Dot for visual polish (static on top of activeDot) */}
+        <Area
+             type="monotone"
+             dataKey="total"
+             stroke="none"
+             fill="none"
+             activeDot={{
+                 r: 6,
+                 stroke: "var(--background)",
+                 strokeWidth: 2,
+                 fill: "var(--primary)"
+             }}
         />
       </AreaChart>
     </ResponsiveContainer>
