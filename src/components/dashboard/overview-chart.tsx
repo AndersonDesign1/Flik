@@ -27,8 +27,8 @@ const data = [
 
 export function OverviewChart() {
   return (
-    <ResponsiveContainer height={350} width="100%">
-      <AreaChart data={data}>
+    <ResponsiveContainer height={300} width="100%">
+      <AreaChart data={data} margin={{ top: 10, right: 0, left: -20, bottom: 0 }}>
         <defs>
           <linearGradient id="colorTotal" x1="0" x2="0" y1="0" y2="1">
             <stop offset="5%" stopColor="var(--foreground)" stopOpacity={0.1} />
@@ -36,23 +36,23 @@ export function OverviewChart() {
           </linearGradient>
         </defs>
         <CartesianGrid
-          opacity={0.5}
-          stroke="var(--border)"
-          strokeDasharray="3 3"
+          opacity={0.1}
+          stroke="var(--foreground)"
+          strokeDasharray="4 4"
           vertical={false}
         />
         <XAxis
           axisLine={false}
           dataKey="name"
-          fontSize={12}
-          stroke="#888888"
+          fontSize={11}
+          stroke="var(--muted-foreground)"
           tickLine={false}
           tickMargin={10}
         />
         <YAxis
           axisLine={false}
-          fontSize={12}
-          stroke="#888888"
+          fontSize={11}
+          stroke="var(--muted-foreground)"
           tickFormatter={(value) => `$${value}`}
           tickLine={false}
         />
@@ -60,12 +60,12 @@ export function OverviewChart() {
           content={({ active, payload }) => {
             if (active && payload && payload.length) {
               return (
-                <div className="rounded-lg border border-border bg-popover p-2 shadow-md">
-                  <div className="flex flex-col gap-1">
-                    <span className="text-[0.70rem] text-muted-foreground uppercase">
+                <div className="rounded-md border border-border bg-popover px-3 py-1.5 shadow-sm">
+                  <div className="flex flex-col gap-0.5">
+                    <span className="text-[0.65rem] text-muted-foreground uppercase tracking-wider">
                       Revenue
                     </span>
-                    <span className="font-bold text-foreground">
+                    <span className="font-bold text-foreground font-mono">
                       ${payload[0].value}
                     </span>
                   </div>
@@ -74,13 +74,14 @@ export function OverviewChart() {
             }
             return null;
           }}
+          cursor={{ stroke: "var(--muted-foreground)", strokeWidth: 1, strokeDasharray: "4 4" }}
         />
         <Area
           dataKey="total"
           fill="url(#colorTotal)"
           fillOpacity={1}
           stroke="var(--foreground)"
-          strokeWidth={2}
+          strokeWidth={1.5}
           type="monotone"
         />
       </AreaChart>

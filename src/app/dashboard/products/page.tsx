@@ -125,9 +125,12 @@ export default function ProductsPage() {
   const selectedProduct = MOCK_PRODUCTS.find((p) => p.id === selectedId);
 
   return (
-    <div className="flex h-full flex-1 flex-col space-y-4">
-      <div className="flex items-center justify-between space-y-2">
-        <h2 className="font-bold text-3xl tracking-tight">Products</h2>
+    <div className="flex h-full flex-1 flex-col space-y-8">
+      <div className="flex flex-col gap-1">
+        <h1 className="font-medium text-2xl tracking-tight">Products</h1>
+         <p className="text-muted-foreground text-sm">
+          Manage your product catalog.
+        </p>
       </div>
       <div className="h-full flex-1 overflow-hidden">
         <SplitView
