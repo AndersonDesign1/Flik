@@ -44,7 +44,7 @@ export function TransactionDetail({ id }: TransactionDetailProps) {
   const time = "3:42 PM";
   const statusKey = "Completed" as keyof typeof statusConfig;
   const status = statusConfig[statusKey];
-  const StatusIcon = status.icon;
+  const _StatusIcon = status.icon;
 
   return (
     <div className="flex h-full min-h-0 flex-col">

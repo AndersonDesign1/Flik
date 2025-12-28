@@ -3,7 +3,7 @@
 import {
   type ProgressBarItem,
   ProgressBarList,
-} from "@/components/dashboard/shared";
+} from "@/components/dashboard/shared/progress-bar-list";
 
 interface PaymentMethod {
   name: string;
@@ -34,7 +34,9 @@ export function PaymentMethodsCard({
     <ProgressBarList
       formatValue={(v) => `$${(v / 1000).toFixed(0)}k`}
       items={items}
-      onViewAll={() => {}}
+      onViewAll={() => {
+        // TODO: Implement view all payment methods
+      }}
       title="Payment Methods"
       totalValue={totalValue}
       trend={trend}

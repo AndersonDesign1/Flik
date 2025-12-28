@@ -38,8 +38,8 @@ const NAV_ITEMS = [
 ];
 
 const FOOTER_ITEMS = [
-  { href: "#", label: "Help Center", icon: HelpCircle },
-  { href: "#", label: "Feedback", icon: MessageSquare },
+  { href: "/dashboard/help", label: "Help Center", icon: HelpCircle },
+  { href: "/dashboard/feedback", label: "Feedback", icon: MessageSquare },
   { href: "/dashboard/settings", label: "Settings", icon: Settings },
 ];
 
@@ -90,22 +90,26 @@ export function AppSidebar() {
 
       {/* Footer Links */}
       <SidebarFooter className="border-border/30 border-t">
-        <SidebarMenu>
-          {FOOTER_ITEMS.map((item) => (
-            <SidebarMenuItem key={item.label}>
-              <SidebarMenuButton
-                asChild
-                isActive={pathname === item.href}
-                tooltip={item.label}
-              >
-                <Link href={item.href}>
-                  <item.icon />
-                  <span>{item.label}</span>
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          ))}
-        </SidebarMenu>
+        <SidebarGroup className="p-0">
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {FOOTER_ITEMS.map((item) => (
+                <SidebarMenuItem key={item.label}>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={pathname === item.href}
+                    tooltip={item.label}
+                  >
+                    <Link href={item.href}>
+                      <item.icon />
+                      <span>{item.label}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
       </SidebarFooter>
     </Sidebar>
   );

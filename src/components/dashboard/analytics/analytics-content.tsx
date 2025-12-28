@@ -2,120 +2,32 @@
 
 import { TrendingDown } from "lucide-react";
 import { useState } from "react";
+import { AnalyticsChart } from "@/components/dashboard/analytics/analytics-chart";
+import { LeadsByStatusCard } from "@/components/dashboard/analytics/leads-by-status-card";
 import {
-  AnalyticsChart,
-  LeadsByStatusCard,
   type PageData,
   PageDetail,
-  TopPagesTable,
-  TrafficSourcesCard,
-  WebVisitsCard,
-} from "@/components/dashboard/analytics";
-import { MetricCard } from "@/components/dashboard/shared";
+} from "@/components/dashboard/analytics/page-detail";
+import { TopPagesTable } from "@/components/dashboard/analytics/top-pages-table";
+import { TrafficSourcesCard } from "@/components/dashboard/analytics/traffic-sources-card";
+import { WebVisitsCard } from "@/components/dashboard/analytics/web-visits-card";
+import { MetricCard } from "@/components/dashboard/shared/metric-card";
 import { Card } from "@/components/ui/card";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
+import type { AnalyticsData } from "@/lib/data";
 
-const METRICS = [
-  {
-    title: "Total Traffic",
-    value: "485,000",
-    trend: "+12.5%",
-    trendUp: true,
-    subtext: "vs Last Month",
-  },
-  {
-    title: "Conversion Rate",
-    value: "18.5%",
-    trend: "-2.3%",
-    trendUp: false,
-    subtext: "vs Last Month",
-  },
-  {
-    title: "Engaged Sessions",
-    value: "92,450",
-    trend: "+25%",
-    trendUp: true,
-    subtext: "vs Last Month",
-  },
-  {
-    title: "Avg. Session Duration",
-    value: "4m 32s",
-    trend: "+18%",
-    trendUp: true,
-    subtext: "vs Last Month",
-  },
-];
+interface AnalyticsContentProps {
+  data: AnalyticsData;
+}
 
-const TRAFFIC_SOURCES = [
-  {
-    name: "Organic Search",
-    value: 156_420,
-    percent: 85,
-    color: "bg-blue-500",
-  },
-  {
-    name: "Direct Traffic",
-    value: 98_340,
-    percent: 65,
-    color: "bg-indigo-500",
-  },
-  {
-    name: "Referral",
-    value: 45_200,
-    percent: 40,
-    color: "bg-emerald-500",
-  },
-  {
-    name: "Social Media",
-    value: 28_150,
-    percent: 25,
-    color: "bg-amber-500",
-  },
-];
-
-const TOP_PAGES: PageData[] = [
-  {
-    path: "/products",
-    title: "Products Page",
-    views: "45,230",
-    bounceRate: "32%",
-    avgTime: "3m 45s",
-    trend: "+12%",
-  },
-  {
-    path: "/checkout",
-    title: "Checkout Flow",
-    views: "28,450",
-    bounceRate: "18%",
-    avgTime: "5m 12s",
-    trend: "+8%",
-  },
-  {
-    path: "/",
-    title: "Homepage",
-    views: "125,800",
-    bounceRate: "45%",
-    avgTime: "1m 30s",
-    trend: "+15%",
-  },
-  {
-    path: "/categories",
-    title: "Categories",
-    views: "38,920",
-    bounceRate: "38%",
-    avgTime: "2m 15s",
-    trend: "-3%",
-  },
-];
-
-export function AnalyticsContent() {
+export function AnalyticsContent({ data }: AnalyticsContentProps) {
   const [selectedPage, setSelectedPage] = useState<PageData | null>(null);
 
   return (
     <div className="space-y-6">
       {/* Metrics Row */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {METRICS.map((item) => (
+        {data.metrics.map((item) => (
           <MetricCard key={item.title} {...item} />
         ))}
       </div>
@@ -130,7 +42,7 @@ export function AnalyticsContent() {
                 Sales Revenue
               </h3>
               <div className="mt-1 font-bold text-2xl text-foreground tabular-nums tracking-tight">
-                $1,631,241
+                {data.salesRevenue}
               </div>
               <div className="mt-0.5 flex items-center gap-1.5">
                 <span className="flex items-center gap-0.5 font-medium text-red-500 text-xs">
@@ -160,7 +72,7 @@ export function AnalyticsContent() {
           <AnalyticsChart />
         </Card>
 
-        <TrafficSourcesCard sources={TRAFFIC_SOURCES} />
+        <TrafficSourcesCard sources={data.trafficSources} />
       </div>
 
       {/* Leads by Status + Web Visits */}
@@ -170,7 +82,10 @@ export function AnalyticsContent() {
       </div>
 
       {/* Top Pages Table */}
-      <TopPagesTable onRowClick={setSelectedPage} pages={TOP_PAGES} />
+      <TopPagesTable
+        onRowClick={setSelectedPage}
+        pages={data.topPages as PageData[]}
+      />
 
       {/* Sheet for Page Detail */}
       <Sheet

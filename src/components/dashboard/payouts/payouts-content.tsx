@@ -1,5 +1,6 @@
 "use client";
 
+import type { LucideIcon } from "lucide-react";
 import {
   Banknote,
   CreditCard,
@@ -9,17 +10,15 @@ import {
   Wallet,
 } from "lucide-react";
 import { useState } from "react";
+import { MonthlyEarningsCard } from "@/components/dashboard/payouts/monthly-earnings-card";
+import { PaymentMethodsCard } from "@/components/dashboard/payouts/payment-methods-card";
+import { TransactionDetail } from "@/components/dashboard/payouts/transaction-detail";
+import { MetricCard } from "@/components/dashboard/shared/metric-card";
 import {
-  MonthlyEarningsCard,
-  PaymentMethodsCard,
-  TransactionDetail,
-} from "@/components/dashboard/payouts";
-import {
-  MetricCard,
   type StatusType,
   statusConfig,
-  TableToolbar,
-} from "@/components/dashboard/shared";
+} from "@/components/dashboard/shared/status-config";
+import { TableToolbar } from "@/components/dashboard/shared/table-toolbar";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -36,128 +35,22 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import type { PayoutsData } from "@/lib/data";
 import { cn } from "@/lib/utils";
 
-const METRICS = [
-  {
-    title: "Available Balance",
-    value: "$12,450.00",
-    trend: "+18.2%",
-    trendUp: true,
-    subtext: "Ready for payout",
-    icon: Wallet,
-    primary: true,
-  },
-  {
-    title: "Pending Payouts",
-    value: "$3,200.00",
-    subtext: "Scheduled tomorrow",
-    icon: Banknote,
-  },
-  {
-    title: "This Month",
-    value: "$24,890.00",
-    trend: "+32.5%",
-    trendUp: true,
-    subtext: "vs last month",
-    icon: TrendingUp,
-  },
-  {
-    title: "Total Earned",
-    value: "$847,520.00",
-    trend: "+24.8%",
-    trendUp: true,
-    subtext: "All time",
-    icon: CreditCard,
-  },
-];
+// Icon map for server-sent icon names
+const iconMap: Record<string, LucideIcon> = {
+  Wallet,
+  Banknote,
+  TrendingUp,
+  CreditCard,
+};
 
-const PAYMENT_METHODS = [
-  {
-    name: "Bank Transfer",
-    value: 425_000,
-    percent: 85,
-    color: "bg-blue-500",
-  },
-  {
-    name: "PayPal",
-    value: 198_340,
-    percent: 55,
-    color: "bg-indigo-500",
-  },
-  {
-    name: "Stripe",
-    value: 145_200,
-    percent: 40,
-    color: "bg-emerald-500",
-  },
-  {
-    name: "Wise",
-    value: 78_980,
-    percent: 25,
-    color: "bg-amber-500",
-  },
-];
-
-interface Transaction {
-  id: string;
-  date: string;
-  time: string;
-  amount: string;
-  method: string;
-  account: string;
-  status: StatusType;
+interface PayoutsContentProps {
+  data: PayoutsData;
 }
 
-const TRANSACTIONS: Transaction[] = [
-  {
-    id: "TRX-1001",
-    date: "Mar 10, 2024",
-    time: "3:42 PM",
-    amount: "+$2,450.00",
-    method: "Bank Transfer",
-    account: "****4242",
-    status: "Completed",
-  },
-  {
-    id: "TRX-1002",
-    date: "Mar 9, 2024",
-    time: "2:15 PM",
-    amount: "+$1,890.00",
-    method: "PayPal",
-    account: "user@email.com",
-    status: "Completed",
-  },
-  {
-    id: "TRX-1003",
-    date: "Mar 8, 2024",
-    time: "11:30 AM",
-    amount: "+$3,200.00",
-    method: "Stripe",
-    account: "acct_xxx",
-    status: "Pending",
-  },
-  {
-    id: "TRX-1004",
-    date: "Mar 7, 2024",
-    time: "4:20 PM",
-    amount: "+$950.00",
-    method: "Bank Transfer",
-    account: "****4242",
-    status: "Completed",
-  },
-  {
-    id: "TRX-1005",
-    date: "Mar 6, 2024",
-    time: "9:45 AM",
-    amount: "+$1,650.00",
-    method: "Wise",
-    account: "****8821",
-    status: "Failed",
-  },
-];
-
-export function PayoutsContent() {
+export function PayoutsContent({ data }: PayoutsContentProps) {
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
   return (
@@ -178,15 +71,24 @@ export function PayoutsContent() {
 
       {/* Metrics Row */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {METRICS.map((item) => (
-          <MetricCard key={item.title} {...item} />
+        {data.metrics.map((item) => (
+          <MetricCard
+            icon={iconMap[item.icon]}
+            key={item.title}
+            primary={item.primary}
+            subtext={item.subtext}
+            title={item.title}
+            trend={item.trend}
+            trendUp={item.trendUp}
+            value={item.value}
+          />
         ))}
       </div>
 
       {/* Earnings Stats + Payment Methods */}
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         <MonthlyEarningsCard />
-        <PaymentMethodsCard methods={PAYMENT_METHODS} />
+        <PaymentMethodsCard methods={data.paymentMethods} />
       </div>
 
       {/* Transactions Table */}
@@ -212,8 +114,8 @@ export function PayoutsContent() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {TRANSACTIONS.map((tx) => {
-              const status = statusConfig[tx.status];
+            {data.transactions.map((tx) => {
+              const status = statusConfig[tx.status as StatusType];
               return (
                 <TableRow
                   className="cursor-pointer border-border/20 transition-colors hover:bg-muted/50"

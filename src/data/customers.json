@@ -1,0 +1,128 @@
+{
+  "customers": [
+    {
+      "id": "CUST-001",
+      "name": "Alice Johnson",
+      "email": "alice@example.com",
+      "spent": 1250.0,
+      "lastOrder": "2024-03-10",
+      "status": "active"
+    },
+    {
+      "id": "CUST-002",
+      "name": "Bob Smith",
+      "email": "bob@example.com",
+      "spent": 450.0,
+      "lastOrder": "2024-03-08",
+      "status": "inactive"
+    },
+    {
+      "id": "CUST-003",
+      "name": "Charlie Davis",
+      "email": "charlie@example.com",
+      "spent": 3200.0,
+      "lastOrder": "2024-03-12",
+      "status": "active"
+    },
+    {
+      "id": "CUST-004",
+      "name": "Diana Evans",
+      "email": "diana@example.com",
+      "spent": 89.0,
+      "lastOrder": "2024-02-28",
+      "status": "active"
+    },
+    {
+      "id": "CUST-005",
+      "name": "Evan Wright",
+      "email": "evan@example.com",
+      "spent": 0.0,
+      "lastOrder": "-",
+      "status": "inactive"
+    },
+    {
+      "id": "CUST-006",
+      "name": "Fiona Green",
+      "email": "fiona@example.com",
+      "spent": 560.0,
+      "lastOrder": "2024-03-01",
+      "status": "active"
+    },
+    {
+      "id": "CUST-007",
+      "name": "George Hall",
+      "email": "george@example.com",
+      "spent": 120.0,
+      "lastOrder": "2024-03-05",
+      "status": "active"
+    },
+    {
+      "id": "CUST-008",
+      "name": "Hannah Lee",
+      "email": "hannah@example.com",
+      "spent": 2300.0,
+      "lastOrder": "2024-03-11",
+      "status": "active"
+    }
+  ],
+  "metrics": [
+    {
+      "title": "Total Customers",
+      "value": "4,972",
+      "trend": "+19.08%",
+      "trendUp": true,
+      "subtext": "Last 30 days",
+      "icon": "Users"
+    },
+    {
+      "title": "Active Customers",
+      "value": "3,847",
+      "trend": "+12.5%",
+      "trendUp": true,
+      "subtext": "Last 30 days",
+      "icon": "UserCheck"
+    },
+    {
+      "title": "New This Month",
+      "value": "482",
+      "trend": "+28.4%",
+      "trendUp": true,
+      "subtext": "vs last month",
+      "icon": "UserPlus"
+    },
+    {
+      "title": "Avg Order Value",
+      "value": "$142.50",
+      "trend": "-3.2%",
+      "trendUp": false,
+      "subtext": "Last 30 days",
+      "icon": "TrendingUp"
+    }
+  ],
+  "segments": [
+    {
+      "name": "VIP Customers",
+      "value": 892,
+      "percent": 75,
+      "color": "bg-amber-500"
+    },
+    {
+      "name": "Regular",
+      "value": 2145,
+      "percent": 60,
+      "color": "bg-blue-500"
+    },
+    {
+      "name": "New Customers",
+      "value": 1248,
+      "percent": 45,
+      "color": "bg-emerald-500"
+    },
+    {
+      "name": "Inactive",
+      "value": 687,
+      "percent": 25,
+      "color": "bg-gray-400"
+    }
+  ]
+}

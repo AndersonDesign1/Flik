@@ -1,0 +1,93 @@
+{
+  "metrics": [
+    {
+      "title": "Total Traffic",
+      "value": "485,000",
+      "trend": "+12.5%",
+      "trendUp": true,
+      "subtext": "vs Last Month"
+    },
+    {
+      "title": "Conversion Rate",
+      "value": "18.5%",
+      "trend": "-2.3%",
+      "trendUp": false,
+      "subtext": "vs Last Month"
+    },
+    {
+      "title": "Engaged Sessions",
+      "value": "92,450",
+      "trend": "+25%",
+      "trendUp": true,
+      "subtext": "vs Last Month"
+    },
+    {
+      "title": "Avg. Session Duration",
+      "value": "4m 32s",
+      "trend": "+18%",
+      "trendUp": true,
+      "subtext": "vs Last Month"
+    }
+  ],
+  "trafficSources": [
+    {
+      "name": "Organic Search",
+      "value": 156420,
+      "percent": 85,
+      "color": "bg-blue-500"
+    },
+    {
+      "name": "Direct Traffic",
+      "value": 98340,
+      "percent": 65,
+      "color": "bg-indigo-500"
+    },
+    {
+      "name": "Referral",
+      "value": 45200,
+      "percent": 40,
+      "color": "bg-emerald-500"
+    },
+    {
+      "name": "Social Media",
+      "value": 28150,
+      "percent": 25,
+      "color": "bg-amber-500"
+    }
+  ],
+  "topPages": [
+    {
+      "path": "/products",
+      "title": "Products Page",
+      "views": "45,230",
+      "bounceRate": "32%",
+      "avgTime": "3m 45s",
+      "trend": "+12%"
+    },
+    {
+      "path": "/checkout",
+      "title": "Checkout Flow",
+      "views": "28,450",
+      "bounceRate": "18%",
+      "avgTime": "5m 12s",
+      "trend": "+8%"
+    },
+    {
+      "path": "/",
+      "title": "Homepage",
+      "views": "125,800",
+      "bounceRate": "45%",
+      "avgTime": "1m 30s",
+      "trend": "+15%"
+    },
+    {
+      "path": "/categories",
+      "title": "Categories",
+      "views": "38,920",
+      "bounceRate": "38%",
+      "avgTime": "2m 15s",
+      "trend": "-3%"
+    }
+  ],
+  "salesRevenue": "$1,631,241"
+}

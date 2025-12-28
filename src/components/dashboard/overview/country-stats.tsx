@@ -3,7 +3,7 @@
 import {
   type ProgressBarItem,
   ProgressBarList,
-} from "@/components/dashboard/shared";
+} from "@/components/dashboard/shared/progress-bar-list";
 
 interface CountryData {
   name: string;
@@ -35,7 +35,9 @@ export function CountryStats({
   return (
     <ProgressBarList
       items={items}
-      onViewAll={() => {}}
+      onViewAll={() => {
+        // TODO: Implement view all countries
+      }}
       title="Country"
       totalValue={totalValue}
       trend={trend}

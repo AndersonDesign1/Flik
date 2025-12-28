@@ -2,7 +2,7 @@
 
 import { MoreHorizontal } from "lucide-react";
 import { useState } from "react";
-import { TableToolbar } from "@/components/dashboard/shared";
+import { TableToolbar } from "@/components/dashboard/shared/table-toolbar";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {

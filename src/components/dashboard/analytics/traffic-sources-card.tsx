@@ -4,7 +4,7 @@ import { Globe } from "lucide-react";
 import {
   type ProgressBarItem,
   ProgressBarList,
-} from "@/components/dashboard/shared";
+} from "@/components/dashboard/shared/progress-bar-list";
 
 interface TrafficSource {
   name: string;
@@ -35,7 +35,9 @@ export function TrafficSourcesCard({
   return (
     <ProgressBarList
       items={items}
-      onViewAll={() => {}}
+      onViewAll={() => {
+        // TODO: Implement view all traffic sources
+      }}
       title="Traffic Sources"
       totalValue={totalValue}
       trend={trend}

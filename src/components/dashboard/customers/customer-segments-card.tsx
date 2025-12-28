@@ -3,7 +3,7 @@
 import {
   type ProgressBarItem,
   ProgressBarList,
-} from "@/components/dashboard/shared";
+} from "@/components/dashboard/shared/progress-bar-list";
 
 interface CustomerSegment {
   name: string;
@@ -33,7 +33,9 @@ export function CustomerSegmentsCard({
   return (
     <ProgressBarList
       items={items}
-      onViewAll={() => {}}
+      onViewAll={() => {
+        // TODO: Implement view all customer segments
+      }}
       title="Customer Segments"
       totalValue={totalValue}
       trend={trend}
