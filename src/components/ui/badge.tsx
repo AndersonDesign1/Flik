@@ -1,4 +1,3 @@
-import { Slot } from "@radix-ui/react-slot";
 import { cva, type VariantProps } from "class-variance-authority";
 import type * as React from "react";
 
@@ -10,12 +9,18 @@ const badgeVariants = cva(
     variants: {
       variant: {
         default:
-          "border-transparent bg-primary text-primary-foreground shadow hover:bg-primary/80",
+          "border-transparent bg-gray-900 text-gray-50 dark:bg-gray-100 dark:text-gray-900",
         secondary:
-          "border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80",
+          "border-gray-200 bg-gray-100 text-gray-700 dark:border-gray-300 dark:bg-gray-200 dark:text-gray-600",
         destructive:
-          "border-transparent bg-destructive text-destructive-foreground shadow hover:bg-destructive/80",
-        outline: "text-foreground",
+          "border-destructive-200 bg-destructive-50 text-destructive-700 dark:border-destructive-100 dark:bg-destructive-50 dark:text-destructive-500",
+        success:
+          "border-success-200 bg-success-50 text-success-700 dark:border-success-100 dark:bg-success-50 dark:text-success-500",
+        warning:
+          "border-warning-100 bg-warning-50 text-warning-600 dark:border-warning-100 dark:bg-warning-50 dark:text-warning-500",
+        accent:
+          "border-accent-200 bg-accent-50 text-accent-700 dark:border-accent-100 dark:bg-accent-50 dark:text-accent-400",
+        outline: "border-border bg-transparent text-foreground",
       },
     },
     defaultVariants: {
@@ -27,18 +32,10 @@ const badgeVariants = cva(
 function Badge({
   className,
   variant,
-  asChild = false,
   ...props
-}: React.ComponentProps<"span"> &
-  VariantProps<typeof badgeVariants> & { asChild?: boolean }) {
-  const Comp = asChild ? Slot : "span";
-
+}: React.ComponentProps<"span"> & VariantProps<typeof badgeVariants>) {
   return (
-    <Comp
-      className={cn(badgeVariants({ variant }), className)}
-      data-slot="badge"
-      {...props}
-    />
+    <span className={cn(badgeVariants({ variant }), className)} {...props} />
   );
 }
 

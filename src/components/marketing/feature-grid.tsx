@@ -39,7 +39,7 @@ const FEATURES = [
 export function FeatureGrid() {
   return (
     <div className="grid auto-rows-[300px] grid-cols-1 gap-4 md:grid-cols-3">
-      {FEATURES.map((feature, i) => (
+      {FEATURES.map((feature, _i) => (
         <div
           className={cn(
             "group relative overflow-hidden rounded-xl border border-border/50 bg-card/50 transition-all hover:border-border",

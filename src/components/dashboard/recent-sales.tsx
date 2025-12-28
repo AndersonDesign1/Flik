@@ -8,138 +8,88 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
+const recentSalesData = [
+  {
+    name: "Olivia Martin",
+    email: "olivia.martin@email.com",
+    amount: "+$1,999.00",
+    avatar: "/avatars/01.png",
+    initials: "OM",
+  },
+  {
+    name: "Jackson Lee",
+    email: "jackson.lee@email.com",
+    amount: "+$39.00",
+    avatar: "/avatars/02.png",
+    initials: "JL",
+  },
+  {
+    name: "Isabella Nguyen",
+    email: "isabella.nguyen@email.com",
+    amount: "+$299.00",
+    avatar: "/avatars/03.png",
+    initials: "IN",
+  },
+  {
+    name: "William Kim",
+    email: "will@email.com",
+    amount: "+$99.00",
+    avatar: "/avatars/04.png",
+    initials: "WK",
+  },
+  {
+    name: "Sofia Davis",
+    email: "sofia.davis@email.com",
+    amount: "+$39.00",
+    avatar: "/avatars/05.png",
+    initials: "SD",
+  },
+];
+
 export function RecentSales() {
   return (
-    <div className="space-y-8">
-      <div className="flex items-center">
-        <Avatar className="h-9 w-9">
-          <AvatarImage alt="Avatar" src="/avatars/01.png" />
-          <AvatarFallback>OM</AvatarFallback>
-        </Avatar>
-        <div className="ml-4 space-y-1">
-          <p className="font-medium text-sm leading-none">Olivia Martin</p>
-          <p className="text-muted-foreground text-sm">
-            olivia.martin@email.com
-          </p>
+    <div className="space-y-1">
+      {recentSalesData.map((sale) => (
+        <div
+          className="group -mx-3 flex items-center justify-between rounded-lg p-3 transition-colors hover:bg-surface-2"
+          key={sale.email}
+        >
+          <div className="flex items-center gap-3">
+            <Avatar className="h-9 w-9 border border-border/30">
+              <AvatarImage alt={sale.name} src={sale.avatar} />
+              <AvatarFallback className="bg-surface-2 font-medium text-muted-foreground text-xs">
+                {sale.initials}
+              </AvatarFallback>
+            </Avatar>
+            <div className="space-y-0.5">
+              <p className="font-medium text-foreground text-sm leading-none">
+                {sale.name}
+              </p>
+              <p className="text-muted-foreground text-xs">{sale.email}</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-3">
+            <span className="font-semibold text-sm text-success-600 tabular-nums dark:text-success-500">
+              {sale.amount}
+            </span>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  className="h-7 w-7 p-0 opacity-0 transition-opacity group-hover:opacity-100 data-[state=open]:opacity-100"
+                  variant="ghost"
+                >
+                  <span className="sr-only">Open menu</span>
+                  <MoreHorizontal className="h-4 w-4 text-muted-foreground" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-[160px]">
+                <DropdownMenuItem>View details</DropdownMenuItem>
+                <DropdownMenuItem>View customer</DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </div>
-        <div className="ml-auto flex items-center gap-4 font-medium">
-          +$1,999.00
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button className="h-8 w-8 p-0" variant="ghost">
-                <span className="sr-only">Open menu</span>
-                <MoreHorizontal className="h-4 w-4 text-muted-foreground" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem>View details</DropdownMenuItem>
-              <DropdownMenuItem>View customer</DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      </div>
-      <div className="flex items-center">
-        <Avatar className="flex h-9 w-9 items-center justify-center space-y-0 border">
-          <AvatarImage alt="Avatar" src="/avatars/02.png" />
-          <AvatarFallback>JL</AvatarFallback>
-        </Avatar>
-        <div className="ml-4 space-y-1">
-          <p className="font-medium text-sm leading-none">Jackson Lee</p>
-          <p className="text-muted-foreground text-sm">jackson.lee@email.com</p>
-        </div>
-        <div className="ml-auto flex items-center gap-4 font-medium">
-          +$39.00
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button className="h-8 w-8 p-0" variant="ghost">
-                <span className="sr-only">Open menu</span>
-                <MoreHorizontal className="h-4 w-4 text-muted-foreground" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem>View details</DropdownMenuItem>
-              <DropdownMenuItem>View customer</DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      </div>
-      <div className="flex items-center">
-        <Avatar className="h-9 w-9">
-          <AvatarImage alt="Avatar" src="/avatars/03.png" />
-          <AvatarFallback>IN</AvatarFallback>
-        </Avatar>
-        <div className="ml-4 space-y-1">
-          <p className="font-medium text-sm leading-none">Isabella Nguyen</p>
-          <p className="text-muted-foreground text-sm">
-            isabella.nguyen@email.com
-          </p>
-        </div>
-        <div className="ml-auto flex items-center gap-4 font-medium">
-          +$299.00
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button className="h-8 w-8 p-0" variant="ghost">
-                <span className="sr-only">Open menu</span>
-                <MoreHorizontal className="h-4 w-4 text-muted-foreground" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem>View details</DropdownMenuItem>
-              <DropdownMenuItem>View customer</DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      </div>
-      <div className="flex items-center">
-        <Avatar className="h-9 w-9">
-          <AvatarImage alt="Avatar" src="/avatars/04.png" />
-          <AvatarFallback>WK</AvatarFallback>
-        </Avatar>
-        <div className="ml-4 space-y-1">
-          <p className="font-medium text-sm leading-none">William Kim</p>
-          <p className="text-muted-foreground text-sm">will@email.com</p>
-        </div>
-        <div className="ml-auto flex items-center gap-4 font-medium">
-          +$99.00
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button className="h-8 w-8 p-0" variant="ghost">
-                <span className="sr-only">Open menu</span>
-                <MoreHorizontal className="h-4 w-4 text-muted-foreground" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem>View details</DropdownMenuItem>
-              <DropdownMenuItem>View customer</DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      </div>
-      <div className="flex items-center">
-        <Avatar className="h-9 w-9">
-          <AvatarImage alt="Avatar" src="/avatars/05.png" />
-          <AvatarFallback>SD</AvatarFallback>
-        </Avatar>
-        <div className="ml-4 space-y-1">
-          <p className="font-medium text-sm leading-none">Sofia Davis</p>
-          <p className="text-muted-foreground text-sm">sofia.davis@email.com</p>
-        </div>
-        <div className="ml-auto flex items-center gap-4 font-medium">
-          +$39.00
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button className="h-8 w-8 p-0" variant="ghost">
-                <span className="sr-only">Open menu</span>
-                <MoreHorizontal className="h-4 w-4 text-muted-foreground" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem>View details</DropdownMenuItem>
-              <DropdownMenuItem>View customer</DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      </div>
+      ))}
     </div>
   );
 }
