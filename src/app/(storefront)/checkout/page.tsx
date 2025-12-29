@@ -113,7 +113,7 @@ export default function CheckoutPage() {
               ) : (
                 <>
                   <Lock className="h-4 w-4" />
-                  Pay ${(totalPrice * 1.05).toFixed(2)}
+                  Pay ${(totalPrice * TOTAL_MULTIPLIER).toFixed(2)}
                 </>
               )}
             </Button>
