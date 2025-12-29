@@ -43,7 +43,7 @@ export function ProductsContent({ products }: ProductsContentProps) {
       </div>
 
       {/* Content */}
-      <div className="flex-1 overflow-hidden">
+      <div className="flex-1 overflow-hidden pt-1 pl-1">
         <DataTable
           columns={columns}
           data={products}

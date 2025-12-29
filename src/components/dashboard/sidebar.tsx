@@ -23,6 +23,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  useSidebar,
 } from "@/components/ui/sidebar";
 
 const NAV_ITEMS = [
@@ -45,6 +46,13 @@ const FOOTER_ITEMS = [
 
 export function DashboardSidebar() {
   const pathname = usePathname();
+  const { isMobile, setOpenMobile } = useSidebar();
+
+  const handleLinkClick = () => {
+    if (isMobile) {
+      setOpenMobile(false);
+    }
+  };
 
   return (
     <Sidebar>
@@ -53,6 +61,7 @@ export function DashboardSidebar() {
         <Link
           className="flex items-center gap-2.5 font-semibold text-foreground tracking-tight transition-all duration-200 hover:opacity-80"
           href="/"
+          onClick={handleLinkClick}
         >
           <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gray-900 text-gray-50 dark:bg-gray-100 dark:text-gray-900">
             <span className="font-bold text-xs">O</span>
@@ -76,7 +85,7 @@ export function DashboardSidebar() {
                     isActive={pathname === item.href}
                     tooltip={item.label}
                   >
-                    <Link href={item.href}>
+                    <Link href={item.href} onClick={handleLinkClick}>
                       <item.icon />
                       <span>{item.label}</span>
                     </Link>
@@ -100,7 +109,7 @@ export function DashboardSidebar() {
                     isActive={pathname === item.href}
                     tooltip={item.label}
                   >
-                    <Link href={item.href}>
+                    <Link href={item.href} onClick={handleLinkClick}>
                       <item.icon />
                       <span>{item.label}</span>
                     </Link>

@@ -53,7 +53,7 @@ export function Hero() {
         </div>
 
         {/* Stats */}
-        <div className="mt-16 flex flex-wrap items-center justify-center gap-x-12 gap-y-6 border-gray-200 border-y py-8">
+        <div className="mt-16 grid grid-cols-2 gap-x-8 gap-y-10 border-gray-200 border-y py-8 sm:flex sm:flex-wrap sm:items-center sm:justify-center sm:gap-x-12 sm:gap-y-6">
           <div className="text-center">
             <p className="font-bold text-3xl text-gray-900">$50M+</p>
             <p className="mt-1 text-gray-500 text-sm">Paid to creators</p>
@@ -92,8 +92,8 @@ export function Hero() {
               </div>
             </div>
             {/* Dashboard preview - simplified version */}
-            <div className="bg-gray-50 p-6">
-              <div className="grid gap-4 md:grid-cols-4">
+            <div className="bg-gray-50 p-4 sm:p-6">
+              <div className="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-4">
                 {/* Metric cards */}
                 {[
                   {
@@ -106,15 +106,17 @@ export function Hero() {
                   { label: "Conversion", value: "4.2%", change: "+2.1%" },
                 ].map((metric) => (
                   <div
-                    className="rounded-xl border border-gray-200 bg-white p-4"
+                    className="rounded-xl border border-gray-200 bg-white p-3 sm:p-4"
                     key={metric.label}
                   >
-                    <p className="text-gray-500 text-xs">{metric.label}</p>
-                    <div className="mt-1 flex items-baseline justify-between">
-                      <p className="font-bold text-gray-900 text-xl">
+                    <p className="truncate text-[10px] text-gray-500 sm:text-xs">
+                      {metric.label}
+                    </p>
+                    <div className="mt-1 flex flex-col items-baseline justify-between sm:flex-row">
+                      <p className="font-bold text-base text-gray-900 sm:text-xl">
                         {metric.value}
                       </p>
-                      <span className="font-medium text-green-600 text-xs">
+                      <span className="font-medium text-[10px] text-green-600 sm:text-xs">
                         {metric.change}
                       </span>
                     </div>
