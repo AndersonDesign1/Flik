@@ -1,65 +1,77 @@
-"use client";
-
 import type { LucideIcon } from "lucide-react";
-import { TrendingDown, TrendingUp } from "lucide-react";
-import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
 interface MetricCardProps {
   title: string;
-  value: string;
+  value: string | number;
+  // Legacy props
+  change?: string;
+  changeType?: "positive" | "negative" | "neutral";
+  // New props from data
+  subtext?: string;
   trend?: string;
   trendUp?: boolean;
-  subtext: string;
-  icon?: LucideIcon;
   primary?: boolean;
+  icon?: LucideIcon;
+  className?: string;
 }
 
 export function MetricCard({
   title,
   value,
-  trend,
-  trendUp = true,
+  change,
+  changeType = "neutral",
   subtext,
+  trend,
+  trendUp,
+  primary,
   icon: Icon,
-  primary = false,
+  className,
 }: MetricCardProps) {
+  // Use trend/trendUp if provided, otherwise fall back to change/changeType
+  const displayChange = trend || change;
+  const displayChangeType = trend
+    ? trendUp
+      ? "positive"
+      : "negative"
+    : changeType;
+
   return (
-    <Card>
-      <div className="flex items-center justify-between">
-        <span className="font-medium text-muted-foreground text-xs">
-          {title}
-        </span>
-        {Icon && <Icon className="h-4 w-4 text-muted-foreground" />}
-      </div>
-      <div
-        className={cn(
-          "mt-1.5 font-bold text-foreground tabular-nums tracking-tight",
-          primary ? "text-3xl" : "text-2xl"
+    <div
+      className={cn(
+        "rounded-xl border border-gray-200 bg-white p-5",
+        primary && "border-primary/20 bg-primary/5",
+        className
+      )}
+    >
+      <div className="flex items-start justify-between">
+        <div>
+          <p className="font-medium text-gray-500 text-sm">{title}</p>
+          <p className="mt-2 font-bold text-2xl text-gray-900 tabular-nums">
+            {value}
+          </p>
+          {displayChange && (
+            <p
+              className={cn(
+                "mt-1 text-sm",
+                displayChangeType === "positive" && "text-emerald-600",
+                displayChangeType === "negative" && "text-red-600",
+                displayChangeType === "neutral" && "text-gray-500"
+              )}
+            >
+              {displayChange}
+            </p>
+          )}
+          {subtext && (
+            <p className="mt-0.5 text-gray-400 text-xs">{subtext}</p>
+          )}
+        </div>
+        {Icon && (
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gray-100">
+            <Icon className="h-5 w-5 text-gray-600" />
+          </div>
         )}
-      >
-        {value}
       </div>
-      <div className="mt-2 flex items-center gap-1.5">
-        {trend && (
-          <span
-            className={cn(
-              "flex items-center gap-0.5 font-medium text-xs",
-              trendUp
-                ? "text-emerald-600 dark:text-emerald-400"
-                : "text-red-500"
-            )}
-          >
-            {trendUp ? (
-              <TrendingUp className="h-3 w-3" />
-            ) : (
-              <TrendingDown className="h-3 w-3" />
-            )}
-            {trend}
-          </span>
-        )}
-        <span className="text-muted-foreground text-xs">{subtext}</span>
-      </div>
-    </Card>
+    </div>
   );
 }

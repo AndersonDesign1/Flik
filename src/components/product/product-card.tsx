@@ -98,7 +98,7 @@ export function ProductCard({ product, index }: ProductCardProps) {
                 className="rounded-full shadow-lg"
                 onClick={(e) => {
                   e.preventDefault();
-                  console.log("Add to cart", product.id);
+                  // TODO: Implement add to cart functionality
                 }}
                 size="icon"
               >

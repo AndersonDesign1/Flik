@@ -1,10 +1,35 @@
 "use client";
 
-import { Archive, DollarSign, Save, Trash2, TrendingUp } from "lucide-react";
+import {
+  Archive,
+  DollarSign,
+  FileText,
+  Loader2,
+  Plus,
+  Save,
+  Trash2,
+  TrendingUp,
+  Upload,
+  X,
+} from "lucide-react";
+import { useState } from "react";
 import type { DashboardProduct } from "@/components/dashboard/products/columns";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 
@@ -14,100 +39,116 @@ interface ProductDetailProps {
 
 const statusConfig = {
   active: {
-    bg: "bg-emerald-50 dark:bg-emerald-500/10",
-    text: "text-emerald-600 dark:text-emerald-400",
-    border: "border-emerald-200 dark:border-emerald-500/20",
+    bg: "bg-emerald-50",
+    text: "text-emerald-600",
+    border: "border-emerald-200",
     label: "Active",
   },
   draft: {
-    bg: "bg-gray-50 dark:bg-gray-500/10",
-    text: "text-gray-600 dark:text-gray-400",
-    border: "border-gray-200 dark:border-gray-500/20",
+    bg: "bg-gray-50",
+    text: "text-gray-600",
+    border: "border-gray-200",
     label: "Draft",
   },
   archived: {
-    bg: "bg-amber-50 dark:bg-amber-500/10",
-    text: "text-amber-600 dark:text-amber-400",
-    border: "border-amber-200 dark:border-amber-500/20",
+    bg: "bg-amber-50",
+    text: "text-amber-600",
+    border: "border-amber-200",
     label: "Archived",
   },
 };
 
 export function ProductDetail({ product }: ProductDetailProps) {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [coverImage, setCoverImage] = useState<string | null>(
+    "/mock-cover.jpg"
+  );
+  const [files, setFiles] = useState<string[]>(["product-file-v1.zip"]);
+
   const status = statusConfig[product.status];
   const formattedPrice = new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: "USD",
   }).format(product.price);
 
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setTimeout(() => setIsSubmitting(false), 1500);
+  };
+
+  const handleFileUpload = () => {
+    setFiles([...files, `product-file-${files.length + 1}.zip`]);
+  };
+
+  const removeFile = (index: number) => {
+    setFiles(files.filter((_, i) => i !== index));
+  };
+
   return (
-    <div className="flex h-full min-h-0 flex-col">
+    <form onSubmit={handleSubmit}>
       {/* Header */}
-      <div className="flex-shrink-0 border-border/40 border-b pb-6">
-        <h2 className="truncate font-semibold text-foreground text-lg tracking-tight">
-          {product.name}
-        </h2>
-        <div className="mt-1 flex items-center gap-2">
-          <p className="font-mono text-muted-foreground text-sm">
-            {product.id}
-          </p>
-          <span
-            className={cn(
-              "inline-flex items-center rounded-full border px-2 py-0.5 font-medium text-xs capitalize",
-              status.bg,
-              status.text,
-              status.border
-            )}
-          >
-            {status.label}
-          </span>
+      <SheetHeader>
+        <div className="flex items-start justify-between">
+          <div>
+            <SheetTitle className="text-left">{product.name}</SheetTitle>
+            <SheetDescription className="flex items-center gap-2 text-left">
+              <span className="font-mono">{product.id}</span>
+              <span
+                className={cn(
+                  "inline-flex items-center rounded-full border px-2 py-0.5 font-medium text-xs capitalize",
+                  status.bg,
+                  status.text,
+                  status.border
+                )}
+              >
+                {status.label}
+              </span>
+            </SheetDescription>
+          </div>
         </div>
-      </div>
+      </SheetHeader>
 
       {/* Scrollable Content */}
-      <div className="flex-1 space-y-6 overflow-y-auto py-6">
+      <div className="grid flex-1 auto-rows-min gap-6 py-6">
         {/* Stats Cards */}
-        <div className="grid grid-cols-2 gap-3">
-          <div className="rounded-xl border border-border/40 bg-card p-4">
-            <div className="mb-2 flex items-center gap-2 text-muted-foreground">
+        <div className="grid grid-cols-3 gap-3">
+          <div className="rounded-xl border border-gray-200 bg-white p-4">
+            <div className="mb-2 flex items-center gap-2 text-gray-500">
               <DollarSign className="h-4 w-4" />
               <span className="font-medium text-xs">Price</span>
             </div>
-            <div className="font-bold text-xl tabular-nums">
+            <div className="font-bold text-gray-900 text-xl tabular-nums">
               {formattedPrice}
             </div>
           </div>
-          <div className="rounded-xl border border-border/40 bg-card p-4">
-            <div className="mb-2 flex items-center gap-2 text-muted-foreground">
+          <div className="rounded-xl border border-gray-200 bg-white p-4">
+            <div className="mb-2 flex items-center gap-2 text-gray-500">
               <Archive className="h-4 w-4" />
               <span className="font-medium text-xs">Inventory</span>
             </div>
-            <div className="font-bold text-xl tabular-nums">
+            <div className="font-bold text-gray-900 text-xl tabular-nums">
               {product.inventory}
             </div>
           </div>
-        </div>
-
-        {/* Sales Card */}
-        <div className="rounded-xl border border-blue-100 bg-gradient-to-br from-blue-50 to-indigo-50/50 p-4 dark:border-blue-500/10 dark:from-blue-500/5 dark:to-indigo-500/5">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400">
+          <div className="rounded-xl border border-blue-100 bg-blue-50 p-4">
+            <div className="mb-2 flex items-center gap-2 text-blue-600">
               <TrendingUp className="h-4 w-4" />
-              <span className="font-medium text-sm">Total Sales</span>
+              <span className="font-medium text-xs">Sales</span>
             </div>
-            <span className="font-bold text-2xl text-blue-700 tabular-nums dark:text-blue-300">
+            <div className="font-bold text-blue-700 text-xl tabular-nums">
               {product.sales}
-            </span>
+            </div>
           </div>
         </div>
 
-        {/* Edit Form */}
+        {/* Product Information */}
         <div className="space-y-4">
-          <h3 className="font-medium text-muted-foreground text-xs uppercase tracking-wider">
-            Edit Product
+          <h3 className="font-medium text-gray-500 text-xs uppercase tracking-wider">
+            Product Information
           </h3>
 
-          <div className="space-y-4 rounded-xl border border-border/40 bg-card p-4">
+          <div className="space-y-4 rounded-xl border border-gray-200 bg-white p-4">
             <div className="space-y-2">
               <Label className="text-sm" htmlFor="name">
                 Product Name
@@ -115,6 +156,124 @@ export function ProductDetail({ product }: ProductDetailProps) {
               <Input className="h-10" defaultValue={product.name} id="name" />
             </div>
 
+            <div className="space-y-2">
+              <Label className="text-sm" htmlFor="description">
+                Description
+              </Label>
+              <Textarea
+                className="min-h-[100px] resize-none"
+                defaultValue="A premium digital asset for modern designers."
+                id="description"
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label className="text-sm" htmlFor="category">
+                  Category
+                </Label>
+                <Select defaultValue="templates">
+                  <SelectTrigger className="h-10">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="templates">Templates</SelectItem>
+                    <SelectItem value="courses">Courses</SelectItem>
+                    <SelectItem value="ebooks">eBooks</SelectItem>
+                    <SelectItem value="software">Software</SelectItem>
+                    <SelectItem value="design">Design Assets</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label className="text-sm" htmlFor="tags">
+                  Tags
+                </Label>
+                <Input
+                  className="h-10"
+                  defaultValue="design, templates"
+                  id="tags"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Cover Image */}
+        <div className="space-y-4">
+          <h3 className="font-medium text-gray-500 text-xs uppercase tracking-wider">
+            Cover Image
+          </h3>
+
+          {coverImage ? (
+            <div className="relative aspect-video overflow-hidden rounded-xl border border-gray-200 bg-gray-100">
+              <div className="flex h-full items-center justify-center text-gray-400">
+                <span className="text-5xl">🖼️</span>
+              </div>
+              <button
+                className="absolute top-2 right-2 flex h-7 w-7 items-center justify-center rounded-full bg-white shadow-md"
+                onClick={() => setCoverImage(null)}
+                type="button"
+              >
+                <X className="h-3 w-3" />
+              </button>
+            </div>
+          ) : (
+            <button
+              className="flex aspect-video w-full flex-col items-center justify-center gap-2 rounded-xl border-2 border-gray-200 border-dashed bg-gray-50 transition-colors hover:border-gray-300"
+              onClick={() => setCoverImage("/mock.jpg")}
+              type="button"
+            >
+              <Upload className="h-5 w-5 text-gray-400" />
+              <span className="text-gray-500 text-sm">Upload cover image</span>
+            </button>
+          )}
+        </div>
+
+        {/* Product Files */}
+        <div className="space-y-4">
+          <h3 className="font-medium text-gray-500 text-xs uppercase tracking-wider">
+            Product Files
+          </h3>
+
+          <div className="space-y-3">
+            {files.map((file, index) => (
+              <div
+                className="flex items-center justify-between rounded-lg border border-gray-200 bg-gray-50 p-3"
+                key={file}
+              >
+                <div className="flex items-center gap-3">
+                  <FileText className="h-4 w-4 text-gray-400" />
+                  <span className="text-gray-900 text-sm">{file}</span>
+                </div>
+                <button
+                  className="text-gray-400 hover:text-gray-600"
+                  onClick={() => removeFile(index)}
+                  type="button"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+            ))}
+
+            <button
+              className="flex w-full items-center justify-center gap-2 rounded-lg border-2 border-gray-200 border-dashed p-3 text-gray-500 transition-colors hover:bg-gray-50"
+              onClick={handleFileUpload}
+              type="button"
+            >
+              <Plus className="h-4 w-4" />
+              <span className="text-sm">Add file</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Pricing */}
+        <div className="space-y-4">
+          <h3 className="font-medium text-gray-500 text-xs uppercase tracking-wider">
+            Pricing
+          </h3>
+
+          <div className="space-y-4 rounded-xl border border-gray-200 bg-white p-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label className="text-sm" htmlFor="price">
@@ -128,6 +287,19 @@ export function ProductDetail({ product }: ProductDetailProps) {
                 />
               </div>
               <div className="space-y-2">
+                <Label className="text-sm" htmlFor="comparePrice">
+                  Compare-at ($)
+                </Label>
+                <Input
+                  className="h-10"
+                  defaultValue={product.price * 2}
+                  id="comparePrice"
+                  type="number"
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
                 <Label className="text-sm" htmlFor="inventory">
                   Inventory
                 </Label>
@@ -138,34 +310,49 @@ export function ProductDetail({ product }: ProductDetailProps) {
                   type="number"
                 />
               </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label className="text-sm" htmlFor="description">
-                Description
-              </Label>
-              <Textarea
-                className="min-h-[100px] resize-none"
-                defaultValue="A premium digital asset for modern designers."
-                id="description"
-                placeholder="Product description..."
-              />
+              <div className="space-y-2">
+                <Label className="text-sm" htmlFor="status">
+                  Status
+                </Label>
+                <Select defaultValue={product.status}>
+                  <SelectTrigger className="h-10">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="active">Active</SelectItem>
+                    <SelectItem value="draft">Draft</SelectItem>
+                    <SelectItem value="archived">Archived</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
       {/* Footer Actions */}
-      <div className="flex flex-shrink-0 gap-3 border-border/40 border-t pt-6">
-        <Button className="flex-1 gap-2" size="lg" variant="outline">
+      <SheetFooter>
+        <Button
+          className="flex-1 gap-2 border-red-200 text-red-600 hover:bg-red-50"
+          type="button"
+          variant="outline"
+        >
           <Trash2 className="h-4 w-4" />
           Delete
         </Button>
-        <Button className="flex-1 gap-2" size="lg">
-          <Save className="h-4 w-4" />
-          Save Changes
+        <Button
+          className="flex-1 gap-2 bg-gray-900 text-white hover:bg-gray-800"
+          disabled={isSubmitting}
+          type="submit"
+        >
+          {isSubmitting ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <Save className="h-4 w-4" />
+          )}
+          {isSubmitting ? "Saving..." : "Save Changes"}
         </Button>
-      </div>
-    </div>
+      </SheetFooter>
+    </form>
   );
 }

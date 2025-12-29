@@ -1,6 +1,7 @@
 "use client";
 
 import { Plus } from "lucide-react";
+import Link from "next/link";
 import { useState } from "react";
 import {
   columns,
@@ -29,9 +30,14 @@ export function ProductsContent({ products }: ProductsContentProps) {
             Manage your product catalog.
           </p>
         </div>
-        <Button className="h-9 gap-2" size="sm">
-          <Plus className="h-4 w-4" />
-          Add Product
+        <Button asChild className="h-9 gap-2" size="sm">
+          <Link
+            className="inline-flex items-center gap-2"
+            href="/dashboard/products/new"
+          >
+            <Plus className="h-4 w-4" />
+            Add Product
+          </Link>
         </Button>
       </div>
 

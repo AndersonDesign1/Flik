@@ -3,6 +3,7 @@
 import type { ColumnDef } from "@tanstack/react-table";
 import { ArrowUpDown, MoreHorizontal } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -183,11 +184,8 @@ export const columns: ColumnDef<DashboardProduct>[] = [
               Copy product ID
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="text-sm">
-              View details
-            </DropdownMenuItem>
-            <DropdownMenuItem className="text-sm">
-              Edit product
+            <DropdownMenuItem asChild className="text-sm">
+              <Link href={`/products/${product.id}`}>View product page</Link>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

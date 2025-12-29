@@ -1,74 +1,180 @@
-"use client";
-
 import { ArrowRight } from "lucide-react";
-import { motion } from "motion/react";
-import Image from "next/image";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { SPRING_PHYSICS } from "@/lib/design-system";
 
 export function Hero() {
   return (
-    <section className="relative flex flex-col items-center justify-center overflow-hidden pt-32 pb-40">
-      <div className="relative z-10 max-w-5xl px-6 text-center">
-        <motion.div
-          animate={{ opacity: 1, scale: 1 }}
-          initial={{ opacity: 0, scale: 0.95 }}
-          transition={{ duration: 0.8 }}
-        >
-          <div className="mb-6 inline-flex items-center rounded-full border border-border/40 bg-muted/50 px-3 py-1 font-medium text-muted-foreground text-xs backdrop-blur-md">
-            <span className="mr-2 inline-block h-2 w-2 animate-pulse rounded-full bg-primary" />
-            v2.0 is now live
-          </div>
-
-          <h1 className="bg-linear-to-b from-foreground to-foreground/40 bg-clip-text font-extrabold text-6xl text-transparent tracking-tighter sm:text-7xl md:text-8xl">
-            The new standard for <br />
-            <span className="text-foreground">Digital Commerce.</span>
-          </h1>
-
-          <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground sm:text-xl">
-            A complete platform for selling digital products. Built for creators
-            who demand the best design, analytics, and performance.
-          </p>
-
-          <div className="mt-8 flex items-center justify-center gap-4">
-            <Button className="h-12 rounded-full px-8 text-base" size="lg">
-              Start Selling <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
-            <Button
-              className="h-12 rounded-full px-8 text-base"
-              size="lg"
-              variant="outline"
-            >
-              View Demo
-            </Button>
-          </div>
-        </motion.div>
+    <section className="relative overflow-hidden px-6 pt-24 pb-12 lg:pt-32 lg:pb-20">
+      {/* Background gradient */}
+      <div className="pointer-events-none absolute inset-0 -z-10">
+        <div className="absolute top-0 left-1/2 h-[600px] w-[800px] -translate-x-1/2 rounded-full bg-gradient-to-b from-gray-900/5 to-transparent blur-3xl" />
       </div>
 
-      {/* Dashboard Mockup Container with Perspective */}
-      <div className="perspective-[2000px] mt-20 w-full max-w-6xl px-6">
-        <motion.div
-          animate={{ opacity: 1, rotateX: 25, y: 0 }}
-          className="relative mx-auto rounded-xl border border-border/40 bg-background/50 p-2 shadow-2xl backdrop-blur-xl"
-          initial={{ opacity: 0, rotateX: 20, y: 100 }}
-          style={{ transformStyle: "preserve-3d" }}
-          transition={{ duration: 1, delay: 0.2, ...SPRING_PHYSICS.slow }}
-        >
-          {/* Mockup Window */}
-          <div className="overflow-hidden rounded-lg border border-border bg-background shadow-xs">
-            <Image
-              alt="Platform Dashboard"
-              className="h-auto w-full object-cover"
-              height={1600}
-              priority
-              src="/images/dashboard.png"
-              width={2400}
-            />
-          </div>
+      <div className="mx-auto max-w-5xl text-center">
+        {/* Announcement Badge */}
+        <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white px-4 py-1.5 text-sm shadow-sm">
+          <span className="rounded-full bg-gray-900 px-2 py-0.5 font-medium text-white text-xs">
+            New
+          </span>
+          <span className="text-gray-600">Instant payouts now available</span>
+          <ArrowRight className="h-3 w-3 text-gray-400" />
+        </div>
 
-          {/* Reflection Gradient Overlay */}
-          <div className="pointer-events-none absolute inset-0 z-20 rounded-xl bg-linear-to-tr from-transparent via-white/5 to-transparent" />
-        </motion.div>
+        {/* Headline */}
+        <h1 className="font-bold text-4xl text-gray-900 tracking-tight sm:text-5xl lg:text-6xl">
+          The platform for{" "}
+          <span className="bg-gradient-to-r from-gray-900 via-gray-700 to-gray-900 bg-clip-text text-transparent">
+            digital creators
+          </span>
+        </h1>
+
+        <p className="mx-auto mt-6 max-w-2xl text-gray-600 text-lg lg:text-xl">
+          Sell digital products, memberships, and services with the most
+          creator-friendly platform. No monthly fees. Just 5% per transaction.
+        </p>
+
+        {/* CTAs */}
+        <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
+          <Button
+            asChild
+            className="h-12 rounded-full bg-gray-900 px-8 font-medium text-white hover:bg-gray-800"
+            size="lg"
+          >
+            <Link href="/signup">Start selling today</Link>
+          </Button>
+          <Button
+            asChild
+            className="h-12 rounded-full border-gray-300 px-8 font-medium"
+            size="lg"
+            variant="outline"
+          >
+            <Link href="#how-it-works">See how it works</Link>
+          </Button>
+        </div>
+
+        {/* Stats */}
+        <div className="mt-16 flex flex-wrap items-center justify-center gap-x-12 gap-y-6 border-gray-200 border-y py-8">
+          <div className="text-center">
+            <p className="font-bold text-3xl text-gray-900">$50M+</p>
+            <p className="mt-1 text-gray-500 text-sm">Paid to creators</p>
+          </div>
+          <div className="text-center">
+            <p className="font-bold text-3xl text-gray-900">100K+</p>
+            <p className="mt-1 text-gray-500 text-sm">Creators</p>
+          </div>
+          <div className="text-center">
+            <p className="font-bold text-3xl text-gray-900">2M+</p>
+            <p className="mt-1 text-gray-500 text-sm">Products sold</p>
+          </div>
+          <div className="text-center">
+            <p className="font-bold text-3xl text-gray-900">99.9%</p>
+            <p className="mt-1 text-gray-500 text-sm">Uptime</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Dashboard Preview */}
+      <div className="mx-auto mt-16 max-w-6xl">
+        <div className="relative">
+          {/* Browser chrome */}
+          <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-2xl shadow-gray-900/10">
+            {/* Browser header */}
+            <div className="flex items-center gap-2 border-gray-100 border-b bg-gray-50 px-4 py-3">
+              <div className="flex gap-1.5">
+                <div className="h-3 w-3 rounded-full bg-red-400" />
+                <div className="h-3 w-3 rounded-full bg-yellow-400" />
+                <div className="h-3 w-3 rounded-full bg-green-400" />
+              </div>
+              <div className="ml-4 flex-1">
+                <div className="mx-auto max-w-md rounded-md bg-white px-4 py-1.5 text-center text-gray-400 text-xs">
+                  app.overlay.com/dashboard
+                </div>
+              </div>
+            </div>
+            {/* Dashboard preview - simplified version */}
+            <div className="bg-gray-50 p-6">
+              <div className="grid gap-4 md:grid-cols-4">
+                {/* Metric cards */}
+                {[
+                  {
+                    label: "Total Revenue",
+                    value: "$24,560",
+                    change: "+12.5%",
+                  },
+                  { label: "Products Sold", value: "1,234", change: "+8.2%" },
+                  { label: "Customers", value: "892", change: "+15.3%" },
+                  { label: "Conversion", value: "4.2%", change: "+2.1%" },
+                ].map((metric) => (
+                  <div
+                    className="rounded-xl border border-gray-200 bg-white p-4"
+                    key={metric.label}
+                  >
+                    <p className="text-gray-500 text-xs">{metric.label}</p>
+                    <div className="mt-1 flex items-baseline justify-between">
+                      <p className="font-bold text-gray-900 text-xl">
+                        {metric.value}
+                      </p>
+                      <span className="font-medium text-green-600 text-xs">
+                        {metric.change}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              {/* Chart placeholder */}
+              <div className="mt-4 rounded-xl border border-gray-200 bg-white p-4">
+                <div className="mb-4 flex items-center justify-between">
+                  <p className="font-medium text-gray-900 text-sm">
+                    Revenue Overview
+                  </p>
+                  <div className="flex gap-2">
+                    <span className="rounded-md bg-gray-100 px-2 py-1 text-gray-600 text-xs">
+                      7 days
+                    </span>
+                  </div>
+                </div>
+                <div className="flex h-32 items-end gap-2">
+                  {[
+                    { day: "mon", height: 40 },
+                    { day: "tue", height: 65 },
+                    { day: "wed", height: 45 },
+                    { day: "thu", height: 80 },
+                    { day: "fri", height: 55 },
+                    { day: "sat", height: 90 },
+                    { day: "sun", height: 70 },
+                  ].map((bar) => (
+                    <div
+                      className="flex-1 rounded-t-md bg-gray-900"
+                      key={bar.day}
+                      style={{ height: `${bar.height}%` }}
+                    />
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+          {/* Decorative gradient behind */}
+          <div className="absolute -right-8 -bottom-8 -left-8 -z-10 h-32 rounded-3xl bg-gradient-to-r from-gray-100 via-gray-50 to-gray-100 blur-2xl" />
+        </div>
+      </div>
+
+      {/* Trusted by logos */}
+      <div className="mx-auto mt-24 max-w-4xl text-center">
+        <p className="mb-8 font-medium text-gray-400 text-sm uppercase tracking-widest">
+          Trusted by creators at
+        </p>
+        <div className="flex flex-wrap items-center justify-center gap-x-12 gap-y-6 opacity-60">
+          {["OpenAI", "Linear", "Figma", "Vercel", "Notion", "Stripe"].map(
+            (company) => (
+              <span
+                className="font-semibold text-gray-400 text-xl"
+                key={company}
+              >
+                {company}
+              </span>
+            )
+          )}
+        </div>
       </div>
     </section>
   );
