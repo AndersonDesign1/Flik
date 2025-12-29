@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { Check, Heart, ShoppingCart, Trash2 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -57,6 +58,11 @@ const WISHLIST_ITEMS = [
 
 export default function WishlistPage() {
   const { addItem, isInCart } = useCart();
+  const [items, setItems] = useState(WISHLIST_ITEMS);
+
+  const removeItem = (id: string) => {
+    setItems((prev) => prev.filter((item) => item.id !== id));
+  };
 
   return (
     <div className="space-y-6">
@@ -65,14 +71,14 @@ export default function WishlistPage() {
         <div>
           <h2 className="font-semibold text-2xl text-gray-900">Wishlist</h2>
           <p className="text-gray-500 text-sm">
-            {WISHLIST_ITEMS.length} items saved for later.
+            {items.length} items saved for later.
           </p>
         </div>
       </div>
 
       {/* Wishlist Grid */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {WISHLIST_ITEMS.map((item) => {
+        {items.map((item) => {
           const inCart = isInCart(item.id);
           return (
             <Card className="group relative overflow-hidden" key={item.id}>
@@ -86,6 +92,7 @@ export default function WishlistPage() {
               {/* Remove Button */}
               <button
                 className="absolute top-3 right-3 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-white opacity-0 shadow-md transition-opacity group-hover:opacity-100"
+                onClick={() => removeItem(item.id)}
                 type="button"
               >
                 <Trash2 className="h-4 w-4 text-gray-500" />

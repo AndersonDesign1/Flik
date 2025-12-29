@@ -3,22 +3,33 @@
 import { ArrowLeft, CreditCard, Lock } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useCart } from "@/contexts/cart-context";
 
+const PLATFORM_FEE_RATE = 0.05;
+
 export default function CheckoutPage() {
   const { items, totalPrice, clearCart } = useCart();
   const router = useRouter();
   const [isProcessing, setIsProcessing] = useState(false);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+      }
+    };
+  }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setIsProcessing(true);
-    // Simulate payment processing
-    setTimeout(() => {
+
+    timerRef.current = setTimeout(() => {
       clearCart();
       router.push("/order/success");
     }, 2000);
@@ -113,7 +124,7 @@ export default function CheckoutPage() {
               ) : (
                 <>
                   <Lock className="h-4 w-4" />
-                  Pay ${(totalPrice * 1.05).toFixed(2)}
+                  Pay ${(totalPrice * (1 + PLATFORM_FEE_RATE)).toFixed(2)}
                 </>
               )}
             </Button>
@@ -149,12 +160,12 @@ export default function CheckoutPage() {
               <span>${totalPrice.toFixed(2)}</span>
             </div>
             <div className="flex justify-between text-sm">
-              <span className="text-gray-500">Platform fee (5%)</span>
-              <span>${(totalPrice * 0.05).toFixed(2)}</span>
+              <span className="text-gray-500">Platform fee ({PLATFORM_FEE_RATE * 100}%)</span>
+              <span>${(totalPrice * PLATFORM_FEE_RATE).toFixed(2)}</span>
             </div>
             <div className="flex justify-between font-semibold">
               <span>Total</span>
-              <span>${(totalPrice * 1.05).toFixed(2)}</span>
+              <span>${(totalPrice * (1 + PLATFORM_FEE_RATE)).toFixed(2)}</span>
             </div>
           </div>
         </div>

@@ -1,10 +1,13 @@
 "use client";
 
-import { ArrowRight, ShoppingBag, Trash2 } from "lucide-react";
+import { ArrowRight, Box, ShoppingBag, Trash2 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/contexts/cart-context";
+
+const PLATFORM_FEE_RATE = 0.05;
+
 
 export default function CartPage() {
   const { items, removeItem, totalPrice, clearCart } = useCart();
@@ -66,8 +69,8 @@ export default function CartPage() {
                     src={item.image}
                   />
                 ) : (
-                  <div className="flex h-full w-full items-center justify-center text-2xl">
-                    📦
+                  <div className="flex h-full w-full items-center justify-center text-gray-300">
+                    <Box className="h-8 w-8" />
                   </div>
                 )}
               </div>
@@ -105,16 +108,16 @@ export default function CartPage() {
               <span className="text-gray-900">${totalPrice.toFixed(2)}</span>
             </div>
             <div className="flex justify-between text-sm">
-              <span className="text-gray-500">Platform fee (5%)</span>
+              <span className="text-gray-500">Platform fee ({PLATFORM_FEE_RATE * 100}%)</span>
               <span className="text-gray-900">
-                ${(totalPrice * 0.05).toFixed(2)}
+                ${(totalPrice * PLATFORM_FEE_RATE).toFixed(2)}
               </span>
             </div>
             <div className="border-gray-200 border-t pt-3">
               <div className="flex justify-between font-semibold">
                 <span className="text-gray-900">Total</span>
                 <span className="text-gray-900">
-                  ${(totalPrice * 1.05).toFixed(2)}
+                  ${(totalPrice * (1 + PLATFORM_FEE_RATE)).toFixed(2)}
                 </span>
               </div>
             </div>

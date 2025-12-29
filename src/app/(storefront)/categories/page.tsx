@@ -82,7 +82,7 @@ export default function CategoriesPage() {
             href={`/categories/${category.slug}`}
             key={category.slug}
           >
-            <div className="mb-4 text-4xl">{category.icon}</div>
+            <div aria-hidden="true" className="mb-4 text-4xl">{category.icon}</div>
             <h2 className="mb-1 font-semibold text-gray-900 text-lg group-hover:text-gray-700">
               {category.name}
             </h2>
