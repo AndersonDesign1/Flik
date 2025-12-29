@@ -83,7 +83,7 @@ export default function CategoryPage({ params }: CategoryPageProps) {
   const { addItem, isInCart } = useCart();
 
   // Get category info
-  const resolvedParams = params as unknown as { slug: string };
+  const resolvedParams = await params;
   const category = CATEGORY_INFO[resolvedParams.slug] || {
     name: "Category",
     icon: "📦",
