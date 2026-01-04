@@ -29,53 +29,50 @@ const TESTIMONIALS = [
 
 export function Testimonials() {
   return (
-    <section className="px-6 py-24">
-      <div className="mx-auto max-w-6xl">
-        {/* Section Header */}
-        <div className="mx-auto mb-16 max-w-2xl text-center">
-          <span className="mb-4 inline-block rounded-full border border-gray-200 bg-gray-50 px-3 py-1 font-medium text-gray-600 text-sm">
+    <section className="w-full px-4 py-24 sm:px-6 lg:px-8">
+      <div className="mx-auto flex w-full max-w-6xl flex-col gap-16">
+        <div className="flex w-full max-w-2xl flex-col items-center gap-4 text-center sm:mx-auto">
+          <span className="inline-block rounded-full border border-border bg-muted px-3 py-1 font-medium text-muted-foreground text-sm">
             Testimonials
           </span>
-          <h2 className="font-bold text-3xl text-gray-900 tracking-tight sm:text-4xl">
+          <h2 className="font-bold text-3xl text-foreground tracking-tight sm:text-4xl">
             Loved by creators worldwide
           </h2>
-          <p className="mt-4 text-gray-600 text-lg">
+          <p className="text-lg text-muted-foreground">
             Join thousands of creators who are already selling with Overlay.
           </p>
         </div>
 
-        {/* Testimonial Cards */}
-        <div className="grid gap-6 md:grid-cols-3">
+        <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-3">
           {TESTIMONIALS.map((testimonial) => (
             <div
-              className="rounded-2xl border border-gray-200 bg-white p-6"
+              className="flex flex-col gap-4 rounded-2xl border border-border bg-card p-6"
               key={testimonial.author}
             >
-              {/* Rating */}
-              <div className="mb-4 flex gap-1">
+              <div className="flex gap-1">
                 {Array.from({ length: testimonial.rating }, (_, i) => (
                   <Star
-                    className="h-4 w-4 fill-yellow-400 text-yellow-400"
+                    className="size-4 fill-amber-400 text-amber-400"
                     key={`${testimonial.author}-star-${i}`}
                   />
                 ))}
               </div>
 
-              {/* Quote */}
-              <p className="mb-6 text-gray-700 leading-relaxed">
+              <p className="text-foreground/80 leading-relaxed">
                 "{testimonial.quote}"
               </p>
 
-              {/* Author */}
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-900 font-medium text-sm text-white">
+                <div className="flex size-10 items-center justify-center rounded-full bg-primary-violet font-medium text-sm text-white">
                   {testimonial.avatar}
                 </div>
-                <div>
-                  <p className="font-medium text-gray-900 text-sm">
+                <div className="flex flex-col">
+                  <p className="font-medium text-foreground text-sm">
                     {testimonial.author}
                   </p>
-                  <p className="text-gray-500 text-xs">{testimonial.role}</p>
+                  <p className="text-muted-foreground text-xs">
+                    {testimonial.role}
+                  </p>
                 </div>
               </div>
             </div>

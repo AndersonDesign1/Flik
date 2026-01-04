@@ -1,127 +1,351 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
-@plugin "tailwindcss-animate";
-
 @custom-variant dark (&:is(.dark *));
 
+:root {
+  --color-primary-violet: #6d28d9;
+  --color-primary-violet-50: #f5f3ff;
+  --color-primary-violet-100: #ede9fe;
+  --color-primary-violet-200: #ddd6fe;
+  --color-primary-violet-600: #7c3aed;
+  --color-primary-violet-700: #6d28d9;
+  --color-primary-violet-800: #5b21b6;
+  --color-primary-violet-900: #4c1d95;
+
+  --color-secondary-magenta: #ec4899;
+  --color-secondary-magenta-50: #fdf2f8;
+  --color-secondary-magenta-100: #fce7f3;
+  --color-secondary-magenta-200: #fbcfe8;
+  --color-secondary-magenta-600: #ec4899;
+  --color-secondary-magenta-700: #db2777;
+
+  --color-neutral-cream: #fafaf7;
+  --color-neutral-cream-50: #fafaf7;
+  --color-neutral-cream-100: #f5f5f1;
+  --color-neutral-cream-200: #ede8e3;
+  --color-neutral-cream-300: #d4ccc1;
+
+  --color-neutral-charcoal: #1f1f1d;
+  --color-neutral-charcoal-dark: #1a1a18;
+  --color-neutral-charcoal-light: #3f3f3c;
+
+  --color-accent-teal: #0d9488;
+  --color-accent-teal-50: #f0fdfa;
+  --color-accent-teal-100: #ccfbf1;
+  --color-accent-teal-200: #99f6e4;
+  --color-accent-teal-600: #0d9488;
+  --color-accent-teal-700: #0f766e;
+
+  --color-error-red: #dc2626;
+  --color-error-red-50: #fef2f2;
+  --color-error-red-100: #fee2e2;
+  --color-error-red-600: #dc2626;
+
+  --color-gray-50: #fafafa;
+  --color-gray-100: #f4f4f5;
+  --color-gray-200: #e4e4e7;
+  --color-gray-300: #d4d4d8;
+  --color-gray-400: #a1a1aa;
+  --color-gray-500: #71717a;
+  --color-gray-600: #52525b;
+  --color-gray-700: #3f3f46;
+  --color-gray-800: #27272a;
+  --color-gray-900: #18181b;
+
+  --background: #ffffff;
+  --foreground: var(--color-neutral-charcoal);
+  --card: #ffffff;
+  --card-foreground: var(--color-neutral-charcoal);
+  --popover: #ffffff;
+  --popover-foreground: var(--color-neutral-charcoal);
+  --primary: var(--color-primary-violet);
+  --primary-foreground: #ffffff;
+  --secondary: var(--color-secondary-magenta);
+  --secondary-foreground: #ffffff;
+  --accent: var(--color-accent-teal);
+  --accent-foreground: #ffffff;
+  --muted: var(--color-neutral-cream);
+  --muted-foreground: var(--color-gray-500);
+  --destructive: var(--color-error-red);
+  --destructive-foreground: #ffffff;
+  --border: var(--color-neutral-cream-200);
+  --input: var(--color-neutral-cream-200);
+  --ring: var(--color-primary-violet);
+
+  --chart-1: var(--color-primary-violet);
+  --chart-2: var(--color-secondary-magenta);
+  --chart-3: var(--color-accent-teal);
+  --chart-4: #f59e0b;
+  --chart-5: #8b5cf6;
+
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --space-2xl: 48px;
+  --space-3xl: 64px;
+
+  --radius: 8px;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+  --radius-2xl: 16px;
+
+  --shadow-none: 0 0 0 transparent;
+  --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.02);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md:
+    0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.12);
+  --shadow-card-hover: 0 10px 25px rgba(0, 0, 0, 0.12);
+  --shadow-focus: 0 0 0 3px rgba(109, 40, 217, 0.1);
+
+  --font-family-sans:
+    var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-family-mono:
+    var(--font-geist-mono), ui-monospace, SFMono-Regular, monospace;
+  --font-size-xs: 12px;
+  --font-size-sm: 14px;
+  --font-size-base: 16px;
+  --font-size-lg: 18px;
+  --font-size-xl: 20px;
+  --font-size-2xl: 24px;
+  --font-size-3xl: 28px;
+  --font-size-4xl: 36px;
+  --font-size-5xl: 48px;
+
+  --line-height-tight: 1.2;
+  --line-height-snug: 1.3;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.6;
+
+  --font-weight-400: 400;
+  --font-weight-500: 500;
+  --font-weight-600: 600;
+  --font-weight-700: 700;
+
+  --duration-fast: 150ms;
+  --duration-normal: 200ms;
+  --duration-slow: 300ms;
+  --duration-slower: 400ms;
+
+  --easing-default: ease-out;
+  --easing-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --easing-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+  --easing-in: cubic-bezier(0.4, 0, 1, 1);
+  --easing-out: cubic-bezier(0, 0, 0.2, 1);
+
+  --sidebar: #ffffff;
+  --sidebar-foreground: var(--color-neutral-charcoal);
+  --sidebar-primary: var(--color-primary-violet);
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: var(--color-primary-violet-50);
+  --sidebar-accent-foreground: var(--color-primary-violet-900);
+  --sidebar-border: var(--color-neutral-cream-200);
+  --sidebar-ring: var(--color-primary-violet);
+}
+
+.dark {
+  --color-primary-violet: #a78bfa;
+  --color-primary-violet-50: #1e1b4b;
+  --color-primary-violet-100: #312e81;
+  --color-primary-violet-200: #4c1d95;
+  --color-primary-violet-600: #a78bfa;
+  --color-primary-violet-700: #c4b5fd;
+  --color-primary-violet-800: #ddd6fe;
+  --color-primary-violet-900: #ede9fe;
+
+  --color-secondary-magenta: #f472b6;
+  --color-secondary-magenta-50: #831843;
+  --color-secondary-magenta-100: #be185d;
+  --color-secondary-magenta-200: #db2777;
+  --color-secondary-magenta-600: #f472b6;
+  --color-secondary-magenta-700: #f7a8d4;
+
+  --color-neutral-cream: #1a1a17;
+  --color-neutral-cream-50: #2a2a26;
+  --color-neutral-cream-100: #3a3a36;
+  --color-neutral-cream-200: #4a4a46;
+  --color-neutral-cream-300: #5a5a56;
+
+  --color-neutral-charcoal: #f5f5f1;
+  --color-neutral-charcoal-dark: #ede8e3;
+  --color-neutral-charcoal-light: #d4ccc1;
+
+  --color-accent-teal: #14b8a6;
+  --color-accent-teal-50: #134e4a;
+  --color-accent-teal-100: #0f766e;
+  --color-accent-teal-200: #0d9488;
+  --color-accent-teal-600: #14b8a6;
+  --color-accent-teal-700: #2dd4bf;
+
+  --color-error-red: #f87171;
+  --color-error-red-50: #7f1d1d;
+  --color-error-red-100: #991b1b;
+  --color-error-red-600: #f87171;
+
+  --color-gray-50: #18181b;
+  --color-gray-100: #27272a;
+  --color-gray-200: #3f3f46;
+  --color-gray-300: #52525b;
+  --color-gray-400: #71717a;
+  --color-gray-500: #a1a1aa;
+  --color-gray-600: #d4d4d8;
+  --color-gray-700: #e4e4e7;
+  --color-gray-800: #f4f4f5;
+  --color-gray-900: #fafafa;
+
+  --background: #0f0f0d;
+  --foreground: var(--color-neutral-charcoal);
+  --card: #1a1a17;
+  --card-foreground: var(--color-neutral-charcoal);
+  --popover: #1a1a17;
+  --popover-foreground: var(--color-neutral-charcoal);
+  --primary: var(--color-primary-violet);
+  --primary-foreground: #0f0f0d;
+  --secondary: var(--color-secondary-magenta);
+  --secondary-foreground: #0f0f0d;
+  --accent: var(--color-accent-teal);
+  --accent-foreground: #0f0f0d;
+  --muted: #2a2a26;
+  --muted-foreground: var(--color-gray-500);
+  --destructive: var(--color-error-red);
+  --destructive-foreground: #0f0f0d;
+  --border: var(--color-neutral-cream-200);
+  --input: var(--color-neutral-cream-200);
+  --ring: var(--color-primary-violet);
+
+  --chart-1: var(--color-primary-violet);
+  --chart-2: var(--color-secondary-magenta);
+  --chart-3: var(--color-accent-teal);
+  --chart-4: #fbbf24;
+  --chart-5: #a78bfa;
+
+  --sidebar: #1a1a17;
+  --sidebar-foreground: var(--color-neutral-charcoal);
+  --sidebar-primary: var(--color-primary-violet);
+  --sidebar-primary-foreground: #0f0f0d;
+  --sidebar-accent: var(--color-primary-violet-50);
+  --sidebar-accent-foreground: var(--color-primary-violet);
+  --sidebar-border: var(--color-neutral-cream-200);
+  --sidebar-ring: var(--color-primary-violet);
+}
+
 @theme inline {
-  /* Core Semantic Colors mapped from CSS variables */
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, monospace;
 
-  /* Extended Gray Scale */
-  --color-gray-50: var(--gray-50);
-  --color-gray-100: var(--gray-100);
-  --color-gray-200: var(--gray-200);
-  --color-gray-300: var(--gray-300);
-  --color-gray-400: var(--gray-400);
-  --color-gray-500: var(--gray-500);
-  --color-gray-600: var(--gray-600);
-  --color-gray-700: var(--gray-700);
-  --color-gray-800: var(--gray-800);
-  --color-gray-900: var(--gray-900);
-  --color-gray-950: var(--gray-950);
-
-  /* Accent Colors - Blue-Purple Gradient (Linear-inspired) */
-  --color-accent-50: var(--accent-50);
-  --color-accent-100: var(--accent-100);
-  --color-accent-200: var(--accent-200);
-  --color-accent-300: var(--accent-300);
-  --color-accent-400: var(--accent-400);
-  --color-accent-500: var(--accent-500);
-  --color-accent-600: var(--accent-600);
-  --color-accent-700: var(--accent-700);
-  --color-accent-800: var(--accent-800);
-  --color-accent-900: var(--accent-900);
-
-  /* Success Colors */
-  --color-success-50: var(--success-50);
-  --color-success-100: var(--success-100);
-  --color-success-200: var(--success-200);
-  --color-success-500: var(--success-500);
-  --color-success-600: var(--success-600);
-  --color-success-700: var(--success-700);
-
-  /* Warning Colors */
-  --color-warning-50: var(--warning-50);
-  --color-warning-100: var(--warning-100);
-  --color-warning-500: var(--warning-500);
-  --color-warning-600: var(--warning-600);
-
-  /* Destructive Colors */
-  --color-destructive-50: var(--destructive-50);
-  --color-destructive-100: var(--destructive-100);
-  --color-destructive-500: var(--destructive-500);
-  --color-destructive-600: var(--destructive-600);
-
-  /* Surface Levels for Visual Hierarchy */
-  --color-surface-0: var(--surface-0);
-  --color-surface-1: var(--surface-1);
-  --color-surface-2: var(--surface-2);
-  --color-surface-3: var(--surface-3);
-
-  /* Sidebar Colors */
-  --color-sidebar-ring: var(--sidebar-ring);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar: var(--sidebar);
-
-  /* Chart Colors */
-  --color-chart-5: var(--chart-5);
-  --color-chart-4: var(--chart-4);
-  --color-chart-3: var(--chart-3);
-  --color-chart-2: var(--chart-2);
-  --color-chart-1: var(--chart-1);
-
-  /* UI Semantic Colors */
-  --color-ring: var(--ring);
-  --color-input: var(--input);
-  --color-border: var(--border);
-  --color-destructive: var(--destructive);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-accent: var(--accent);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-muted: var(--muted);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-secondary: var(--secondary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-primary: var(--primary);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-popover: var(--popover);
-  --color-card-foreground: var(--card-foreground);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
   --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
 
-  /* Border Radius */
-  --radius-sm: calc(var(--radius) - 2px);
-  --radius-md: calc(var(--radius));
-  --radius-lg: calc(var(--radius) + 2px);
-  --radius-xl: calc(var(--radius) + 4px);
-  --radius-2xl: calc(var(--radius) + 8px);
+  --color-primary-violet: var(--color-primary-violet);
+  --color-primary-violet-50: var(--color-primary-violet-50);
+  --color-primary-violet-100: var(--color-primary-violet-100);
+  --color-primary-violet-200: var(--color-primary-violet-200);
+  --color-primary-violet-600: var(--color-primary-violet-600);
+  --color-primary-violet-700: var(--color-primary-violet-700);
+  --color-primary-violet-800: var(--color-primary-violet-800);
+  --color-primary-violet-900: var(--color-primary-violet-900);
+  --color-secondary-magenta: var(--color-secondary-magenta);
+  --color-secondary-magenta-50: var(--color-secondary-magenta-50);
+  --color-secondary-magenta-100: var(--color-secondary-magenta-100);
+  --color-secondary-magenta-200: var(--color-secondary-magenta-200);
+  --color-secondary-magenta-600: var(--color-secondary-magenta-600);
+  --color-secondary-magenta-700: var(--color-secondary-magenta-700);
+  --color-neutral-cream: var(--color-neutral-cream);
+  --color-neutral-cream-50: var(--color-neutral-cream-50);
+  --color-neutral-cream-100: var(--color-neutral-cream-100);
+  --color-neutral-cream-200: var(--color-neutral-cream-200);
+  --color-neutral-cream-300: var(--color-neutral-cream-300);
+  --color-neutral-charcoal: var(--color-neutral-charcoal);
+  --color-neutral-charcoal-dark: var(--color-neutral-charcoal-dark);
+  --color-neutral-charcoal-light: var(--color-neutral-charcoal-light);
+  --color-accent-teal: var(--color-accent-teal);
+  --color-accent-teal-50: var(--color-accent-teal-50);
+  --color-accent-teal-100: var(--color-accent-teal-100);
+  --color-accent-teal-200: var(--color-accent-teal-200);
+  --color-accent-teal-600: var(--color-accent-teal-600);
+  --color-accent-teal-700: var(--color-accent-teal-700);
+  --color-error-red: var(--color-error-red);
+  --color-error-red-50: var(--color-error-red-50);
+  --color-error-red-100: var(--color-error-red-100);
+  --color-error-red-600: var(--color-error-red-600);
+  --color-gray-50: var(--color-gray-50);
+  --color-gray-100: var(--color-gray-100);
+  --color-gray-200: var(--color-gray-200);
+  --color-gray-300: var(--color-gray-300);
+  --color-gray-400: var(--color-gray-400);
+  --color-gray-500: var(--color-gray-500);
+  --color-gray-600: var(--color-gray-600);
+  --color-gray-700: var(--color-gray-700);
+  --color-gray-800: var(--color-gray-800);
+  --color-gray-900: var(--color-gray-900);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
 
-  /* Shadow System with Glow Effects */
-  --shadow-subtle: 0 1px 2px -1px rgb(0 0 0 / 0.04);
-  --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.04), 0 1px 2px -1px rgb(0 0 0 / 0.04);
-  --shadow-md:
-    0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.04);
-  --shadow-lg:
-    0 10px 15px -3px rgb(0 0 0 / 0.05), 0 4px 6px -4px rgb(0 0 0 / 0.04);
-  --shadow-xl:
-    0 20px 25px -5px rgb(0 0 0 / 0.06), 0 8px 10px -6px rgb(0 0 0 / 0.04);
-  --shadow-glow-accent: 0 0 20px -5px var(--accent-500);
-  --shadow-glow-success: 0 0 15px -3px var(--success-500);
+  --space-xs: var(--space-xs);
+  --space-sm: var(--space-sm);
+  --space-md: var(--space-md);
+  --space-lg: var(--space-lg);
+  --space-xl: var(--space-xl);
+  --space-2xl: var(--space-2xl);
+  --space-3xl: var(--space-3xl);
 
-  /* Animations */
-  --animate-accordion-down: accordion-down 0.2s ease-out;
-  --animate-accordion-up: accordion-up 0.2s ease-out;
-  --animate-in-fade: in-fade 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-  --animate-pulse-subtle: pulse-subtle 2s ease-in-out infinite;
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-lg: var(--radius-lg);
+  --radius-xl: var(--radius-xl);
+  --radius-2xl: var(--radius-2xl);
+
+  --shadow-xs: var(--shadow-xs);
+  --shadow-sm: var(--shadow-sm);
+  --shadow-md: var(--shadow-md);
+  --shadow-lg: var(--shadow-lg);
+  --shadow-card-hover: var(--shadow-card-hover);
+  --shadow-focus: var(--shadow-focus);
+
+  --duration-fast: var(--duration-fast);
+  --duration-normal: var(--duration-normal);
+  --duration-slow: var(--duration-slow);
+  --duration-slower: var(--duration-slower);
+
+  --easing-default: var(--easing-default);
+  --easing-spring: var(--easing-spring);
+  --easing-smooth: var(--easing-smooth);
+  --easing-in: var(--easing-in);
+  --easing-out: var(--easing-out);
+
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
 
   @keyframes accordion-down {
     from {
@@ -131,6 +355,7 @@
       height: var(--radix-accordion-content-height);
     }
   }
+
   @keyframes accordion-up {
     from {
       height: var(--radix-accordion-content-height);
@@ -139,247 +364,129 @@
       height: 0;
     }
   }
-  @keyframes in-fade {
-    from {
-      opacity: 0;
-      transform: translateY(4px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-  @keyframes pulse-subtle {
-    0%,
-    100% {
-      opacity: 1;
-    }
-    50% {
-      opacity: 0.7;
-    }
-  }
+
+  --animate-accordion-down: accordion-down 0.2s ease-out;
+  --animate-accordion-up: accordion-up 0.2s ease-out;
 }
 
-/* ============================================
-   LIGHT MODE - Vercel-Inspired Clean Aesthetic
-   ============================================ */
-:root {
-  --radius: 0.625rem;
-
-  /* Extended Gray Scale - Cool undertone for premium feel */
-  --gray-50: oklch(0.985 0.002 250);
-  --gray-100: oklch(0.967 0.002 250);
-  --gray-200: oklch(0.928 0.003 250);
-  --gray-300: oklch(0.872 0.004 250);
-  --gray-400: oklch(0.707 0.005 250);
-  --gray-500: oklch(0.553 0.006 250);
-  --gray-600: oklch(0.446 0.007 250);
-  --gray-700: oklch(0.373 0.008 250);
-  --gray-800: oklch(0.269 0.008 250);
-  --gray-900: oklch(0.205 0.01 250);
-  --gray-950: oklch(0.13 0.01 250);
-
-  /* Accent Colors - Linear-style Blue-Purple Gradient */
-  --accent-50: oklch(0.97 0.02 265);
-  --accent-100: oklch(0.94 0.04 265);
-  --accent-200: oklch(0.88 0.08 268);
-  --accent-300: oklch(0.78 0.12 272);
-  --accent-400: oklch(0.68 0.16 276);
-  --accent-500: oklch(0.58 0.2 280);
-  --accent-600: oklch(0.5 0.215 282);
-  --accent-700: oklch(0.42 0.19 284);
-  --accent-800: oklch(0.35 0.16 284);
-  --accent-900: oklch(0.28 0.13 284);
-
-  /* Success Colors - Refined Emerald */
-  --success-50: oklch(0.965 0.025 155);
-  --success-100: oklch(0.92 0.055 155);
-  --success-200: oklch(0.85 0.1 155);
-  --success-500: oklch(0.65 0.185 158);
-  --success-600: oklch(0.55 0.175 158);
-  --success-700: oklch(0.45 0.15 158);
-
-  /* Warning Colors - Warm Amber */
-  --warning-50: oklch(0.975 0.03 85);
-  --warning-100: oklch(0.94 0.065 82);
-  --warning-500: oklch(0.75 0.16 75);
-  --warning-600: oklch(0.65 0.16 70);
-
-  /* Destructive Colors - Crimson Red */
-  --destructive-50: oklch(0.97 0.022 25);
-  --destructive-100: oklch(0.935 0.055 25);
-  --destructive-500: oklch(0.58 0.22 25);
-  --destructive-600: oklch(0.5 0.2 25);
-
-  /* Surface Levels - Creates Visual Hierarchy */
-  --surface-0: var(--gray-50);
-  --surface-1: oklch(1 0 0);
-  --surface-2: var(--gray-100);
-  --surface-3: var(--gray-200);
-
-  /* Semantic Color Mappings */
-  --background: var(--surface-0);
-  --foreground: var(--gray-900);
-
-  --card: var(--surface-1);
-  --card-foreground: var(--gray-900);
-
-  --popover: var(--surface-1);
-  --popover-foreground: var(--gray-900);
-
-  --primary: var(--gray-900);
-  --primary-foreground: var(--gray-50);
-
-  --secondary: var(--gray-100);
-  --secondary-foreground: var(--gray-900);
-
-  --muted: var(--gray-100);
-  --muted-foreground: var(--gray-500);
-
-  --accent: var(--accent-500);
-  --accent-foreground: oklch(1 0 0);
-
-  --destructive: var(--destructive-500);
-
-  /* Refined Borders - Subtle but Present */
-  --border: var(--gray-200);
-  --input: var(--gray-200);
-  --ring: var(--accent-500);
-
-  /* Chart Colors - Cohesive Palette */
-  --chart-1: var(--accent-500);
-  --chart-2: var(--accent-400);
-  --chart-3: var(--accent-300);
-  --chart-4: var(--gray-400);
-  --chart-5: var(--gray-300);
-
-  /* Sidebar - Subtle Differentiation */
-  --sidebar: var(--surface-1);
-  --sidebar-foreground: var(--gray-600);
-  --sidebar-primary: var(--gray-900);
-  --sidebar-primary-foreground: oklch(1 0 0);
-  --sidebar-accent: var(--accent-50);
-  --sidebar-accent-foreground: var(--accent-700);
-  --sidebar-border: var(--gray-200);
-  --sidebar-ring: var(--accent-500);
-}
-
-/* ============================================
-   DARK MODE - Linear-Inspired Sophisticated Dark
-   ============================================ */
-.dark {
-  /* Extended Gray Scale - Deep, Rich, Layered */
-  --gray-50: oklch(0.09 0.005 265);
-  --gray-100: oklch(0.12 0.006 265);
-  --gray-200: oklch(0.16 0.006 265);
-  --gray-300: oklch(0.22 0.006 265);
-  --gray-400: oklch(0.4 0.006 265);
-  --gray-500: oklch(0.55 0.005 265);
-  --gray-600: oklch(0.7 0.004 265);
-  --gray-700: oklch(0.8 0.003 265);
-  --gray-800: oklch(0.9 0.002 265);
-  --gray-900: oklch(0.96 0.001 265);
-  --gray-950: oklch(0.99 0 0);
-
-  /* Accent Colors - Brighter for Dark Mode */
-  --accent-50: oklch(0.18 0.04 275);
-  --accent-100: oklch(0.24 0.07 275);
-  --accent-200: oklch(0.34 0.12 278);
-  --accent-300: oklch(0.48 0.16 280);
-  --accent-400: oklch(0.62 0.19 282);
-  --accent-500: oklch(0.7 0.2 284);
-  --accent-600: oklch(0.78 0.18 285);
-  --accent-700: oklch(0.85 0.14 286);
-  --accent-800: oklch(0.91 0.09 286);
-  --accent-900: oklch(0.95 0.04 286);
-
-  /* Success in Dark */
-  --success-50: oklch(0.15 0.04 158);
-  --success-100: oklch(0.22 0.08 158);
-  --success-200: oklch(0.32 0.12 158);
-  --success-500: oklch(0.7 0.18 155);
-  --success-600: oklch(0.78 0.16 155);
-  --success-700: oklch(0.85 0.13 155);
-
-  /* Warning in Dark */
-  --warning-50: oklch(0.16 0.05 80);
-  --warning-100: oklch(0.24 0.09 78);
-  --warning-500: oklch(0.8 0.16 75);
-  --warning-600: oklch(0.86 0.14 73);
-
-  /* Destructive in Dark */
-  --destructive-50: oklch(0.18 0.05 25);
-  --destructive-100: oklch(0.26 0.1 25);
-  --destructive-500: oklch(0.65 0.22 25);
-  --destructive-600: oklch(0.72 0.2 25);
-
-  /* Surface Levels - Layered Depth */
-  --surface-0: var(--gray-50);
-  --surface-1: var(--gray-100);
-  --surface-2: var(--gray-200);
-  --surface-3: var(--gray-300);
-
-  /* Semantic Colors */
-  --background: var(--surface-0);
-  --foreground: var(--gray-900);
-
-  --card: var(--surface-1);
-  --card-foreground: var(--gray-900);
-
-  --popover: var(--surface-1);
-  --popover-foreground: var(--gray-900);
-
-  --primary: var(--gray-900);
-  --primary-foreground: var(--gray-50);
-
-  --secondary: var(--gray-200);
-  --secondary-foreground: var(--gray-900);
-
-  --muted: var(--gray-200);
-  --muted-foreground: var(--gray-500);
-
-  --accent: var(--accent-500);
-  --accent-foreground: var(--gray-950);
-
-  --destructive: var(--destructive-500);
-
-  /* Borders - Very Subtle in Dark Mode */
-  --border: var(--gray-300);
-  --input: var(--gray-300);
-  --ring: var(--accent-500);
-
-  /* Charts */
-  --chart-1: var(--accent-500);
-  --chart-2: var(--accent-400);
-  --chart-3: var(--accent-300);
-  --chart-4: var(--gray-500);
-  --chart-5: var(--gray-400);
-
-  /* Sidebar */
-  --sidebar: var(--surface-1);
-  --sidebar-foreground: var(--gray-500);
-  --sidebar-primary: var(--gray-900);
-  --sidebar-primary-foreground: var(--gray-50);
-  --sidebar-accent: var(--accent-50);
-  --sidebar-accent-foreground: var(--accent-400);
-  --sidebar-border: var(--gray-300);
-  --sidebar-ring: var(--accent-500);
-}
-
-/* ============================================
-   BASE STYLES
-   ============================================ */
 @layer base {
   * {
     @apply border-border outline-ring/50;
   }
-
   body {
-    @apply bg-background text-foreground antialiased;
-    font-feature-settings: "ss01", "ss02", "cv01", "cv02";
+    @apply bg-background text-foreground font-sans;
+    font-size: var(--font-size-base);
+    line-height: var(--line-height-normal);
   }
 
-  /* Premium Scrollbar */
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes slideUp {
+    from {
+      transform: translateY(12px);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  @keyframes slideDown {
+    from {
+      transform: translateY(-8px);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  @keyframes scaleIn {
+    from {
+      transform: scale(0.95);
+      opacity: 0;
+    }
+    to {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+
+  @keyframes pulseColor {
+    0%,
+    100% {
+      color: var(--color-primary-violet);
+    }
+    50% {
+      color: var(--color-neutral-charcoal);
+    }
+  }
+
+  @keyframes shimmer {
+    0% {
+      background-position: -1000px 0;
+    }
+    100% {
+      background-position: 1000px 0;
+    }
+  }
+
+  @keyframes spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  @keyframes shake {
+    0%,
+    100% {
+      transform: translateX(0);
+    }
+    25% {
+      transform: translateX(-2px);
+    }
+    75% {
+      transform: translateX(2px);
+    }
+  }
+
+  @keyframes successCheckmark {
+    0% {
+      transform: scale(0.8);
+      opacity: 0;
+    }
+    50% {
+      transform: scale(1.1);
+    }
+    100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+
+  @keyframes cardLift {
+    from {
+      transform: translateY(0);
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    }
+    to {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-card-hover);
+    }
+  }
+
   ::-webkit-scrollbar {
     width: 8px;
     height: 8px;
@@ -395,91 +502,269 @@
     @apply bg-gray-400;
   }
   .dark ::-webkit-scrollbar-thumb {
-    @apply bg-gray-400;
+    @apply bg-gray-600;
   }
   .dark ::-webkit-scrollbar-thumb:hover {
     @apply bg-gray-500;
   }
 
-  /* Selection */
   ::selection {
-    @apply bg-accent-100 text-accent-900;
+    @apply bg-primary-violet-100 text-primary-violet-900;
   }
   .dark ::selection {
-    @apply bg-accent-200 text-accent-900;
+    @apply bg-primary-violet-200 text-primary-violet-100;
   }
 }
 
-/* ============================================
-   UTILITY CLASSES
-   ============================================ */
 @layer utilities {
-  /* Surface Utilities */
+  .animate-fade-in {
+    animation: fadeIn var(--duration-normal) var(--easing-default);
+  }
+
+  .animate-fade-in-slow {
+    animation: fadeIn var(--duration-slow) var(--easing-default);
+  }
+
+  .animate-slide-up {
+    animation: slideUp var(--duration-normal) var(--easing-default);
+  }
+
+  .animate-slide-down {
+    animation: slideDown var(--duration-normal) var(--easing-default);
+  }
+
+  .animate-scale-in {
+    animation: scaleIn var(--duration-normal) var(--easing-spring);
+  }
+
+  .animate-pulse-color {
+    animation: pulseColor var(--duration-slow) var(--easing-smooth);
+  }
+
+  .animate-shimmer {
+    animation: shimmer 2s infinite;
+    background: linear-gradient(
+      90deg,
+      var(--color-neutral-cream-100) 0%,
+      var(--color-neutral-cream-200) 50%,
+      var(--color-neutral-cream-100) 100%
+    );
+    background-size: 1000px 100%;
+  }
+
+  .animate-spin-smooth {
+    animation: spin 2s var(--easing-smooth) infinite;
+  }
+
+  .animate-shake {
+    animation: shake var(--duration-normal) var(--easing-default);
+  }
+
+  .animate-success-checkmark {
+    animation: successCheckmark var(--duration-slow) var(--easing-spring);
+  }
+
+  .animate-card-lift {
+    animation: cardLift var(--duration-normal) var(--easing-default);
+  }
+
+  .focus-ring {
+    @apply focus:outline-none focus:ring-2 focus:ring-offset-2;
+    --tw-ring-color: var(--color-primary-violet);
+  }
+
+  .focus-ring-sm {
+    @apply focus:outline-none focus:ring-1 focus:ring-offset-1;
+    --tw-ring-color: var(--color-primary-violet);
+  }
+
+  .focus-ring-error {
+    @apply focus:outline-none focus:ring-2 focus:ring-offset-2;
+    --tw-ring-color: var(--color-error-red);
+  }
+
+  .transition-fast {
+    transition-duration: var(--duration-fast);
+  }
+  .transition-normal {
+    transition-duration: var(--duration-normal);
+  }
+  .transition-slow {
+    transition-duration: var(--duration-slow);
+  }
+  .ease-spring {
+    transition-timing-function: var(--easing-spring);
+  }
+  .ease-smooth {
+    transition-timing-function: var(--easing-smooth);
+  }
+
+  .gap-xs {
+    gap: var(--space-xs);
+  }
+  .gap-sm {
+    gap: var(--space-sm);
+  }
+  .gap-md {
+    gap: var(--space-md);
+  }
+  .gap-lg {
+    gap: var(--space-lg);
+  }
+  .gap-xl {
+    gap: var(--space-xl);
+  }
+  .gap-2xl {
+    gap: var(--space-2xl);
+  }
+  .gap-3xl {
+    gap: var(--space-3xl);
+  }
+
+  .shadow-card {
+    box-shadow: var(--shadow-sm);
+  }
+  .shadow-card-hover {
+    box-shadow: var(--shadow-card-hover);
+  }
+  .shadow-focus {
+    box-shadow: var(--shadow-focus);
+  }
+
+  .card-lift-hover {
+    @apply transition-all;
+    transition-duration: var(--duration-normal);
+    transition-timing-function: var(--easing-out);
+  }
+  .card-lift-hover:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-card-hover);
+  }
+
+  .text-violet-primary {
+    color: var(--color-primary-violet);
+  }
+  .bg-violet-primary {
+    background-color: var(--color-primary-violet);
+  }
+  .bg-violet-primary-light {
+    background-color: var(--color-primary-violet-50);
+  }
+  .text-magenta-secondary {
+    color: var(--color-secondary-magenta);
+  }
+  .bg-magenta-secondary {
+    background-color: var(--color-secondary-magenta);
+  }
+  .text-teal-accent {
+    color: var(--color-accent-teal);
+  }
+  .bg-teal-accent {
+    background-color: var(--color-accent-teal);
+  }
+  .bg-teal-accent-light {
+    background-color: var(--color-accent-teal-50);
+  }
+  .text-neutral-muted {
+    color: var(--color-gray-500);
+  }
+  .border-subtle {
+    border-color: var(--color-neutral-cream-200);
+  }
+  .bg-cream {
+    background-color: var(--color-neutral-cream);
+  }
+
   .surface-0 {
-    @apply bg-surface-0;
+    background-color: var(--background);
   }
   .surface-1 {
-    @apply bg-surface-1;
+    background-color: var(--card);
   }
   .surface-2 {
-    @apply bg-surface-2;
-  }
-  .surface-3 {
-    @apply bg-surface-3;
+    background-color: var(--muted);
   }
 
-  /* Glass Effect with Blur */
   .glass {
-    @apply bg-surface-1/80 backdrop-blur-xl border border-border/50;
+    @apply backdrop-blur-xl;
+    background-color: rgba(255, 255, 255, 0.8);
+    border: 1px solid var(--border);
   }
-  .glass-subtle {
-    @apply bg-surface-1/60 backdrop-blur-md border border-border/30;
-  }
-
-  /* Gradient Text */
-  .text-gradient-accent {
-    @apply bg-gradient-to-r from-accent-400 to-accent-600 bg-clip-text text-transparent;
+  .dark .glass {
+    background-color: rgba(26, 26, 23, 0.8);
   }
 
-  /* Glow Effects */
-  .glow-accent {
-    box-shadow: var(--shadow-glow-accent);
+  .badge-success {
+    @apply bg-accent-teal-50 text-accent-teal-700;
+    border: 1px solid var(--color-accent-teal-200);
   }
-  .glow-success {
-    box-shadow: var(--shadow-glow-success);
+  .badge-warning {
+    background-color: #fef3c7;
+    color: #b45309;
+    border: 1px solid #fcd34d;
   }
-
-  /* Premium Card Styles */
-  .card-elevated {
-    @apply bg-surface-1 border border-border/50 rounded-xl;
-    box-shadow: var(--shadow-sm);
-    transition:
-      box-shadow 0.2s ease,
-      border-color 0.2s ease,
-      transform 0.2s ease;
+  .badge-destructive {
+    @apply bg-error-red-50 text-error-red-600;
+    border: 1px solid var(--color-error-red-100);
   }
-  .card-elevated:hover {
-    @apply border-border;
-    box-shadow: var(--shadow-md);
-    transform: translateY(-1px);
+  .badge-accent {
+    @apply bg-primary-violet-50 text-primary-violet-700;
+    border: 1px solid var(--color-primary-violet-200);
   }
-
-  /* Interactive Surface */
-  .interactive-surface {
-    @apply bg-surface-1 border border-transparent rounded-lg transition-all duration-200;
-  }
-  .interactive-surface:hover {
-    @apply bg-surface-2 border-border/30;
+  .badge-neutral {
+    @apply bg-gray-100 text-gray-600;
+    border: 1px solid var(--color-gray-200);
   }
 
-  /* Metric Cards */
+  .dark .badge-success {
+    @apply bg-accent-teal-50 text-accent-teal-600;
+    border-color: var(--color-accent-teal-100);
+  }
+  .dark .badge-warning {
+    background-color: #78350f;
+    color: #fbbf24;
+    border-color: #92400e;
+  }
+  .dark .badge-destructive {
+    @apply bg-error-red-50 text-error-red-600;
+    border-color: var(--color-error-red-100);
+  }
+  .dark .badge-accent {
+    @apply bg-primary-violet-50 text-primary-violet-600;
+    border-color: var(--color-primary-violet-100);
+  }
+  .dark .badge-neutral {
+    @apply bg-gray-200 text-gray-500;
+    border-color: var(--color-gray-300);
+  }
+
+  .trend-up {
+    @apply px-2 py-0.5 rounded-full text-xs font-semibold;
+    color: var(--color-accent-teal-700);
+    background-color: var(--color-accent-teal-50);
+  }
+  .trend-down {
+    @apply px-2 py-0.5 rounded-full text-xs font-semibold;
+    color: var(--color-error-red-600);
+    background-color: var(--color-error-red-50);
+  }
+  .dark .trend-up {
+    color: var(--color-accent-teal-600);
+    background-color: var(--color-accent-teal-50);
+  }
+  .dark .trend-down {
+    color: var(--color-error-red-600);
+    background-color: var(--color-error-red-50);
+  }
+
   .metric-card {
-    @apply relative overflow-hidden rounded-xl bg-surface-1 p-6 border border-border/40;
-    box-shadow: var(--shadow-subtle);
+    @apply relative overflow-hidden rounded-xl p-6;
+    background-color: var(--card);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-sm);
     transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   }
   .metric-card:hover {
-    @apply border-border/60;
     box-shadow: var(--shadow-md);
     transform: translateY(-2px);
   }
@@ -493,7 +778,7 @@
     background: linear-gradient(
       90deg,
       transparent,
-      var(--accent-200),
+      var(--color-primary-violet-200),
       transparent
     );
     opacity: 0;
@@ -503,73 +788,74 @@
     opacity: 1;
   }
 
-  /* Table Row Hover */
   .table-row-hover {
-    @apply transition-colors duration-150;
+    @apply transition-colors;
+    transition-duration: var(--duration-fast);
   }
   .table-row-hover:hover {
-    @apply bg-surface-2;
+    background-color: var(--muted);
   }
 
-  /* Status Badge Base */
-  .badge-success {
-    @apply bg-success-50 text-success-700 border border-success-200;
+  .card-elevated {
+    @apply rounded-xl;
+    background-color: var(--card);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-sm);
+    transition:
+      box-shadow 0.2s ease,
+      border-color 0.2s ease,
+      transform 0.2s ease;
   }
-  .badge-warning {
-    @apply bg-warning-50 text-warning-600 border border-warning-100;
-  }
-  .badge-destructive {
-    @apply bg-destructive-50 text-destructive-600 border border-destructive-100;
-  }
-  .badge-accent {
-    @apply bg-accent-50 text-accent-700 border border-accent-200;
-  }
-  .badge-neutral {
-    @apply bg-gray-100 text-gray-600 border border-gray-200;
-  }
-
-  /* Dark mode badge adjustments */
-  .dark .badge-success {
-    @apply bg-success-50 text-success-500 border-success-100;
-  }
-  .dark .badge-warning {
-    @apply bg-warning-50 text-warning-500 border-warning-100;
-  }
-  .dark .badge-destructive {
-    @apply bg-destructive-50 text-destructive-500 border-destructive-100;
-  }
-  .dark .badge-accent {
-    @apply bg-accent-50 text-accent-400 border-accent-100;
-  }
-  .dark .badge-neutral {
-    @apply bg-gray-200 text-gray-500 border-gray-300;
+  .card-elevated:hover {
+    border-color: var(--color-gray-300);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-1px);
   }
 
-  /* Trend Indicators */
-  .trend-up {
-    @apply text-success-600 bg-success-50 px-2 py-0.5 rounded-full text-xs font-semibold;
+  .interactive-surface {
+    @apply rounded-lg transition-all;
+    background-color: var(--card);
+    border: 1px solid transparent;
+    transition-duration: var(--duration-normal);
   }
-  .trend-down {
-    @apply text-destructive-600 bg-destructive-50 px-2 py-0.5 rounded-full text-xs font-semibold;
-  }
-  .dark .trend-up {
-    @apply text-success-500 bg-success-50;
-  }
-  .dark .trend-down {
-    @apply text-destructive-500 bg-destructive-50;
+  .interactive-surface:hover {
+    background-color: var(--muted);
+    border-color: var(--border);
   }
 
-  /* Focus Ring */
-  .focus-ring {
-    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500 focus-visible:ring-offset-2 focus-visible:ring-offset-background;
+  .text-gradient-accent {
+    @apply bg-clip-text text-transparent;
+    background-image: linear-gradient(
+      to right,
+      var(--color-primary-violet-600),
+      var(--color-secondary-magenta)
+    );
   }
-}
 
-@layer base {
-  * {
-    @apply border-border outline-ring/50;
+  .glow-violet {
+    box-shadow: 0 0 20px -5px var(--color-primary-violet);
   }
-  body {
-    @apply bg-background text-foreground;
+  .glow-teal {
+    box-shadow: 0 0 15px -3px var(--color-accent-teal);
+  }
+
+  .touch-target {
+    @apply min-h-[44px] min-w-[44px];
+  }
+
+  .focus-visible-ring {
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-background;
+    --tw-ring-color: var(--color-primary-violet);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
   }
 }

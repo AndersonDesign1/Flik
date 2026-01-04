@@ -73,10 +73,10 @@ const _BENTO_FEATURES = [
 
 export function FeatureGrid() {
   return (
-    <section className="px-6 py-24">
-      <div className="mx-auto max-w-6xl">
+    <section className="w-full px-4 py-24 sm:px-6 lg:px-8">
+      <div className="mx-auto w-full max-w-6xl">
         {/* Section Header */}
-        <div className="mx-auto mb-16 max-w-2xl text-center">
+        <div className="mb-16 w-full max-w-2xl text-center sm:mx-auto">
           <span className="mb-4 inline-block rounded-full border border-gray-200 bg-gray-50 px-3 py-1 font-medium text-gray-600 text-sm">
             Features
           </span>
@@ -90,7 +90,7 @@ export function FeatureGrid() {
         </div>
 
         {/* Bento Grid */}
-        <div className="grid gap-4 md:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
           {/* Large featured card */}
           <div className="group relative overflow-hidden rounded-2xl border border-gray-200 bg-gradient-to-br from-gray-900 to-gray-800 p-8 text-white md:col-span-2">
             <div className="relative z-10">

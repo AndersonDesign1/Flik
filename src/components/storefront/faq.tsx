@@ -35,45 +35,45 @@ export function FAQ() {
   const [openIndex, setOpenIndex] = useState<number | null>(0);
 
   return (
-    <section className="px-6 py-24">
-      <div className="mx-auto max-w-3xl">
-        {/* Section Header */}
-        <div className="mb-12 text-center">
-          <span className="mb-4 inline-block rounded-full border border-gray-200 bg-gray-50 px-3 py-1 font-medium text-gray-600 text-sm">
+    <section className="w-full px-4 py-24 sm:px-6 lg:px-8">
+      <div className="mx-auto flex w-full max-w-3xl flex-col gap-12">
+        <div className="flex w-full flex-col items-center gap-4 text-center">
+          <span className="inline-block rounded-full border border-border bg-muted px-3 py-1 font-medium text-muted-foreground text-sm">
             FAQ
           </span>
-          <h2 className="font-bold text-3xl text-gray-900 tracking-tight sm:text-4xl">
+          <h2 className="font-bold text-3xl text-foreground tracking-tight sm:text-4xl">
             Frequently asked questions
           </h2>
-          <p className="mt-4 text-gray-600 text-lg">
+          <p className="text-lg text-muted-foreground">
             Everything you need to know about selling with Overlay.
           </p>
         </div>
 
-        {/* FAQ Accordion */}
-        <div className="space-y-3">
+        <div className="flex flex-col gap-3">
           {FAQ_ITEMS.map((item, index) => (
             <div
-              className="overflow-hidden rounded-xl border border-gray-200 bg-white"
+              className="overflow-hidden rounded-xl border border-border bg-card"
               key={item.question}
             >
               <button
-                className="flex w-full items-center justify-between p-5 text-left transition-colors hover:bg-gray-50"
+                className="flex w-full items-center justify-between p-5 text-left transition-colors hover:bg-muted"
                 onClick={() => setOpenIndex(openIndex === index ? null : index)}
                 type="button"
               >
-                <span className="font-medium text-gray-900">
+                <span className="font-medium text-foreground">
                   {item.question}
                 </span>
                 <ChevronDown
-                  className={`h-5 w-5 text-gray-500 transition-transform ${
+                  className={`size-5 text-muted-foreground transition-transform ${
                     openIndex === index ? "rotate-180" : ""
                   }`}
                 />
               </button>
               {openIndex === index && (
-                <div className="border-gray-100 border-t px-5 pt-4 pb-5">
-                  <p className="text-gray-600 leading-relaxed">{item.answer}</p>
+                <div className="border-border border-t px-5 pt-4 pb-5">
+                  <p className="text-muted-foreground leading-relaxed">
+                    {item.answer}
+                  </p>
                 </div>
               )}
             </div>

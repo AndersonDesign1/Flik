@@ -1,7 +1,10 @@
 import { AlertTriangle, CheckCircle, Clock, MessageSquare } from "lucide-react";
+import {
+  DashboardList,
+  DashboardListItem,
+} from "@/components/shared/dashboard-list";
 import { StatsGrid } from "@/components/shared/stats-grid";
-import { Badge } from "@/components/ui/badge";
-import { Card } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 
 const STAFF_METRICS = [
   {
@@ -65,132 +68,123 @@ const RECENT_TICKETS = [
   },
 ];
 
-const priorityVariants = {
-  high: "destructive",
-  medium: "secondary",
-  low: "outline",
+const PENDING_MODERATION = [
+  {
+    name: "Dark Theme UI Kit",
+    seller: "UI Kit Pro",
+    type: "New product",
+  },
+  { name: "Icon Pack v3", seller: "Icon Foundry", type: "Update" },
+  {
+    name: "Landing Templates",
+    seller: "Template Hub",
+    type: "New product",
+  },
+  {
+    name: "Figma Components",
+    seller: "Design Studio",
+    type: "New product",
+  },
+];
+
+const priorityConfig = {
+  high: "text-error-red",
+  medium: "text-amber-600 dark:text-amber-400",
+  low: "text-muted-foreground",
 } as const;
 
-const statusVariants = {
-  open: "default",
-  pending: "secondary",
-  resolved: "success",
+const ticketStatusConfig = {
+  open: {
+    bg: "bg-primary-violet-50 dark:bg-primary-violet/10",
+    text: "text-primary-violet dark:text-primary-violet",
+    border: "border-primary-violet-200 dark:border-primary-violet/20",
+  },
+  pending: {
+    bg: "bg-amber-50 dark:bg-amber-500/10",
+    text: "text-amber-600 dark:text-amber-400",
+    border: "border-amber-200 dark:border-amber-500/20",
+  },
+  resolved: {
+    bg: "bg-accent-teal-50 dark:bg-accent-teal/10",
+    text: "text-accent-teal-700 dark:text-accent-teal",
+    border: "border-accent-teal-200 dark:border-accent-teal/20",
+  },
 } as const;
 
 export default function StaffDashboardPage() {
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div>
-        <h2 className="font-semibold text-2xl text-gray-900">
+    <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-1">
+        <h2 className="font-semibold text-2xl text-foreground">
           Staff Dashboard
         </h2>
-        <p className="text-gray-500 text-sm">
+        <p className="text-muted-foreground text-sm">
           Support queue and moderation overview.
         </p>
       </div>
 
-      {/* Stats */}
       <StatsGrid metrics={STAFF_METRICS} />
 
-      {/* Content */}
       <div className="grid gap-6 lg:grid-cols-2">
-        {/* Recent Tickets */}
-        <Card className="p-6">
-          <div className="mb-4 flex items-center justify-between">
-            <h3 className="font-semibold text-gray-900">Recent Tickets</h3>
-            <a
-              className="font-medium text-gray-500 text-sm hover:text-gray-700"
-              href="/staff/tickets"
-            >
-              View all →
-            </a>
-          </div>
-          <div className="space-y-3">
-            {RECENT_TICKETS.map((ticket) => (
-              <div
-                className="flex items-center justify-between rounded-lg border border-gray-100 p-3"
-                key={ticket.id}
-              >
-                <div>
+        <DashboardList title="Recent Tickets" viewAllHref="/staff/tickets">
+          {RECENT_TICKETS.map((ticket) => {
+            const status =
+              ticketStatusConfig[
+                ticket.status as keyof typeof ticketStatusConfig
+              ];
+            const priority =
+              priorityConfig[ticket.priority as keyof typeof priorityConfig];
+            return (
+              <DashboardListItem key={ticket.id}>
+                <div className="flex flex-col gap-1">
                   <div className="flex items-center gap-2">
-                    <span className="font-mono text-gray-400 text-xs">
+                    <span className="font-mono text-muted-foreground text-xs">
                       {ticket.id}
                     </span>
-                    <Badge
-                      className="capitalize"
-                      variant={
-                        priorityVariants[
-                          ticket.priority as keyof typeof priorityVariants
-                        ]
-                      }
-                    >
+                    <span className={cn("font-medium text-xs", priority)}>
                       {ticket.priority}
-                    </Badge>
+                    </span>
                   </div>
-                  <p className="mt-1 font-medium text-gray-900 text-sm">
+                  <p className="font-medium text-foreground text-sm">
                     {ticket.subject}
                   </p>
-                  <p className="text-gray-500 text-xs">{ticket.user}</p>
+                  <p className="text-muted-foreground text-xs">{ticket.user}</p>
                 </div>
-                <Badge
-                  className="capitalize"
-                  variant={
-                    statusVariants[ticket.status as keyof typeof statusVariants]
-                  }
+                <span
+                  className={cn(
+                    "inline-flex rounded-full border px-2.5 py-1 font-medium text-xs capitalize",
+                    status.bg,
+                    status.text,
+                    status.border
+                  )}
                 >
                   {ticket.status}
-                </Badge>
-              </div>
-            ))}
-          </div>
-        </Card>
+                </span>
+              </DashboardListItem>
+            );
+          })}
+        </DashboardList>
 
-        {/* Pending Moderation */}
-        <Card className="p-6">
-          <div className="mb-4 flex items-center justify-between">
-            <h3 className="font-semibold text-gray-900">Pending Moderation</h3>
-            <a
-              className="font-medium text-gray-500 text-sm hover:text-gray-700"
-              href="/staff/moderation"
-            >
-              View all →
-            </a>
-          </div>
-          <div className="space-y-3">
-            {[
-              {
-                name: "Dark Theme UI Kit",
-                seller: "UI Kit Pro",
-                type: "New product",
-              },
-              { name: "Icon Pack v3", seller: "Icon Foundry", type: "Update" },
-              {
-                name: "Landing Templates",
-                seller: "Template Hub",
-                type: "New product",
-              },
-              {
-                name: "Figma Components",
-                seller: "Design Studio",
-                type: "New product",
-              },
-            ].map((item) => (
-              <div
-                className="flex items-center justify-between rounded-lg border border-gray-100 p-3"
-                key={item.name}
-              >
-                <div>
-                  <p className="font-medium text-gray-900 text-sm">
-                    {item.name}
-                  </p>
-                  <p className="text-gray-500 text-xs">by {item.seller}</p>
-                </div>
-                <Badge variant="secondary">{item.type}</Badge>
+        <DashboardList
+          title="Pending Moderation"
+          viewAllHref="/staff/moderation"
+        >
+          {PENDING_MODERATION.map((item) => (
+            <DashboardListItem key={item.name}>
+              <div className="flex flex-col gap-0.5">
+                <p className="font-medium text-foreground text-sm">
+                  {item.name}
+                </p>
+                <p className="text-muted-foreground text-xs">
+                  by {item.seller}
+                </p>
               </div>
-            ))}
-          </div>
-        </Card>
+              <span className="font-medium text-muted-foreground text-xs">
+                {item.type}
+              </span>
+            </DashboardListItem>
+          ))}
+        </DashboardList>
       </div>
     </div>
   );

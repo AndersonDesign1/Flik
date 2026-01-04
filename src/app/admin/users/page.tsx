@@ -1,7 +1,8 @@
 "use client";
 
-import { MoreHorizontal, Search } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { MoreHorizontal } from "lucide-react";
+import { useState } from "react";
+import { TableToolbar } from "@/components/shared/table-toolbar";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {
@@ -10,7 +11,15 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { cn } from "@/lib/utils";
 
 const USERS = [
   {
@@ -60,117 +69,133 @@ const USERS = [
   },
 ];
 
-const roleVariants = {
-  user: "secondary",
-  admin: "default",
-  staff: "outline",
+const roleConfig = {
+  user: {
+    bg: "bg-gray-50 dark:bg-gray-500/10",
+    text: "text-gray-600 dark:text-gray-400",
+    border: "border-gray-200 dark:border-gray-500/20",
+  },
+  admin: {
+    bg: "bg-primary-violet-50 dark:bg-primary-violet/10",
+    text: "text-primary-violet dark:text-primary-violet",
+    border: "border-primary-violet-200 dark:border-primary-violet/20",
+  },
+  staff: {
+    bg: "bg-accent-teal-50 dark:bg-accent-teal/10",
+    text: "text-accent-teal-700 dark:text-accent-teal",
+    border: "border-accent-teal-200 dark:border-accent-teal/20",
+  },
 } as const;
 
 export default function AdminUsersPage() {
+  const [searchValue, setSearchValue] = useState("");
+
+  const filteredUsers = USERS.filter(
+    (user) =>
+      user.name.toLowerCase().includes(searchValue.toLowerCase()) ||
+      user.email.toLowerCase().includes(searchValue.toLowerCase())
+  );
+
   return (
-    <div className="space-y-6">
-      {/* Header */}
+    <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
-        <div>
-          <h2 className="font-semibold text-2xl text-gray-900">Users</h2>
-          <p className="text-gray-500 text-sm">
+        <div className="flex flex-col gap-1">
+          <h2 className="font-semibold text-2xl text-foreground">Users</h2>
+          <p className="text-muted-foreground text-sm">
             Manage all users on the platform.
           </p>
         </div>
         <Button>Add User</Button>
       </div>
 
-      {/* Toolbar */}
-      <div className="flex items-center gap-4">
-        <div className="relative max-w-sm flex-1">
-          <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400" />
-          <Input className="h-9 pl-9" placeholder="Search users..." />
-        </div>
-      </div>
+      <Card className="overflow-hidden p-0">
+        <TableToolbar
+          onSearchChange={setSearchValue}
+          searchPlaceholder="Search users..."
+          searchValue={searchValue}
+          title="All Users"
+        />
 
-      {/* Table */}
-      <Card>
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="border-gray-100 border-b bg-gray-50">
-              <tr>
-                <th className="px-4 py-3 text-left font-medium text-gray-500 text-xs uppercase tracking-wider">
-                  User
-                </th>
-                <th className="px-4 py-3 text-right font-medium text-gray-500 text-xs uppercase tracking-wider">
-                  Purchases
-                </th>
-                <th className="px-4 py-3 text-right font-medium text-gray-500 text-xs uppercase tracking-wider">
-                  Total Spent
-                </th>
-                <th className="px-4 py-3 text-left font-medium text-gray-500 text-xs uppercase tracking-wider">
-                  Role
-                </th>
-                <th className="px-4 py-3 text-left font-medium text-gray-500 text-xs uppercase tracking-wider">
-                  Joined
-                </th>
-                <th className="px-4 py-3" />
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {USERS.map((user) => (
-                <tr
-                  className="transition-colors hover:bg-gray-50"
+        <Table>
+          <TableHeader>
+            <TableRow className="border-border/30 hover:bg-transparent">
+              <TableHead className="h-11 font-medium text-xs">User</TableHead>
+              <TableHead className="h-11 text-right font-medium text-xs">
+                Purchases
+              </TableHead>
+              <TableHead className="h-11 text-right font-medium text-xs">
+                Total Spent
+              </TableHead>
+              <TableHead className="h-11 font-medium text-xs">Role</TableHead>
+              <TableHead className="h-11 font-medium text-xs">Joined</TableHead>
+              <TableHead className="h-11 w-12" />
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {filteredUsers.map((user) => {
+              const role = roleConfig[user.role as keyof typeof roleConfig];
+              return (
+                <TableRow
+                  className="border-border/20 transition-colors hover:bg-muted/50"
                   key={user.id}
                 >
-                  <td className="px-4 py-4">
+                  <TableCell className="py-4">
                     <div className="flex items-center gap-3">
-                      <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gray-100 font-medium text-gray-600 text-sm">
+                      <div className="flex size-9 items-center justify-center rounded-full bg-primary-violet font-medium text-sm text-white">
                         {user.name.charAt(0)}
                       </div>
-                      <div>
-                        <p className="font-medium text-gray-900 text-sm">
+                      <div className="flex flex-col gap-0.5">
+                        <p className="font-medium text-foreground text-sm">
                           {user.name}
                         </p>
-                        <p className="text-gray-500 text-xs">{user.email}</p>
+                        <p className="text-muted-foreground text-xs">
+                          {user.email}
+                        </p>
                       </div>
                     </div>
-                  </td>
-                  <td className="px-4 py-4 text-right text-gray-600 text-sm">
+                  </TableCell>
+                  <TableCell className="py-4 text-right text-muted-foreground tabular-nums">
                     {user.purchases}
-                  </td>
-                  <td className="px-4 py-4 text-right font-medium text-gray-900 text-sm">
+                  </TableCell>
+                  <TableCell className="py-4 text-right font-semibold tabular-nums">
                     {user.spent}
-                  </td>
-                  <td className="px-4 py-4">
-                    <Badge
-                      className="capitalize"
-                      variant={
-                        roleVariants[user.role as keyof typeof roleVariants]
-                      }
+                  </TableCell>
+                  <TableCell className="py-4">
+                    <span
+                      className={cn(
+                        "inline-flex items-center rounded-full border px-2.5 py-1 font-medium text-xs capitalize",
+                        role.bg,
+                        role.text,
+                        role.border
+                      )}
                     >
                       {user.role}
-                    </Badge>
-                  </td>
-                  <td className="px-4 py-4 text-gray-500 text-sm">
+                    </span>
+                  </TableCell>
+                  <TableCell className="py-4 text-muted-foreground">
                     {user.joined}
-                  </td>
-                  <td className="px-4 py-4">
+                  </TableCell>
+                  <TableCell className="py-4">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button className="h-8 w-8 p-0" variant="ghost">
-                          <MoreHorizontal className="h-4 w-4" />
+                        <Button className="size-8" size="icon" variant="ghost">
+                          <MoreHorizontal className="size-4" />
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuItem>View details</DropdownMenuItem>
                         <DropdownMenuItem>Change role</DropdownMenuItem>
-                        <DropdownMenuItem className="text-red-600">
+                        <DropdownMenuItem className="text-error-red">
                           Suspend user
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+                  </TableCell>
+                </TableRow>
+              );
+            })}
+          </TableBody>
+        </Table>
       </Card>
     </div>
   );
