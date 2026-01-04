@@ -4,10 +4,8 @@ import { cn } from "@/lib/utils";
 interface MetricCardProps {
   title: string;
   value: string | number;
-  // Legacy props
   change?: string;
   changeType?: "positive" | "negative" | "neutral";
-  // New props from data
   subtext?: string;
   trend?: string;
   trendUp?: boolean;
@@ -28,7 +26,6 @@ export function MetricCard({
   icon: Icon,
   className,
 }: MetricCardProps) {
-  // Use trend/trendUp if provided, otherwise fall back to change/changeType
   const displayChange = trend || change;
   const getDisplayChangeType = () => {
     if (trend) {
@@ -41,34 +38,36 @@ export function MetricCard({
   return (
     <div
       className={cn(
-        "rounded-xl border border-gray-200 bg-white p-5",
-        primary && "border-primary/20 bg-primary/5",
+        "rounded-xl border border-border bg-card p-5 transition-all hover:shadow-md",
+        primary && "border-primary-violet/20 bg-primary-violet-50",
         className
       )}
     >
       <div className="flex items-start justify-between">
-        <div>
-          <p className="font-medium text-gray-500 text-sm">{title}</p>
-          <p className="mt-2 font-bold text-2xl text-gray-900 tabular-nums">
+        <div className="flex flex-col gap-2">
+          <p className="font-medium text-muted-foreground text-sm">{title}</p>
+          <p className="font-bold text-2xl text-foreground tabular-nums">
             {value}
           </p>
           {displayChange && (
             <p
               className={cn(
-                "mt-1 text-sm",
-                displayChangeType === "positive" && "text-emerald-600",
-                displayChangeType === "negative" && "text-red-600",
-                displayChangeType === "neutral" && "text-gray-500"
+                "text-sm",
+                displayChangeType === "positive" && "text-accent-teal",
+                displayChangeType === "negative" && "text-error-red",
+                displayChangeType === "neutral" && "text-muted-foreground"
               )}
             >
               {displayChange}
             </p>
           )}
-          {subtext && <p className="mt-0.5 text-gray-400 text-xs">{subtext}</p>}
+          {subtext && (
+            <p className="text-muted-foreground/60 text-xs">{subtext}</p>
+          )}
         </div>
         {Icon && (
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gray-100">
-            <Icon className="h-5 w-5 text-gray-600" />
+          <div className="flex size-10 items-center justify-center rounded-lg bg-muted">
+            <Icon className="size-5 text-muted-foreground" />
           </div>
         )}
       </div>

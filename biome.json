@@ -7,12 +7,7 @@
   },
   "files": {
     "ignoreUnknown": true,
-    "includes": [
-      "!node_modules",
-      "!.next",
-      "!dist",
-      "!build"
-    ]
+    "includes": ["!node_modules", "!.next", "!dist", "!build"]
   },
   "formatter": {
     "enabled": true,
@@ -39,6 +34,21 @@
       }
     }
   },
+  "overrides": [
+    {
+      "includes": ["src/components/ui/**"],
+      "linter": {
+        "rules": {
+          "performance": {
+            "noNamespaceImport": "off"
+          },
+          "suspicious": {
+            "noDocumentCookie": "off"
+          }
+        }
+      }
+    }
+  ],
   "extends": [
     "ultracite/core",
     "ultracite/react",

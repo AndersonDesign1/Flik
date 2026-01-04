@@ -56,14 +56,13 @@ export function DashboardSidebar() {
 
   return (
     <Sidebar>
-      {/* Header with Logo */}
-      <SidebarHeader className="border-border/30 border-b px-4 py-3">
+      <SidebarHeader className="border-border border-b px-4 py-3">
         <Link
           className="flex items-center gap-2.5 font-semibold text-foreground tracking-tight transition-all duration-200 hover:opacity-80"
           href="/"
           onClick={handleLinkClick}
         >
-          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gray-900 text-gray-50 dark:bg-gray-100 dark:text-gray-900">
+          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary-violet text-white">
             <span className="font-bold text-xs">O</span>
           </div>
           <span className="font-semibold text-sm group-data-[collapsible=icon]:hidden">
@@ -72,7 +71,6 @@ export function DashboardSidebar() {
         </Link>
       </SidebarHeader>
 
-      {/* Main Navigation */}
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel>Menu</SidebarGroupLabel>
@@ -97,8 +95,7 @@ export function DashboardSidebar() {
         </SidebarGroup>
       </SidebarContent>
 
-      {/* Footer Links */}
-      <SidebarFooter className="border-border/30 border-t">
+      <SidebarFooter className="border-border border-t">
         <SidebarGroup className="p-0">
           <SidebarGroupContent>
             <SidebarMenu>

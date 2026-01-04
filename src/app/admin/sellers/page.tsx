@@ -1,8 +1,8 @@
 "use client";
 
-import { MoreHorizontal, Search } from "lucide-react";
+import { MoreHorizontal } from "lucide-react";
 import { useState } from "react";
-import { Badge } from "@/components/ui/badge";
+import { TableToolbar } from "@/components/shared/table-toolbar";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {
@@ -11,7 +11,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
 import {
   Sheet,
   SheetContent,
@@ -20,6 +19,15 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { cn } from "@/lib/utils";
 
 const SELLERS = [
   {
@@ -69,111 +77,126 @@ const SELLERS = [
   },
 ];
 
-const statusVariants = {
-  active: "success",
-  pending: "secondary",
-  suspended: "destructive",
+const sellerStatusConfig = {
+  active: {
+    bg: "bg-accent-teal-50 dark:bg-accent-teal/10",
+    text: "text-accent-teal-700 dark:text-accent-teal",
+    border: "border-accent-teal-200 dark:border-accent-teal/20",
+  },
+  pending: {
+    bg: "bg-amber-50 dark:bg-amber-500/10",
+    text: "text-amber-600 dark:text-amber-400",
+    border: "border-amber-200 dark:border-amber-500/20",
+  },
+  suspended: {
+    bg: "bg-error-red-50 dark:bg-error-red/10",
+    text: "text-error-red dark:text-error-red",
+    border: "border-error-red-100 dark:border-error-red/20",
+  },
 } as const;
 
 export default function AdminSellersPage() {
   const [selectedSeller, setSelectedSeller] = useState<
     (typeof SELLERS)[0] | null
   >(null);
+  const [searchValue, setSearchValue] = useState("");
+
+  const filteredSellers = SELLERS.filter(
+    (seller) =>
+      seller.name.toLowerCase().includes(searchValue.toLowerCase()) ||
+      seller.email.toLowerCase().includes(searchValue.toLowerCase())
+  );
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="font-semibold text-2xl text-gray-900">Sellers</h2>
-          <p className="text-gray-500 text-sm">
-            Manage all sellers on the platform.
-          </p>
-        </div>
+    <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-1">
+        <h2 className="font-semibold text-2xl text-foreground">Sellers</h2>
+        <p className="text-muted-foreground text-sm">
+          Manage all sellers on the platform.
+        </p>
       </div>
 
-      {/* Toolbar */}
-      <div className="flex items-center gap-4">
-        <div className="relative max-w-sm flex-1">
-          <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400" />
-          <Input className="h-9 pl-9" placeholder="Search sellers..." />
-        </div>
-      </div>
+      <Card className="overflow-hidden p-0">
+        <TableToolbar
+          onSearchChange={setSearchValue}
+          searchPlaceholder="Search sellers..."
+          searchValue={searchValue}
+          title="All Sellers"
+        />
 
-      {/* Table */}
-      <Card>
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="border-gray-100 border-b bg-gray-50">
-              <tr>
-                <th className="px-4 py-3 text-left font-medium text-gray-500 text-xs uppercase tracking-wider">
-                  Seller
-                </th>
-                <th className="px-4 py-3 text-left font-medium text-gray-500 text-xs uppercase tracking-wider">
-                  Products
-                </th>
-                <th className="px-4 py-3 text-left font-medium text-gray-500 text-xs uppercase tracking-wider">
-                  Revenue
-                </th>
-                <th className="px-4 py-3 text-left font-medium text-gray-500 text-xs uppercase tracking-wider">
-                  Status
-                </th>
-                <th className="px-4 py-3 text-left font-medium text-gray-500 text-xs uppercase tracking-wider">
-                  Joined
-                </th>
-                <th className="px-4 py-3" />
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {SELLERS.map((seller) => (
-                <tr
-                  className="cursor-pointer transition-colors hover:bg-gray-50"
+        <Table>
+          <TableHeader>
+            <TableRow className="border-border/30 hover:bg-transparent">
+              <TableHead className="h-11 font-medium text-xs">Seller</TableHead>
+              <TableHead className="h-11 font-medium text-xs">
+                Products
+              </TableHead>
+              <TableHead className="h-11 font-medium text-xs">
+                Revenue
+              </TableHead>
+              <TableHead className="h-11 font-medium text-xs">Status</TableHead>
+              <TableHead className="h-11 font-medium text-xs">Joined</TableHead>
+              <TableHead className="h-11 w-12" />
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {filteredSellers.map((seller) => {
+              const status =
+                sellerStatusConfig[
+                  seller.status as keyof typeof sellerStatusConfig
+                ];
+              return (
+                <TableRow
+                  className="cursor-pointer border-border/20 transition-colors hover:bg-muted/50"
                   key={seller.id}
                   onClick={() => setSelectedSeller(seller)}
                 >
-                  <td className="px-4 py-4">
+                  <TableCell className="py-4">
                     <div className="flex items-center gap-3">
-                      <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gray-100 font-medium text-gray-600 text-sm">
+                      <div className="flex size-9 items-center justify-center rounded-full bg-primary-violet font-medium text-sm text-white">
                         {seller.name.charAt(0)}
                       </div>
-                      <div>
-                        <p className="font-medium text-gray-900 text-sm">
+                      <div className="flex flex-col gap-0.5">
+                        <p className="font-medium text-foreground text-sm">
                           {seller.name}
                         </p>
-                        <p className="text-gray-500 text-xs">{seller.email}</p>
+                        <p className="text-muted-foreground text-xs">
+                          {seller.email}
+                        </p>
                       </div>
                     </div>
-                  </td>
-                  <td className="px-4 py-4 text-gray-600 text-sm">
+                  </TableCell>
+                  <TableCell className="py-4 text-muted-foreground">
                     {seller.products}
-                  </td>
-                  <td className="px-4 py-4 font-medium text-gray-900 text-sm">
+                  </TableCell>
+                  <TableCell className="py-4 font-semibold tabular-nums">
                     {seller.revenue}
-                  </td>
-                  <td className="px-4 py-4">
-                    <Badge
-                      className="capitalize"
-                      variant={
-                        statusVariants[
-                          seller.status as keyof typeof statusVariants
-                        ]
-                      }
+                  </TableCell>
+                  <TableCell className="py-4">
+                    <span
+                      className={cn(
+                        "inline-flex items-center rounded-full border px-2.5 py-1 font-medium text-xs capitalize",
+                        status.bg,
+                        status.text,
+                        status.border
+                      )}
                     >
                       {seller.status}
-                    </Badge>
-                  </td>
-                  <td className="px-4 py-4 text-gray-500 text-sm">
+                    </span>
+                  </TableCell>
+                  <TableCell className="py-4 text-muted-foreground">
                     {seller.joined}
-                  </td>
-                  <td className="px-4 py-4">
+                  </TableCell>
+                  <TableCell className="py-4">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button
-                          className="h-8 w-8 p-0"
+                          className="size-8"
                           onClick={(e) => e.stopPropagation()}
+                          size="icon"
                           variant="ghost"
                         >
-                          <MoreHorizontal className="h-4 w-4" />
+                          <MoreHorizontal className="size-4" />
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
@@ -181,15 +204,14 @@ export default function AdminSellersPage() {
                         <DropdownMenuItem>Suspend seller</DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+                  </TableCell>
+                </TableRow>
+              );
+            })}
+          </TableBody>
+        </Table>
       </Card>
 
-      {/* Detail Sheet */}
       <Sheet
         onOpenChange={(open) => !open && setSelectedSeller(null)}
         open={!!selectedSeller}
@@ -203,35 +225,41 @@ export default function AdminSellersPage() {
               </SheetHeader>
               <div className="grid gap-4 py-6">
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="rounded-lg border border-gray-200 p-4">
-                    <p className="text-gray-500 text-xs">Products</p>
-                    <p className="font-bold text-gray-900 text-xl">
+                  <div className="rounded-lg border border-border p-4">
+                    <p className="text-muted-foreground text-xs">Products</p>
+                    <p className="font-bold text-foreground text-xl">
                       {selectedSeller.products}
                     </p>
                   </div>
-                  <div className="rounded-lg border border-gray-200 p-4">
-                    <p className="text-gray-500 text-xs">Revenue</p>
-                    <p className="font-bold text-gray-900 text-xl">
+                  <div className="rounded-lg border border-border p-4">
+                    <p className="text-muted-foreground text-xs">Revenue</p>
+                    <p className="font-bold text-foreground text-xl">
                       {selectedSeller.revenue}
                     </p>
                   </div>
                 </div>
-                <div className="rounded-lg border border-gray-200 p-4">
-                  <p className="text-gray-500 text-xs">Status</p>
-                  <Badge
-                    className="mt-1 capitalize"
-                    variant={
-                      statusVariants[
-                        selectedSeller.status as keyof typeof statusVariants
-                      ]
-                    }
+                <div className="rounded-lg border border-border p-4">
+                  <p className="text-muted-foreground text-xs">Status</p>
+                  <span
+                    className={cn(
+                      "mt-1 inline-flex items-center rounded-full border px-2.5 py-1 font-medium text-xs capitalize",
+                      sellerStatusConfig[
+                        selectedSeller.status as keyof typeof sellerStatusConfig
+                      ].bg,
+                      sellerStatusConfig[
+                        selectedSeller.status as keyof typeof sellerStatusConfig
+                      ].text,
+                      sellerStatusConfig[
+                        selectedSeller.status as keyof typeof sellerStatusConfig
+                      ].border
+                    )}
                   >
                     {selectedSeller.status}
-                  </Badge>
+                  </span>
                 </div>
-                <div className="rounded-lg border border-gray-200 p-4">
-                  <p className="text-gray-500 text-xs">Joined</p>
-                  <p className="font-medium text-gray-900 text-sm">
+                <div className="rounded-lg border border-border p-4">
+                  <p className="text-muted-foreground text-xs">Joined</p>
+                  <p className="font-medium text-foreground text-sm">
                     {selectedSeller.joined}
                   </p>
                 </div>

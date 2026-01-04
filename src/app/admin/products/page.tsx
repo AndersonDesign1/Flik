@@ -1,9 +1,9 @@
 "use client";
 
-import { MoreHorizontal, Search } from "lucide-react";
+import { MoreHorizontal } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
-import { Badge } from "@/components/ui/badge";
+import { TableToolbar } from "@/components/shared/table-toolbar";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {
@@ -12,7 +12,15 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { cn } from "@/lib/utils";
 
 const PRODUCTS = [
   {
@@ -62,83 +70,98 @@ const PRODUCTS = [
   },
 ];
 
-const statusVariants = {
-  active: "success",
-  pending: "secondary",
-  rejected: "destructive",
+const productStatusConfig = {
+  active: {
+    bg: "bg-accent-teal-50 dark:bg-accent-teal/10",
+    text: "text-accent-teal-700 dark:text-accent-teal",
+    border: "border-accent-teal-200 dark:border-accent-teal/20",
+  },
+  pending: {
+    bg: "bg-amber-50 dark:bg-amber-500/10",
+    text: "text-amber-600 dark:text-amber-400",
+    border: "border-amber-200 dark:border-amber-500/20",
+  },
+  rejected: {
+    bg: "bg-error-red-50 dark:bg-error-red/10",
+    text: "text-error-red dark:text-error-red",
+    border: "border-error-red-100 dark:border-error-red/20",
+  },
 } as const;
 
 export default function AdminProductsPage() {
   const [filter, setFilter] = useState("all");
+  const [searchValue, setSearchValue] = useState("");
+
+  const filteredProducts = PRODUCTS.filter((p) => {
+    const matchesFilter = filter === "all" || p.status === filter;
+    const matchesSearch =
+      p.name.toLowerCase().includes(searchValue.toLowerCase()) ||
+      p.seller.toLowerCase().includes(searchValue.toLowerCase());
+    return matchesFilter && matchesSearch;
+  });
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="font-semibold text-2xl text-gray-900">Products</h2>
-          <p className="text-gray-500 text-sm">
-            Moderate and manage all products.
-          </p>
-        </div>
+    <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-1">
+        <h2 className="font-semibold text-2xl text-foreground">Products</h2>
+        <p className="text-muted-foreground text-sm">
+          Moderate and manage all products.
+        </p>
       </div>
 
-      {/* Toolbar */}
-      <div className="flex items-center gap-4">
-        <div className="relative max-w-sm flex-1">
-          <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400" />
-          <Input className="h-9 pl-9" placeholder="Search products..." />
-        </div>
-        <div className="flex gap-2">
-          {["all", "pending", "active", "rejected"].map((status) => (
-            <Button
-              className="h-8 capitalize"
-              key={status}
-              onClick={() => setFilter(status)}
-              size="sm"
-              variant={filter === status ? "default" : "outline"}
-            >
-              {status}
-            </Button>
-          ))}
-        </div>
+      <div className="flex items-center gap-2">
+        {["all", "pending", "active", "rejected"].map((status) => (
+          <Button
+            className="h-8 capitalize"
+            key={status}
+            onClick={() => setFilter(status)}
+            size="sm"
+            variant={filter === status ? "default" : "outline"}
+          >
+            {status}
+          </Button>
+        ))}
       </div>
 
-      {/* Table */}
-      <Card>
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="border-gray-100 border-b bg-gray-50">
-              <tr>
-                <th className="px-4 py-3 text-left font-medium text-gray-500 text-xs uppercase tracking-wider">
-                  Product
-                </th>
-                <th className="px-4 py-3 text-left font-medium text-gray-500 text-xs uppercase tracking-wider">
-                  Seller
-                </th>
-                <th className="px-4 py-3 text-right font-medium text-gray-500 text-xs uppercase tracking-wider">
-                  Price
-                </th>
-                <th className="px-4 py-3 text-right font-medium text-gray-500 text-xs uppercase tracking-wider">
-                  Sales
-                </th>
-                <th className="px-4 py-3 text-left font-medium text-gray-500 text-xs uppercase tracking-wider">
-                  Status
-                </th>
-                <th className="px-4 py-3" />
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {PRODUCTS.filter(
-                (p) => filter === "all" || p.status === filter
-              ).map((product) => (
-                <tr
-                  className="transition-colors hover:bg-gray-50"
+      <Card className="overflow-hidden p-0">
+        <TableToolbar
+          onSearchChange={setSearchValue}
+          searchPlaceholder="Search products..."
+          searchValue={searchValue}
+          title="All Products"
+        />
+
+        <Table>
+          <TableHeader>
+            <TableRow className="border-border/30 hover:bg-transparent">
+              <TableHead className="h-11 font-medium text-xs">
+                Product
+              </TableHead>
+              <TableHead className="h-11 font-medium text-xs">Seller</TableHead>
+              <TableHead className="h-11 text-right font-medium text-xs">
+                Price
+              </TableHead>
+              <TableHead className="h-11 text-right font-medium text-xs">
+                Sales
+              </TableHead>
+              <TableHead className="h-11 font-medium text-xs">Status</TableHead>
+              <TableHead className="h-11 w-12" />
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {filteredProducts.map((product) => {
+              const status =
+                productStatusConfig[
+                  product.status as keyof typeof productStatusConfig
+                ];
+              return (
+                <TableRow
+                  className="border-border/20 transition-colors hover:bg-muted/50"
                   key={product.id}
                 >
-                  <td className="px-4 py-4">
+                  <TableCell className="py-4">
                     <div className="flex items-center gap-3">
-                      <div className="relative h-10 w-10 overflow-hidden rounded-lg border border-gray-200 bg-gray-100">
+                      <div className="relative size-10 overflow-hidden rounded-lg border border-border bg-muted">
                         {product.image ? (
                           <Image
                             alt={product.name}
@@ -147,58 +170,58 @@ export default function AdminProductsPage() {
                             src={product.image}
                           />
                         ) : (
-                          <div className="flex h-full w-full items-center justify-center text-gray-400 text-xs">
+                          <div className="flex size-full items-center justify-center text-muted-foreground text-xs">
                             IMG
                           </div>
                         )}
                       </div>
-                      <p className="font-medium text-gray-900 text-sm">
+                      <p className="font-medium text-foreground text-sm">
                         {product.name}
                       </p>
                     </div>
-                  </td>
-                  <td className="px-4 py-4 text-gray-600 text-sm">
+                  </TableCell>
+                  <TableCell className="py-4 text-muted-foreground">
                     {product.seller}
-                  </td>
-                  <td className="px-4 py-4 text-right font-medium text-gray-900 text-sm">
+                  </TableCell>
+                  <TableCell className="py-4 text-right font-semibold tabular-nums">
                     {product.price}
-                  </td>
-                  <td className="px-4 py-4 text-right text-gray-600 text-sm">
+                  </TableCell>
+                  <TableCell className="py-4 text-right text-muted-foreground tabular-nums">
                     {product.sales}
-                  </td>
-                  <td className="px-4 py-4">
-                    <Badge
-                      className="capitalize"
-                      variant={
-                        statusVariants[
-                          product.status as keyof typeof statusVariants
-                        ]
-                      }
+                  </TableCell>
+                  <TableCell className="py-4">
+                    <span
+                      className={cn(
+                        "inline-flex items-center rounded-full border px-2.5 py-1 font-medium text-xs capitalize",
+                        status.bg,
+                        status.text,
+                        status.border
+                      )}
                     >
                       {product.status}
-                    </Badge>
-                  </td>
-                  <td className="px-4 py-4">
+                    </span>
+                  </TableCell>
+                  <TableCell className="py-4">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button className="h-8 w-8 p-0" variant="ghost">
-                          <MoreHorizontal className="h-4 w-4" />
+                        <Button className="size-8" size="icon" variant="ghost">
+                          <MoreHorizontal className="size-4" />
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuItem>View product</DropdownMenuItem>
                         <DropdownMenuItem>Approve</DropdownMenuItem>
-                        <DropdownMenuItem className="text-red-600">
+                        <DropdownMenuItem className="text-error-red">
                           Reject
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+                  </TableCell>
+                </TableRow>
+              );
+            })}
+          </TableBody>
+        </Table>
       </Card>
     </div>
   );

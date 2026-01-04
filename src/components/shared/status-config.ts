@@ -2,15 +2,15 @@ import { CheckCircle2, Clock, XCircle } from "lucide-react";
 
 export const statusConfig = {
   Completed: {
-    bg: "bg-emerald-50 dark:bg-emerald-500/10",
-    text: "text-emerald-600 dark:text-emerald-400",
-    border: "border-emerald-200 dark:border-emerald-500/20",
+    bg: "bg-accent-teal-50 dark:bg-accent-teal/10",
+    text: "text-accent-teal-700 dark:text-accent-teal",
+    border: "border-accent-teal-200 dark:border-accent-teal/20",
     icon: CheckCircle2,
   },
   Failed: {
-    bg: "bg-red-50 dark:bg-red-500/10",
-    text: "text-red-600 dark:text-red-400",
-    border: "border-red-200 dark:border-red-500/20",
+    bg: "bg-error-red-50 dark:bg-error-red/10",
+    text: "text-error-red dark:text-error-red",
+    border: "border-error-red-100 dark:border-error-red/20",
     icon: XCircle,
   },
   Pending: {
@@ -25,9 +25,9 @@ export type StatusType = keyof typeof statusConfig;
 
 export const productStatusConfig = {
   active: {
-    bg: "bg-emerald-50 dark:bg-emerald-500/10",
-    text: "text-emerald-600 dark:text-emerald-400",
-    border: "border-emerald-200 dark:border-emerald-500/20",
+    bg: "bg-accent-teal-50 dark:bg-accent-teal/10",
+    text: "text-accent-teal-700 dark:text-accent-teal",
+    border: "border-accent-teal-200 dark:border-accent-teal/20",
     label: "Active",
   },
   draft: {

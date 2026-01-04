@@ -17,61 +17,53 @@ export function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <nav className="fixed top-0 right-0 left-0 z-50 h-16 border-gray-200/80 border-b bg-white/80 backdrop-blur-lg">
+    <nav className="fixed top-0 right-0 left-0 z-50 h-16 border-border border-b bg-background/80 backdrop-blur-lg">
       <div className="mx-auto flex h-full max-w-7xl items-center justify-between px-6">
-        {/* Logo */}
         <Link
-          className="flex items-center gap-2 font-bold text-gray-900 text-lg tracking-tight"
+          className="flex items-center gap-2 font-bold text-foreground text-lg tracking-tight"
           href="/"
         >
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gray-900 text-white">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-violet text-white">
             <span className="font-bold text-sm">O</span>
           </div>
           Overlay
         </Link>
 
-        {/* Navigation Links - Desktop */}
         <div className="hidden items-center gap-8 md:flex">
           <Link
-            className="font-medium text-gray-600 text-sm transition-colors hover:text-gray-900"
+            className="font-medium text-muted-foreground text-sm transition-colors hover:text-foreground"
             href="/categories"
           >
             Browse
           </Link>
           <Link
-            className="font-medium text-gray-600 text-sm transition-colors hover:text-gray-900"
+            className="font-medium text-muted-foreground text-sm transition-colors hover:text-foreground"
             href="#features"
           >
             Features
           </Link>
           <Link
-            className="font-medium text-gray-600 text-sm transition-colors hover:text-gray-900"
+            className="font-medium text-muted-foreground text-sm transition-colors hover:text-foreground"
             href="#pricing"
           >
             Pricing
           </Link>
         </div>
 
-        {/* Actions */}
         <div className="flex items-center gap-3">
           <CartButton />
           <div className="hidden items-center gap-3 sm:flex">
             <Link
-              className="font-medium text-gray-600 text-sm transition-colors hover:text-gray-900"
+              className="font-medium text-muted-foreground text-sm transition-colors hover:text-foreground"
               href="/login"
             >
               Log in
             </Link>
-            <Button
-              asChild
-              className="rounded-full bg-gray-900 px-5 text-white hover:bg-gray-800"
-              size="sm"
-            >
+            <Button asChild className="rounded-full px-5" size="sm">
               <Link href="/signup">Get Started</Link>
             </Button>
           </div>
 
-          {/* Mobile Menu Trigger */}
           <div className="sm:hidden">
             <Sheet onOpenChange={setIsOpen} open={isOpen}>
               <SheetTrigger asChild>
@@ -85,29 +77,29 @@ export function Navbar() {
                 </SheetHeader>
                 <div className="mt-8 flex flex-col gap-6">
                   <Link
-                    className="font-medium text-gray-600 text-lg"
+                    className="font-medium text-lg text-muted-foreground"
                     href="/categories"
                     onClick={() => setIsOpen(false)}
                   >
                     Browse
                   </Link>
                   <Link
-                    className="font-medium text-gray-600 text-lg"
+                    className="font-medium text-lg text-muted-foreground"
                     href="#features"
                     onClick={() => setIsOpen(false)}
                   >
                     Features
                   </Link>
                   <Link
-                    className="font-medium text-gray-600 text-lg"
+                    className="font-medium text-lg text-muted-foreground"
                     href="#pricing"
                     onClick={() => setIsOpen(false)}
                   >
                     Pricing
                   </Link>
-                  <hr className="border-gray-100" />
+                  <hr className="border-border" />
                   <Link
-                    className="font-medium text-gray-600 text-lg"
+                    className="font-medium text-lg text-muted-foreground"
                     href="/login"
                     onClick={() => setIsOpen(false)}
                   >
@@ -115,7 +107,7 @@ export function Navbar() {
                   </Link>
                   <Button
                     asChild
-                    className="h-12 w-full rounded-xl bg-gray-900 text-white"
+                    className="h-12 w-full rounded-xl"
                     onClick={() => setIsOpen(false)}
                   >
                     <Link href="/signup">Get Started</Link>
