@@ -1,5 +1,5 @@
 import { Download, Receipt } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { StatusBadge } from "@/components/shared/status-badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 
@@ -10,7 +10,7 @@ const PURCHASES = [
     seller: "Design Studio Co",
     price: "$29.00",
     date: "Dec 25, 2024",
-    status: "completed",
+    status: "completed" as const,
   },
   {
     id: "ORD-002",
@@ -18,7 +18,7 @@ const PURCHASES = [
     seller: "Creative Assets",
     price: "$49.00",
     date: "Dec 20, 2024",
-    status: "completed",
+    status: "completed" as const,
   },
   {
     id: "ORD-003",
@@ -26,7 +26,7 @@ const PURCHASES = [
     seller: "Icon Foundry",
     price: "$24.00",
     date: "Dec 15, 2024",
-    status: "completed",
+    status: "completed" as const,
   },
   {
     id: "ORD-004",
@@ -34,7 +34,7 @@ const PURCHASES = [
     seller: "UI Kit Pro",
     price: "$15.00",
     date: "Dec 10, 2024",
-    status: "completed",
+    status: "completed" as const,
   },
   {
     id: "ORD-005",
@@ -42,7 +42,7 @@ const PURCHASES = [
     seller: "Template Hub",
     price: "$39.00",
     date: "Dec 5, 2024",
-    status: "refunded",
+    status: "refunded" as const,
   },
 ];
 
@@ -74,16 +74,7 @@ export default function PurchasesPage() {
                     <p className="font-medium text-gray-900 text-sm">
                       {purchase.name}
                     </p>
-                    <Badge
-                      className="capitalize"
-                      variant={
-                        purchase.status === "completed"
-                          ? "success"
-                          : "secondary"
-                      }
-                    >
-                      {purchase.status}
-                    </Badge>
+                    <StatusBadge status={purchase.status} type="order" />
                   </div>
                   <p className="text-gray-500 text-xs">
                     {purchase.id} • {purchase.seller} • {purchase.date}

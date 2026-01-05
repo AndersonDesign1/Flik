@@ -2,8 +2,8 @@
 
 import type { ColumnDef } from "@tanstack/react-table";
 import { ArrowUpDown, MoreHorizontal } from "lucide-react";
+import { StatusBadge } from "@/components/shared/status-badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -24,11 +24,6 @@ export interface Customer {
   status: "active" | "inactive";
   image?: string;
 }
-
-const statusVariantMap = {
-  active: "success",
-  inactive: "secondary",
-} as const;
 
 export const columns: ColumnDef<Customer>[] = [
   {
@@ -101,15 +96,8 @@ export const columns: ColumnDef<Customer>[] = [
     accessorKey: "status",
     header: "Status",
     cell: ({ row }) => {
-      const status = row.getValue("status") as keyof typeof statusVariantMap;
-      return (
-        <Badge
-          className="text-xs capitalize"
-          variant={statusVariantMap[status]}
-        >
-          {status}
-        </Badge>
-      );
+      const status = row.getValue("status") as "active" | "inactive";
+      return <StatusBadge status={status} type="customer" />;
     },
   },
   {

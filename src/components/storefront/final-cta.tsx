@@ -14,17 +14,14 @@ export function FinalCTA() {
     <section className="w-full px-4 py-24 sm:px-6 lg:px-8">
       <div className="mx-auto w-full max-w-4xl">
         <div className="relative overflow-hidden rounded-2xl border border-border bg-card p-8 sm:p-12 lg:p-16">
-          {/* Subtle gradient orbs */}
           <div className="pointer-events-none absolute top-0 right-0 size-64 translate-x-1/2 -translate-y-1/2 rounded-full bg-primary-violet/10 blur-3xl" />
           <div className="pointer-events-none absolute bottom-0 left-0 size-48 -translate-x-1/3 translate-y-1/3 rounded-full bg-secondary-magenta/10 blur-3xl" />
 
           <div className="relative z-10 flex flex-col items-center gap-8 text-center">
-            {/* Badge */}
             <span className="inline-block rounded-full border border-border bg-muted px-3 py-1 font-medium text-muted-foreground text-sm">
               Join 100,000+ creators
             </span>
 
-            {/* Main heading */}
             <div className="flex flex-col gap-4">
               <h2 className="font-bold text-3xl text-foreground tracking-tight sm:text-4xl">
                 Ready to start selling?
@@ -35,7 +32,6 @@ export function FinalCTA() {
               </p>
             </div>
 
-            {/* Benefits grid */}
             <div className="grid w-full max-w-lg grid-cols-2 gap-3">
               {benefits.map((benefit) => (
                 <div
@@ -48,7 +44,6 @@ export function FinalCTA() {
               ))}
             </div>
 
-            {/* CTAs */}
             <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
               <Button
                 asChild
@@ -71,7 +66,6 @@ export function FinalCTA() {
               </Button>
             </div>
 
-            {/* Trust signals */}
             <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2">
               <p className="flex items-center gap-1.5 text-muted-foreground text-sm">
                 <CheckCircle2 className="size-4" />

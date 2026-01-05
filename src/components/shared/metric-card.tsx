@@ -38,15 +38,17 @@ export function MetricCard({
   return (
     <div
       className={cn(
-        "rounded-xl border border-border bg-card p-5 transition-all hover:shadow-md",
+        "min-w-0 rounded-xl border border-border bg-card p-5 transition-all hover:shadow-md",
         primary && "border-primary-violet/20 bg-primary-violet-50",
         className
       )}
     >
-      <div className="flex items-start justify-between">
-        <div className="flex flex-col gap-2">
-          <p className="font-medium text-muted-foreground text-sm">{title}</p>
-          <p className="font-bold text-2xl text-foreground tabular-nums">
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex min-w-0 flex-1 flex-col gap-2">
+          <p className="truncate font-medium text-muted-foreground text-sm">
+            {title}
+          </p>
+          <p className="truncate font-bold text-2xl text-foreground tabular-nums">
             {value}
           </p>
           {displayChange && (

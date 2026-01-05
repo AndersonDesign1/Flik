@@ -15,7 +15,7 @@ interface StatsGridProps {
 
 export function StatsGrid({ metrics }: StatsGridProps) {
   return (
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+    <div className="grid w-full min-w-0 gap-4 sm:grid-cols-2 lg:grid-cols-4">
       {metrics.map((metric) => (
         <MetricCard
           change={metric.change}

@@ -45,3 +45,43 @@ export const productStatusConfig = {
 } as const;
 
 export type ProductStatusType = keyof typeof productStatusConfig;
+
+export const customerStatusConfig = {
+  active: {
+    bg: "bg-accent-teal-50 dark:bg-accent-teal/10",
+    text: "text-accent-teal-700 dark:text-accent-teal",
+    border: "border-accent-teal-200 dark:border-accent-teal/20",
+    label: "Active",
+  },
+  inactive: {
+    bg: "bg-gray-50 dark:bg-gray-500/10",
+    text: "text-gray-600 dark:text-gray-400",
+    border: "border-gray-200 dark:border-gray-500/20",
+    label: "Inactive",
+  },
+} as const;
+
+export type CustomerStatusType = keyof typeof customerStatusConfig;
+
+export const orderStatusConfig = {
+  completed: {
+    bg: "bg-accent-teal-50 dark:bg-accent-teal/10",
+    text: "text-accent-teal-700 dark:text-accent-teal",
+    border: "border-accent-teal-200 dark:border-accent-teal/20",
+    label: "Completed",
+  },
+  refunded: {
+    bg: "bg-amber-50 dark:bg-amber-500/10",
+    text: "text-amber-600 dark:text-amber-400",
+    border: "border-amber-200 dark:border-amber-500/20",
+    label: "Refunded",
+  },
+  pending: {
+    bg: "bg-gray-50 dark:bg-gray-500/10",
+    text: "text-gray-600 dark:text-gray-400",
+    border: "border-gray-200 dark:border-gray-500/20",
+    label: "Pending",
+  },
+} as const;
+
+export type OrderStatusType = keyof typeof orderStatusConfig;

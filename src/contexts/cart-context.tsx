@@ -34,7 +34,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const addItem = useCallback((item: CartItem) => {
     setItems((prev) => {
       if (prev.some((i) => i.id === item.id)) {
-        return prev; // Already in cart
+        return prev;
       }
       return [...prev, item];
     });

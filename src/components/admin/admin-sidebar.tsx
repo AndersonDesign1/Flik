@@ -1,11 +1,14 @@
 "use client";
 
 import {
+  Activity,
+  AlertTriangle,
   BarChart3,
   Box,
   CreditCard,
   HelpCircle,
   LayoutGrid,
+  Receipt,
   Settings,
   Store,
   Users,
@@ -17,6 +20,9 @@ const ADMIN_NAV_ITEMS = [
   { href: "/admin/sellers", label: "Sellers", icon: Store },
   { href: "/admin/products", label: "Products", icon: Box },
   { href: "/admin/users", label: "Users", icon: Users },
+  { href: "/admin/disputes", label: "Disputes", icon: AlertTriangle },
+  { href: "/admin/platform-health", label: "Platform Health", icon: Activity },
+  { href: "/admin/tax-compliance", label: "Tax & Compliance", icon: Receipt },
   { href: "/admin/analytics", label: "Analytics", icon: BarChart3 },
   { href: "/admin/payouts", label: "Payouts", icon: CreditCard },
 ];

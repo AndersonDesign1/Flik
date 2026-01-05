@@ -4,7 +4,7 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { ArrowUpDown, MoreHorizontal } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { Badge } from "@/components/ui/badge";
+import { StatusBadge } from "@/components/shared/status-badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -25,12 +25,6 @@ export interface DashboardProduct {
   sales: number;
   image: string;
 }
-
-const statusVariantMap = {
-  active: "success",
-  draft: "secondary",
-  archived: "secondary",
-} as const;
 
 export const columns: ColumnDef<DashboardProduct>[] = [
   {
@@ -104,15 +98,8 @@ export const columns: ColumnDef<DashboardProduct>[] = [
     accessorKey: "status",
     header: "Status",
     cell: ({ row }) => {
-      const status = row.getValue("status") as keyof typeof statusVariantMap;
-      return (
-        <Badge
-          className="text-xs capitalize"
-          variant={statusVariantMap[status]}
-        >
-          {status}
-        </Badge>
-      );
+      const status = row.getValue("status") as "active" | "draft" | "archived";
+      return <StatusBadge status={status} type="product" />;
     },
   },
   {

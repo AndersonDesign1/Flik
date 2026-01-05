@@ -55,7 +55,6 @@ function DashboardContent({
       <SidebarProvider>
         {sidebar}
         <SidebarInset>
-          {/* Top Header Bar */}
           <header className="flex h-14 items-center justify-between border-border/30 border-b bg-surface-1 px-4">
             <div className="flex items-center gap-2">
               <SidebarTrigger className="-ml-1" />
@@ -64,9 +63,7 @@ function DashboardContent({
               </h1>
             </div>
             <div className="flex items-center gap-2">
-              {/* Command Palette Search */}
               <CommandPalette searchRole={searchRole} />
-              {/* User-only features */}
               {isUser && (
                 <>
                   <Link
@@ -83,9 +80,8 @@ function DashboardContent({
             </div>
           </header>
 
-          {/* Page Content */}
           <div className="flex-1 overflow-y-auto p-6">
-            <div className="mx-auto max-w-[1400px]">{children}</div>
+            <div className="mx-auto w-full max-w-[1400px]">{children}</div>
           </div>
         </SidebarInset>
       </SidebarProvider>
