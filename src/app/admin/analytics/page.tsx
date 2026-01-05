@@ -11,6 +11,7 @@ import {
   TrendingUp,
   Users,
 } from "lucide-react";
+import { useMemo, useState } from "react";
 import {
   Area,
   AreaChart,
@@ -26,6 +27,10 @@ import {
   YAxis,
 } from "recharts";
 import { StatsGrid } from "@/components/shared/stats-grid";
+import {
+  type TimeframeOption,
+  TimeframeSelector,
+} from "@/components/shared/timeframe-selector";
 import { Card } from "@/components/ui/card";
 import adminData from "@/data/admin-dashboard.json";
 
@@ -102,14 +107,21 @@ const creatorGrowth = adminData.creatorGrowthData.map((d) => ({
 function ChartHeader({
   title,
   subtitle,
+  actions,
 }: {
   title: string;
   subtitle?: string;
+  actions?: React.ReactNode;
 }) {
   return (
-    <div className="flex flex-col gap-0.5 border-border/30 border-b px-5 py-4">
-      <h3 className="font-semibold text-foreground text-sm">{title}</h3>
-      {subtitle && <p className="text-muted-foreground text-xs">{subtitle}</p>}
+    <div className="flex items-center justify-between border-border/30 border-b px-5 py-4">
+      <div className="flex flex-col gap-0.5">
+        <h3 className="font-semibold text-foreground text-sm">{title}</h3>
+        {subtitle && (
+          <p className="text-muted-foreground text-xs">{subtitle}</p>
+        )}
+      </div>
+      {actions}
     </div>
   );
 }
@@ -151,9 +163,61 @@ function CustomTooltip({
   );
 }
 
+function formatTimeframeLabel(tf: TimeframeOption): string {
+  const labels: Record<TimeframeOption, string> = {
+    "24h": "24 hours",
+    "7d": "7 days",
+    "30d": "30 days",
+    "90d": "90 days",
+    "12m": "12 months",
+    ytd: "year to date",
+  };
+  return labels[tf];
+}
+
 export default function AnalyticsPage() {
+  const [revenueTimeframe, setRevenueTimeframe] =
+    useState<TimeframeOption>("12m");
+  const [transactionsTimeframe, setTransactionsTimeframe] =
+    useState<TimeframeOption>("24h");
+  const [creatorTimeframe, setCreatorTimeframe] =
+    useState<TimeframeOption>("12m");
+
+  // Filter revenue data based on timeframe
+  const revenueData = useMemo(() => {
+    if (revenueTimeframe === "12m") {
+      return monthlyData;
+    }
+    if (revenueTimeframe === "90d") {
+      return monthlyData.slice(-3);
+    }
+    return monthlyData.slice(-2); // At least 2 points for smooth chart
+  }, [revenueTimeframe]);
+
+  // Filter transactions data based on timeframe
+  const transactionsData = useMemo(() => {
+    if (transactionsTimeframe === "24h") {
+      return hourlyData;
+    }
+    if (transactionsTimeframe === "7d") {
+      return hourlyData.slice(0, 14); // Simulated week view
+    }
+    return hourlyData.slice(0, 8); // Simulated month view with fewer points
+  }, [transactionsTimeframe]);
+
+  // Filter creator data based on timeframe
+  const creatorData = useMemo(() => {
+    if (creatorTimeframe === "12m") {
+      return creatorGrowth;
+    }
+    if (creatorTimeframe === "90d") {
+      return creatorGrowth.slice(-3);
+    }
+    return creatorGrowth.slice(-2); // At least 2 points
+  }, [creatorTimeframe]);
+
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex w-full min-w-0 flex-col gap-6">
       <div className="flex flex-col gap-1">
         <h2 className="font-semibold text-2xl text-foreground">
           Platform Analytics
@@ -167,15 +231,22 @@ export default function AnalyticsPage() {
       <StatsGrid metrics={ANALYTICS_METRICS} />
 
       {/* GMV & Revenue Trends */}
-      <Card className="overflow-hidden p-0">
+      <Card className="min-w-0 overflow-hidden p-0">
         <ChartHeader
-          subtitle="Monthly GMV vs Net Revenue trend over 12 months"
+          actions={
+            <TimeframeSelector
+              onChange={setRevenueTimeframe}
+              options={["30d", "90d", "12m"]}
+              value={revenueTimeframe}
+            />
+          }
+          subtitle={`GMV vs Net Revenue over ${formatTimeframeLabel(revenueTimeframe)}`}
           title="Revenue Trends"
         />
         <div className="p-5" style={{ height: 320 }}>
           <ResponsiveContainer height="100%" width="100%">
             <ComposedChart
-              data={monthlyData}
+              data={revenueData}
               margin={{ top: 5, right: 10, left: 5, bottom: 0 }}
             >
               <defs>
@@ -193,6 +264,7 @@ export default function AnalyticsPage() {
               />
               <YAxis
                 axisLine={false}
+                domain={[0, "auto"]}
                 fontSize={11}
                 stroke="var(--gray-400)"
                 tickFormatter={(v) => `$${(v / 1_000_000).toFixed(1)}M`}
@@ -313,15 +385,22 @@ export default function AnalyticsPage() {
         </Card>
 
         {/* Transaction Volume by Hour */}
-        <Card className="overflow-hidden p-0">
+        <Card className="min-w-0 overflow-hidden p-0">
           <ChartHeader
-            subtitle="Transaction count over the last 24 hours"
-            title="Hourly Transactions"
+            actions={
+              <TimeframeSelector
+                onChange={setTransactionsTimeframe}
+                options={["24h", "7d", "30d"]}
+                value={transactionsTimeframe}
+              />
+            }
+            subtitle={`Transaction count over the last ${transactionsTimeframe}`}
+            title="Transactions"
           />
           <div className="p-5" style={{ height: 280 }}>
             <ResponsiveContainer height="100%" width="100%">
               <AreaChart
-                data={hourlyData}
+                data={transactionsData}
                 margin={{ top: 5, right: 10, left: 5, bottom: 0 }}
               >
                 <defs>
@@ -346,6 +425,7 @@ export default function AnalyticsPage() {
                 />
                 <YAxis
                   axisLine={false}
+                  domain={[0, "auto"]}
                   fontSize={11}
                   stroke="var(--gray-400)"
                   tickFormatter={(v) => v.toLocaleString()}
@@ -376,15 +456,22 @@ export default function AnalyticsPage() {
       </div>
 
       {/* Creator Ecosystem */}
-      <Card className="overflow-hidden p-0">
+      <Card className="min-w-0 overflow-hidden p-0">
         <ChartHeader
-          subtitle="Monthly creator signups, active creators, and churn"
+          actions={
+            <TimeframeSelector
+              onChange={setCreatorTimeframe}
+              options={["30d", "90d", "12m"]}
+              value={creatorTimeframe}
+            />
+          }
+          subtitle={`Creator signups, active creators, and churn over ${creatorTimeframe === "12m" ? "12 months" : creatorTimeframe}`}
           title="Creator Ecosystem"
         />
         <div className="p-5" style={{ height: 300 }}>
           <ResponsiveContainer height="100%" width="100%">
             <ComposedChart
-              data={creatorGrowth}
+              data={creatorData}
               margin={{ top: 5, right: 10, left: 5, bottom: 0 }}
             >
               <XAxis
@@ -396,6 +483,7 @@ export default function AnalyticsPage() {
               />
               <YAxis
                 axisLine={false}
+                domain={[0, "auto"]}
                 fontSize={11}
                 stroke="var(--gray-400)"
                 tickFormatter={(v) => v.toLocaleString()}

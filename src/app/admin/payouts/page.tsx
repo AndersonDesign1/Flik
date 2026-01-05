@@ -13,6 +13,10 @@ import { useState } from "react";
 import { PayoutStatusChart } from "@/components/admin/charts/payout-status-chart";
 import { StatsGrid } from "@/components/shared/stats-grid";
 import { TableToolbar } from "@/components/shared/table-toolbar";
+import {
+  type TimeframeOption,
+  TimeframeSelector,
+} from "@/components/shared/timeframe-selector";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {
@@ -115,6 +119,7 @@ function formatDate(dateString: string) {
 export default function PayoutsPage() {
   const [filter, setFilter] = useState("all");
   const [searchValue, setSearchValue] = useState("");
+  const [timeframe, setTimeframe] = useState<TimeframeOption>("30d");
 
   const filteredPayouts = recentPayouts.filter((p) => {
     const matchesFilter = filter === "all" || p.status === filter;
@@ -125,13 +130,20 @@ export default function PayoutsPage() {
   });
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex flex-col gap-1">
-        <h2 className="font-semibold text-2xl text-foreground">Payouts</h2>
-        <p className="text-muted-foreground text-sm">
-          Manage creator payouts, track processing status, and resolve failed
-          transfers.
-        </p>
+    <div className="flex w-full min-w-0 flex-col gap-6">
+      <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-1">
+          <h2 className="font-semibold text-2xl text-foreground">Payouts</h2>
+          <p className="text-muted-foreground text-sm">
+            Manage creator payouts, track processing status, and resolve failed
+            transfers.
+          </p>
+        </div>
+        <TimeframeSelector
+          onChange={setTimeframe}
+          options={["7d", "30d", "90d"]}
+          value={timeframe}
+        />
       </div>
 
       <StatsGrid metrics={PAYOUT_METRICS} />

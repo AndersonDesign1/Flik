@@ -13,6 +13,7 @@ import {
   TrendingUp,
 } from "lucide-react";
 import Link from "next/link";
+import { useMemo } from "react";
 import {
   Area,
   AreaChart,
@@ -22,6 +23,10 @@ import {
   YAxis,
 } from "recharts";
 import { StatsGrid } from "@/components/shared/stats-grid";
+import {
+  TimeframeSelector,
+  useTimeframe,
+} from "@/components/shared/timeframe-selector";
 import { Card } from "@/components/ui/card";
 import adminData from "@/data/admin-dashboard.json";
 
@@ -111,6 +116,21 @@ function getStatusBadgeColor(status: string) {
 }
 
 export default function AdminDashboardPage() {
+  const { timeframe, setTimeframe } = useTimeframe("12m");
+
+  // Filter data based on timeframe
+  const chartData = useMemo(() => {
+    const fullData = adminData.gmvRevenueTimeSeries;
+    if (timeframe === "12m") {
+      return fullData;
+    }
+    if (timeframe === "90d") {
+      return fullData.slice(-3);
+    }
+    // For 30d, show last 4 weeks as individual points
+    return fullData.slice(-2);
+  }, [timeframe]);
+
   return (
     <div className="flex w-full min-w-0 flex-col gap-6">
       {/* Header */}
@@ -161,21 +181,29 @@ export default function AdminDashboardPage() {
                 Revenue Trend
               </h3>
               <p className="text-muted-foreground text-xs">
-                GMV over the last 12 months
+                GMV over the last{" "}
+                {timeframe === "12m" ? "12 months" : timeframe}
               </p>
             </div>
-            <Link
-              className="flex items-center gap-1 font-medium text-primary-violet text-xs hover:underline"
-              href="/admin/analytics"
-            >
-              View details
-              <ArrowRight className="size-3" />
-            </Link>
+            <div className="flex items-center gap-3">
+              <TimeframeSelector
+                onChange={setTimeframe}
+                options={["30d", "90d", "12m"]}
+                value={timeframe}
+              />
+              <Link
+                className="flex items-center gap-1 font-medium text-primary-violet text-xs hover:underline"
+                href="/admin/analytics"
+              >
+                View details
+                <ArrowRight className="size-3" />
+              </Link>
+            </div>
           </div>
           <div className="min-w-0 p-4" style={{ height: 220 }}>
             <ResponsiveContainer height="100%" width="100%">
               <AreaChart
-                data={adminData.gmvRevenueTimeSeries}
+                data={chartData}
                 margin={{ top: 5, right: 5, left: 0, bottom: 0 }}
               >
                 <defs>
@@ -193,6 +221,7 @@ export default function AdminDashboardPage() {
                 />
                 <YAxis
                   axisLine={false}
+                  domain={[0, "auto"]}
                   fontSize={9}
                   stroke="var(--gray-400)"
                   tickFormatter={(v) => `${(v / 1_000_000).toFixed(1)}M`}
