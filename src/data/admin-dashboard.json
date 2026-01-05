@@ -1,0 +1,657 @@
+{
+  "platformMetrics": {
+    "gmv": {
+      "value": 2456780,
+      "formattedValue": "$2.46M",
+      "change": 18.5,
+      "changeType": "positive",
+      "period": "Last 30 days"
+    },
+    "netRevenue": {
+      "value": 245678,
+      "formattedValue": "$245.7K",
+      "change": 22.3,
+      "changeType": "positive",
+      "period": "Last 30 days",
+      "takeRate": 10
+    },
+    "activeCreators": {
+      "value": 2456,
+      "change": 124,
+      "changeType": "positive",
+      "period": "This month"
+    },
+    "totalCreators": {
+      "value": 8924,
+      "newThisMonth": 342
+    },
+    "transactionVolume": {
+      "last24h": 15672,
+      "change": 8.2,
+      "changeType": "positive",
+      "avgPerHour": 653
+    },
+    "checkoutSuccessRate": {
+      "value": 94.8,
+      "change": 1.2,
+      "changeType": "positive"
+    },
+    "totalProducts": {
+      "value": 48392,
+      "activeListings": 42156
+    },
+    "totalBuyers": {
+      "value": 156789,
+      "newThisMonth": 8432
+    }
+  },
+  "gmvRevenueTimeSeries": [
+    {
+      "month": "Jan",
+      "gmv": 1850000,
+      "revenue": 185000,
+      "transactions": 12450
+    },
+    {
+      "month": "Feb",
+      "gmv": 1920000,
+      "revenue": 192000,
+      "transactions": 13200
+    },
+    {
+      "month": "Mar",
+      "gmv": 2050000,
+      "revenue": 205000,
+      "transactions": 14100
+    },
+    {
+      "month": "Apr",
+      "gmv": 1980000,
+      "revenue": 198000,
+      "transactions": 13800
+    },
+    {
+      "month": "May",
+      "gmv": 2180000,
+      "revenue": 218000,
+      "transactions": 15200
+    },
+    {
+      "month": "Jun",
+      "gmv": 2320000,
+      "revenue": 232000,
+      "transactions": 16100
+    },
+    {
+      "month": "Jul",
+      "gmv": 2150000,
+      "revenue": 215000,
+      "transactions": 14900
+    },
+    {
+      "month": "Aug",
+      "gmv": 2280000,
+      "revenue": 228000,
+      "transactions": 15800
+    },
+    {
+      "month": "Sep",
+      "gmv": 2410000,
+      "revenue": 241000,
+      "transactions": 16700
+    },
+    {
+      "month": "Oct",
+      "gmv": 2520000,
+      "revenue": 252000,
+      "transactions": 17400
+    },
+    {
+      "month": "Nov",
+      "gmv": 2380000,
+      "revenue": 238000,
+      "transactions": 16500
+    },
+    { "month": "Dec", "gmv": 2456780, "revenue": 245678, "transactions": 17200 }
+  ],
+  "creatorGrowthData": [
+    { "month": "Jan", "signups": 285, "active": 1890, "churned": 42 },
+    { "month": "Feb", "signups": 312, "active": 1945, "churned": 38 },
+    { "month": "Mar", "signups": 298, "active": 2010, "churned": 45 },
+    { "month": "Apr", "signups": 345, "active": 2085, "churned": 52 },
+    { "month": "May", "signups": 378, "active": 2180, "churned": 48 },
+    { "month": "Jun", "signups": 356, "active": 2250, "churned": 55 },
+    { "month": "Jul", "signups": 324, "active": 2290, "churned": 41 },
+    { "month": "Aug", "signups": 398, "active": 2365, "churned": 62 },
+    { "month": "Sep", "signups": 412, "active": 2420, "churned": 58 },
+    { "month": "Oct", "signups": 385, "active": 2480, "churned": 45 },
+    { "month": "Nov", "signups": 342, "active": 2520, "churned": 38 },
+    { "month": "Dec", "signups": 367, "active": 2456, "churned": 44 }
+  ],
+  "transactionVolumeHourly": [
+    { "hour": "00:00", "transactions": 245, "value": 12450 },
+    { "hour": "01:00", "transactions": 189, "value": 9230 },
+    { "hour": "02:00", "transactions": 156, "value": 7820 },
+    { "hour": "03:00", "transactions": 134, "value": 6540 },
+    { "hour": "04:00", "transactions": 112, "value": 5280 },
+    { "hour": "05:00", "transactions": 145, "value": 7120 },
+    { "hour": "06:00", "transactions": 234, "value": 11560 },
+    { "hour": "07:00", "transactions": 389, "value": 19230 },
+    { "hour": "08:00", "transactions": 512, "value": 25680 },
+    { "hour": "09:00", "transactions": 678, "value": 34120 },
+    { "hour": "10:00", "transactions": 812, "value": 41230 },
+    { "hour": "11:00", "transactions": 945, "value": 47890 },
+    { "hour": "12:00", "transactions": 1024, "value": 52340 },
+    { "hour": "13:00", "transactions": 978, "value": 49120 },
+    { "hour": "14:00", "transactions": 1089, "value": 55670 },
+    { "hour": "15:00", "transactions": 1156, "value": 58920 },
+    { "hour": "16:00", "transactions": 1234, "value": 62450 },
+    { "hour": "17:00", "transactions": 1312, "value": 66780 },
+    { "hour": "18:00", "transactions": 1189, "value": 60230 },
+    { "hour": "19:00", "transactions": 1078, "value": 54560 },
+    { "hour": "20:00", "transactions": 956, "value": 48230 },
+    { "hour": "21:00", "transactions": 823, "value": 41450 },
+    { "hour": "22:00", "transactions": 567, "value": 28340 },
+    { "hour": "23:00", "transactions": 345, "value": 17230 }
+  ],
+  "marketplaceLiquidity": {
+    "buyerToSellerRatio": 63.8,
+    "searchToFillRate": 28.4,
+    "avgTimeToFirstSale": "4.2 days",
+    "repeatPurchaseRate": 42.5,
+    "avgOrderValue": 47.8,
+    "cartAbandonmentRate": 68.2
+  },
+  "topPerformers": [
+    {
+      "id": "creator_001",
+      "name": "Design Studio Co",
+      "avatar": "D",
+      "email": "contact@designstudio.co",
+      "products": 67,
+      "gmv": 245680,
+      "revenue": 24568,
+      "trend": 24.5,
+      "sales": 5234,
+      "rating": 4.9,
+      "joinedDate": "2024-03-15",
+      "topProduct": "Premium UI Kit Bundle",
+      "category": "Design Assets"
+    },
+    {
+      "id": "creator_002",
+      "name": "CodeCraft Academy",
+      "avatar": "C",
+      "email": "hello@codecraft.io",
+      "products": 23,
+      "gmv": 198450,
+      "revenue": 19845,
+      "trend": 18.2,
+      "sales": 4128,
+      "rating": 4.8,
+      "joinedDate": "2024-01-22",
+      "topProduct": "Full-Stack Masterclass",
+      "category": "Education"
+    },
+    {
+      "id": "creator_003",
+      "name": "Pixel Perfect",
+      "avatar": "P",
+      "email": "hi@pixelperfect.design",
+      "products": 89,
+      "gmv": 167890,
+      "revenue": 16789,
+      "trend": 15.8,
+      "sales": 3567,
+      "rating": 4.7,
+      "joinedDate": "2024-02-08",
+      "topProduct": "Icon Library Pro",
+      "category": "Design Assets"
+    },
+    {
+      "id": "creator_004",
+      "name": "Template Hub",
+      "avatar": "T",
+      "email": "support@templatehub.com",
+      "products": 156,
+      "gmv": 145670,
+      "revenue": 14567,
+      "trend": 12.4,
+      "sales": 3089,
+      "rating": 4.6,
+      "joinedDate": "2023-11-30",
+      "topProduct": "Notion Template Pack",
+      "category": "Productivity"
+    },
+    {
+      "id": "creator_005",
+      "name": "Audio Nexus",
+      "avatar": "A",
+      "email": "contact@audionexus.io",
+      "products": 234,
+      "gmv": 134560,
+      "revenue": 13456,
+      "trend": 28.9,
+      "sales": 2845,
+      "rating": 4.9,
+      "joinedDate": "2024-05-12",
+      "topProduct": "Cinematic Sound Pack",
+      "category": "Audio & Music"
+    },
+    {
+      "id": "creator_006",
+      "name": "Font Foundry",
+      "avatar": "F",
+      "email": "hello@fontfoundry.co",
+      "products": 45,
+      "gmv": 112340,
+      "revenue": 11234,
+      "trend": -2.3,
+      "sales": 2234,
+      "rating": 4.5,
+      "joinedDate": "2024-04-18",
+      "topProduct": "Modern Sans Collection",
+      "category": "Fonts"
+    },
+    {
+      "id": "creator_007",
+      "name": "Motion Masters",
+      "avatar": "M",
+      "email": "team@motionmasters.com",
+      "products": 78,
+      "gmv": 98760,
+      "revenue": 9876,
+      "trend": 35.2,
+      "sales": 1987,
+      "rating": 4.8,
+      "joinedDate": "2024-07-22",
+      "topProduct": "After Effects Transitions",
+      "category": "Video"
+    },
+    {
+      "id": "creator_008",
+      "name": "Ebook Empire",
+      "avatar": "E",
+      "email": "info@ebookempire.io",
+      "products": 34,
+      "gmv": 87650,
+      "revenue": 8765,
+      "trend": 8.7,
+      "sales": 1756,
+      "rating": 4.4,
+      "joinedDate": "2024-06-05",
+      "topProduct": "Startup Playbook",
+      "category": "Ebooks"
+    }
+  ],
+  "disputesAndRefunds": {
+    "disputeRate": 1.2,
+    "refundRate": 3.8,
+    "chargebackRate": 0.4,
+    "totalDisputes": 189,
+    "totalRefunds": 596,
+    "totalChargebacks": 63,
+    "avgResolutionTime": "2.4 days",
+    "disputesWon": 78.5,
+    "flaggedCreators": [
+      {
+        "id": "creator_flagged_001",
+        "name": "Quick Downloads",
+        "refundRate": 18.5,
+        "disputes": 23,
+        "status": "under_review",
+        "flaggedDate": "2025-12-28",
+        "reason": "High refund rate"
+      },
+      {
+        "id": "creator_flagged_002",
+        "name": "Digital Deals",
+        "refundRate": 15.2,
+        "disputes": 18,
+        "status": "warning_issued",
+        "flaggedDate": "2025-12-25",
+        "reason": "Product quality complaints"
+      },
+      {
+        "id": "creator_flagged_003",
+        "name": "Fast Files",
+        "refundRate": 12.8,
+        "disputes": 12,
+        "status": "monitoring",
+        "flaggedDate": "2025-12-30",
+        "reason": "Delivery issues"
+      }
+    ],
+    "recentDisputes": [
+      {
+        "id": "dispute_001",
+        "orderId": "#ORD-78234",
+        "buyer": "john.doe@email.com",
+        "seller": "Design Studio Co",
+        "amount": 49.99,
+        "reason": "Product not as described",
+        "status": "pending",
+        "createdAt": "2026-01-04T14:23:00Z"
+      },
+      {
+        "id": "dispute_002",
+        "orderId": "#ORD-78190",
+        "buyer": "sarah.smith@email.com",
+        "seller": "Template Hub",
+        "amount": 29.0,
+        "reason": "Did not receive download",
+        "status": "in_review",
+        "createdAt": "2026-01-03T09:45:00Z"
+      },
+      {
+        "id": "dispute_003",
+        "orderId": "#ORD-78156",
+        "buyer": "mike.wilson@email.com",
+        "seller": "Audio Nexus",
+        "amount": 79.0,
+        "reason": "License terms unclear",
+        "status": "resolved",
+        "createdAt": "2026-01-02T16:12:00Z"
+      }
+    ]
+  },
+  "payoutQueue": {
+    "summary": {
+      "pending": { "count": 234, "amount": 156780 },
+      "processing": { "count": 89, "amount": 67890 },
+      "completed": { "count": 1245, "amount": 892340 },
+      "failed": { "count": 12, "amount": 8920 }
+    },
+    "nextPayoutDate": "2026-01-06",
+    "totalPendingAmount": 156780,
+    "avgProcessingTime": "2-3 business days",
+    "recentPayouts": [
+      {
+        "id": "payout_001",
+        "seller": "Design Studio Co",
+        "amount": 4567.8,
+        "status": "processing",
+        "initiatedAt": "2026-01-04T08:00:00Z",
+        "method": "bank_transfer",
+        "bankLast4": "4523"
+      },
+      {
+        "id": "payout_002",
+        "seller": "CodeCraft Academy",
+        "amount": 3892.5,
+        "status": "pending",
+        "initiatedAt": "2026-01-04T10:30:00Z",
+        "method": "stripe",
+        "bankLast4": "7891"
+      },
+      {
+        "id": "payout_003",
+        "seller": "Pixel Perfect",
+        "amount": 2456.0,
+        "status": "completed",
+        "initiatedAt": "2026-01-03T14:00:00Z",
+        "completedAt": "2026-01-04T09:15:00Z",
+        "method": "paypal",
+        "paypalEmail": "pay***@pixelperfect.design"
+      },
+      {
+        "id": "payout_004",
+        "seller": "Template Hub",
+        "amount": 1890.25,
+        "status": "failed",
+        "initiatedAt": "2026-01-03T11:00:00Z",
+        "failedAt": "2026-01-03T23:45:00Z",
+        "method": "bank_transfer",
+        "failureReason": "Invalid account details",
+        "bankLast4": "2341"
+      },
+      {
+        "id": "payout_005",
+        "seller": "Audio Nexus",
+        "amount": 3245.6,
+        "status": "completed",
+        "initiatedAt": "2026-01-02T16:00:00Z",
+        "completedAt": "2026-01-03T12:30:00Z",
+        "method": "stripe",
+        "bankLast4": "9012"
+      }
+    ],
+    "failedPayouts": [
+      {
+        "id": "failed_001",
+        "seller": "Quick Setup LLC",
+        "email": "billing@quicksetup.com",
+        "amount": 2345.0,
+        "failureReason": "Insufficient bank account verification",
+        "attempts": 2,
+        "lastAttempt": "2026-01-03T18:00:00Z"
+      },
+      {
+        "id": "failed_002",
+        "seller": "Digital Prints Co",
+        "email": "finance@digitalprints.co",
+        "amount": 1567.8,
+        "failureReason": "Account closed",
+        "attempts": 3,
+        "lastAttempt": "2026-01-02T14:30:00Z"
+      }
+    ]
+  },
+  "platformHealth": {
+    "apiUptime": 99.97,
+    "avgResponseTime": 124,
+    "checkoutSuccessRate": 94.8,
+    "errorRate": 0.12,
+    "activeConnections": 4567,
+    "requestsPerMinute": 12450,
+    "paymentGateways": [
+      {
+        "name": "Stripe",
+        "status": "operational",
+        "latency": 89,
+        "successRate": 99.2
+      },
+      {
+        "name": "PayPal",
+        "status": "operational",
+        "latency": 156,
+        "successRate": 98.8
+      },
+      {
+        "name": "Apple Pay",
+        "status": "operational",
+        "latency": 67,
+        "successRate": 99.5
+      },
+      {
+        "name": "Google Pay",
+        "status": "degraded",
+        "latency": 234,
+        "successRate": 96.2
+      }
+    ],
+    "recentIncidents": [
+      {
+        "id": "incident_001",
+        "title": "Google Pay delayed processing",
+        "status": "monitoring",
+        "severity": "minor",
+        "startedAt": "2026-01-04T18:30:00Z",
+        "affectedUsers": 234
+      }
+    ],
+    "serverLoad": {
+      "cpu": 42,
+      "memory": 68,
+      "disk": 54,
+      "bandwidth": 78
+    }
+  },
+  "taxVatTracking": {
+    "totalCollected": 234567.89,
+    "totalRemitted": 198456.23,
+    "pendingRemittance": 36111.66,
+    "nextRemittanceDate": "2026-01-15",
+    "countries": [
+      {
+        "code": "US",
+        "name": "United States",
+        "flag": "🇺🇸",
+        "collected": 89234.56,
+        "remitted": 78923.45,
+        "pending": 10311.11,
+        "rate": "Varies by state",
+        "status": "current"
+      },
+      {
+        "code": "GB",
+        "name": "United Kingdom",
+        "flag": "🇬🇧",
+        "collected": 45678.9,
+        "remitted": 45678.9,
+        "pending": 0,
+        "rate": "20%",
+        "status": "current"
+      },
+      {
+        "code": "DE",
+        "name": "Germany",
+        "flag": "🇩🇪",
+        "collected": 34567.23,
+        "remitted": 28456.12,
+        "pending": 6111.11,
+        "rate": "19%",
+        "status": "pending"
+      },
+      {
+        "code": "FR",
+        "name": "France",
+        "flag": "🇫🇷",
+        "collected": 23456.78,
+        "remitted": 18234.56,
+        "pending": 5222.22,
+        "rate": "20%",
+        "status": "pending"
+      },
+      {
+        "code": "CA",
+        "name": "Canada",
+        "flag": "🇨🇦",
+        "collected": 18765.43,
+        "remitted": 15234.21,
+        "pending": 3531.22,
+        "rate": "5-15%",
+        "status": "current"
+      },
+      {
+        "code": "AU",
+        "name": "Australia",
+        "flag": "🇦🇺",
+        "collected": 12345.67,
+        "remitted": 9876.54,
+        "pending": 2469.13,
+        "rate": "10%",
+        "status": "pending"
+      },
+      {
+        "code": "JP",
+        "name": "Japan",
+        "flag": "🇯🇵",
+        "collected": 10519.32,
+        "remitted": 8052.45,
+        "pending": 2466.87,
+        "rate": "10%",
+        "status": "current"
+      }
+    ],
+    "complianceAlerts": [
+      {
+        "country": "Germany",
+        "message": "Q4 2025 VAT remittance due Jan 15",
+        "dueDate": "2026-01-15",
+        "amount": 6111.11,
+        "priority": "high"
+      },
+      {
+        "country": "France",
+        "message": "Annual VAT reconciliation pending",
+        "dueDate": "2026-01-31",
+        "amount": 5222.22,
+        "priority": "medium"
+      }
+    ]
+  },
+  "recentSellers": [
+    {
+      "id": "seller_recent_001",
+      "name": "Nova Creative",
+      "email": "hello@novacreative.co",
+      "products": 12,
+      "revenue": 4560.0,
+      "status": "active",
+      "joinedDate": "2026-01-02",
+      "category": "Design Assets"
+    },
+    {
+      "id": "seller_recent_002",
+      "name": "Learn With Lee",
+      "email": "lee@learnwithlee.com",
+      "products": 5,
+      "revenue": 2340.0,
+      "status": "active",
+      "joinedDate": "2026-01-01",
+      "category": "Education"
+    },
+    {
+      "id": "seller_recent_003",
+      "name": "Preset Palace",
+      "email": "support@presetpalace.io",
+      "products": 28,
+      "revenue": 1890.0,
+      "status": "pending",
+      "joinedDate": "2025-12-30",
+      "category": "Photography"
+    },
+    {
+      "id": "seller_recent_004",
+      "name": "Stock Sounds",
+      "email": "info@stocksounds.net",
+      "products": 156,
+      "revenue": 890.0,
+      "status": "active",
+      "joinedDate": "2025-12-28",
+      "category": "Audio & Music"
+    },
+    {
+      "id": "seller_recent_005",
+      "name": "3D Model Hub",
+      "email": "contact@3dmodelhub.com",
+      "products": 34,
+      "revenue": 5670.0,
+      "status": "active",
+      "joinedDate": "2025-12-26",
+      "category": "3D Assets"
+    }
+  ],
+  "categories": [
+    {
+      "name": "Design Assets",
+      "products": 12456,
+      "gmv": 567890,
+      "sellers": 456
+    },
+    { "name": "Education", "products": 8923, "gmv": 489560, "sellers": 312 },
+    {
+      "name": "Audio & Music",
+      "products": 6789,
+      "gmv": 234560,
+      "sellers": 234
+    },
+    { "name": "Video", "products": 5234, "gmv": 198450, "sellers": 178 },
+    { "name": "Productivity", "products": 4567, "gmv": 167890, "sellers": 156 },
+    { "name": "Ebooks", "products": 3456, "gmv": 145670, "sellers": 198 },
+    { "name": "Fonts", "products": 2890, "gmv": 123450, "sellers": 89 },
+    { "name": "Photography", "products": 2345, "gmv": 98760, "sellers": 112 },
+    { "name": "3D Assets", "products": 1732, "gmv": 87650, "sellers": 67 }
+  ]
+}

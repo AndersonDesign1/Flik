@@ -2,12 +2,12 @@
 
 import {
   type CustomerStatusType,
-  type OrderStatusType,
-  type ProductStatusType,
-  type StatusType,
   customerStatusConfig,
+  type OrderStatusType,
   orderStatusConfig,
+  type ProductStatusType,
   productStatusConfig,
+  type StatusType,
   statusConfig,
 } from "@/components/shared/status-config";
 import { cn } from "@/lib/utils";
@@ -105,4 +105,3 @@ export function StatusBadge({
     </span>
   );
 }
-

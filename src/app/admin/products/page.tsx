@@ -1,8 +1,9 @@
 "use client";
 
-import { MoreHorizontal } from "lucide-react";
+import { Box, CheckCircle, Clock, MoreHorizontal, XCircle } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
+import { StatsGrid } from "@/components/shared/stats-grid";
 import { TableToolbar } from "@/components/shared/table-toolbar";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -88,6 +89,37 @@ const productStatusConfig = {
   },
 } as const;
 
+const PRODUCT_METRICS = [
+  {
+    title: "Total Products",
+    value: PRODUCTS.length.toString(),
+    change: "All listings",
+    changeType: "neutral" as const,
+    icon: Box,
+  },
+  {
+    title: "Active",
+    value: PRODUCTS.filter((p) => p.status === "active").length.toString(),
+    change: "Live on platform",
+    changeType: "positive" as const,
+    icon: CheckCircle,
+  },
+  {
+    title: "Pending Approval",
+    value: PRODUCTS.filter((p) => p.status === "pending").length.toString(),
+    change: "Awaiting review",
+    changeType: "neutral" as const,
+    icon: Clock,
+  },
+  {
+    title: "Rejected",
+    value: PRODUCTS.filter((p) => p.status === "rejected").length.toString(),
+    change: "Not approved",
+    changeType: "negative" as const,
+    icon: XCircle,
+  },
+];
+
 export default function AdminProductsPage() {
   const [filter, setFilter] = useState("all");
   const [searchValue, setSearchValue] = useState("");
@@ -108,6 +140,8 @@ export default function AdminProductsPage() {
           Moderate and manage all products.
         </p>
       </div>
+
+      <StatsGrid metrics={PRODUCT_METRICS} />
 
       <div className="flex items-center gap-2">
         {["all", "pending", "active", "rejected"].map((status) => (

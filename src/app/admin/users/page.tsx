@@ -1,7 +1,14 @@
 "use client";
 
-import { MoreHorizontal } from "lucide-react";
+import {
+  MoreHorizontal,
+  Shield,
+  ShoppingBag,
+  UserCog,
+  Users,
+} from "lucide-react";
 import { useState } from "react";
+import { StatsGrid } from "@/components/shared/stats-grid";
 import { TableToolbar } from "@/components/shared/table-toolbar";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -87,6 +94,37 @@ const roleConfig = {
   },
 } as const;
 
+const USER_METRICS = [
+  {
+    title: "Total Users",
+    value: USERS.length.toString(),
+    change: "All registered",
+    changeType: "neutral" as const,
+    icon: Users,
+  },
+  {
+    title: "Customers",
+    value: USERS.filter((u) => u.role === "user").length.toString(),
+    change: "Active buyers",
+    changeType: "positive" as const,
+    icon: ShoppingBag,
+  },
+  {
+    title: "Staff Members",
+    value: USERS.filter((u) => u.role === "staff").length.toString(),
+    change: "Support team",
+    changeType: "neutral" as const,
+    icon: UserCog,
+  },
+  {
+    title: "Admins",
+    value: USERS.filter((u) => u.role === "admin").length.toString(),
+    change: "Platform admins",
+    changeType: "neutral" as const,
+    icon: Shield,
+  },
+];
+
 export default function AdminUsersPage() {
   const [searchValue, setSearchValue] = useState("");
 
@@ -107,6 +145,8 @@ export default function AdminUsersPage() {
         </div>
         <Button>Add User</Button>
       </div>
+
+      <StatsGrid metrics={USER_METRICS} />
 
       <Card className="overflow-hidden p-0">
         <TableToolbar

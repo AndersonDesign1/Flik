@@ -81,7 +81,7 @@ function DashboardContent({
           </header>
 
           <div className="flex-1 overflow-y-auto p-6">
-            <div className="mx-auto max-w-[1400px]">{children}</div>
+            <div className="mx-auto w-full max-w-[1400px]">{children}</div>
           </div>
         </SidebarInset>
       </SidebarProvider>

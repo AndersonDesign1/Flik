@@ -1,190 +1,320 @@
-import { Box, CreditCard, DollarSign, Store, Users } from "lucide-react";
+"use client";
+
+import {
+  AlertTriangle,
+  ArrowRight,
+  BarChart3,
+  CreditCard,
+  DollarSign,
+  Globe,
+  Server,
+  ShoppingCart,
+  Store,
+  TrendingUp,
+} from "lucide-react";
 import Link from "next/link";
+import {
+  Area,
+  AreaChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 import { StatsGrid } from "@/components/shared/stats-grid";
 import { Card } from "@/components/ui/card";
-import { cn } from "@/lib/utils";
+import adminData from "@/data/admin-dashboard.json";
 
 const ADMIN_METRICS = [
   {
-    title: "Total Revenue",
-    value: "$1.2M",
-    change: "+18.2% from last month",
+    title: "Gross Merchandise Value",
+    value: adminData.platformMetrics.gmv.formattedValue,
+    change: `+${adminData.platformMetrics.gmv.change}% from last month`,
     changeType: "positive" as const,
     icon: DollarSign,
   },
   {
-    title: "Active Sellers",
-    value: "2,456",
-    change: "+124 this month",
+    title: "Net Revenue (10% Take)",
+    value: adminData.platformMetrics.netRevenue.formattedValue,
+    change: `+${adminData.platformMetrics.netRevenue.change}% from last month`,
+    changeType: "positive" as const,
+    icon: TrendingUp,
+  },
+  {
+    title: "Active Creators",
+    value: adminData.platformMetrics.activeCreators.value.toLocaleString(),
+    change: `+${adminData.platformMetrics.activeCreators.change} this month`,
     changeType: "positive" as const,
     icon: Store,
   },
   {
-    title: "Total Products",
-    value: "48,392",
-    change: "+1,234 this month",
+    title: "Transactions (24h)",
+    value: adminData.platformMetrics.transactionVolume.last24h.toLocaleString(),
+    change: `+${adminData.platformMetrics.transactionVolume.change}% vs yesterday`,
     changeType: "positive" as const,
-    icon: Box,
-  },
-  {
-    title: "Total Users",
-    value: "156,789",
-    change: "+8,432 this month",
-    changeType: "positive" as const,
-    icon: Users,
+    icon: ShoppingCart,
   },
 ];
 
-const RECENT_SELLERS = [
+// Quick links data
+const quickLinks = [
   {
-    name: "Design Studio Co",
-    products: 45,
-    revenue: "$12,450",
-    status: "active",
+    title: "Analytics",
+    href: "/admin/analytics",
+    icon: BarChart3,
+    value: adminData.platformMetrics.gmv.formattedValue,
+    label: "Total GMV",
+    color: "text-primary-violet",
   },
   {
-    name: "Creative Assets",
-    products: 23,
-    revenue: "$8,920",
-    status: "active",
+    title: "Payouts",
+    href: "/admin/payouts",
+    icon: CreditCard,
+    value: `$${(adminData.payoutQueue.summary.pending.amount / 1000).toFixed(0)}K`,
+    label: "Pending",
+    color: "text-blue-500",
   },
-  { name: "UI Kit Pro", products: 67, revenue: "$34,100", status: "pending" },
-  { name: "Template Hub", products: 12, revenue: "$3,200", status: "active" },
-  { name: "Icon Foundry", products: 89, revenue: "$45,600", status: "active" },
+  {
+    title: "Disputes",
+    href: "/admin/disputes",
+    icon: AlertTriangle,
+    value: `${adminData.disputesAndRefunds.disputeRate}%`,
+    label: "Rate",
+    color: "text-amber-500",
+  },
+  {
+    title: "Health",
+    href: "/admin/platform-health",
+    icon: Server,
+    value: `${adminData.platformHealth.apiUptime}%`,
+    label: "Uptime",
+    color: "text-emerald-500",
+  },
+  {
+    title: "Tax",
+    href: "/admin/tax-compliance",
+    icon: Globe,
+    value: `$${(adminData.taxVatTracking.totalCollected / 1000).toFixed(0)}K`,
+    label: "Collected",
+    color: "text-cyan-500",
+  },
 ];
 
-const PENDING_PAYOUTS = [
-  { seller: "Design Studio Co", amount: "$2,450", date: "Dec 28" },
-  { seller: "Creative Assets", amount: "$1,890", date: "Dec 28" },
-  { seller: "UI Kit Pro", amount: "$5,670", date: "Dec 29" },
-  { seller: "Template Hub", amount: "$890", date: "Dec 29" },
-  { seller: "Icon Foundry", amount: "$3,450", date: "Dec 30" },
-];
-
-const sellerStatusConfig = {
-  active: {
-    bg: "bg-accent-teal-50 dark:bg-accent-teal/10",
-    text: "text-accent-teal-700 dark:text-accent-teal",
-    border: "border-accent-teal-200 dark:border-accent-teal/20",
-  },
-  pending: {
-    bg: "bg-amber-50 dark:bg-amber-500/10",
-    text: "text-amber-600 dark:text-amber-400",
-    border: "border-amber-200 dark:border-amber-500/20",
-  },
-  suspended: {
-    bg: "bg-error-red-50 dark:bg-error-red/10",
-    text: "text-error-red dark:text-error-red",
-    border: "border-error-red-100 dark:border-error-red/20",
-  },
-} as const;
+function getStatusBadgeColor(status: string) {
+  if (status === "active") {
+    return "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400";
+  }
+  if (status === "pending") {
+    return "bg-amber-100 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400";
+  }
+  return "bg-muted text-muted-foreground";
+}
 
 export default function AdminDashboardPage() {
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex w-full min-w-0 flex-col gap-6">
+      {/* Header */}
       <div className="flex flex-col gap-1">
         <h2 className="font-semibold text-2xl text-foreground">
-          Platform Overview
+          Platform Command Center
         </h2>
         <p className="text-muted-foreground text-sm">
-          Monitor platform-wide metrics and activity.
+          Quick overview of platform health. Click any section to dive deeper.
         </p>
       </div>
 
+      {/* Hero Metrics */}
       <StatsGrid metrics={ADMIN_METRICS} />
 
-      <div className="grid gap-6 lg:grid-cols-2">
-        <Card className="overflow-hidden p-0">
-          <div className="flex items-center justify-between border-border/30 border-b px-5 py-4">
-            <h3 className="font-semibold text-foreground text-sm">
-              Recent Sellers
-            </h3>
+      {/* Quick Links Row - Horizontal compact design */}
+      <div className="grid w-full grid-cols-2 gap-2 rounded-xl border border-border/50 bg-muted/30 p-2 md:grid-cols-3 lg:grid-cols-5">
+        {quickLinks.map((link) => {
+          const Icon = link.icon;
+          return (
             <Link
-              className="font-medium text-muted-foreground text-sm hover:text-foreground"
-              href="/admin/sellers"
+              className="group flex items-center gap-3 rounded-lg px-3 py-3 transition-all hover:bg-background hover:shadow-sm"
+              href={link.href}
+              key={link.title}
             >
-              View all →
+              <Icon className={`size-4 ${link.color}`} />
+              <div className="flex flex-col">
+                <span className="font-semibold text-foreground text-sm tabular-nums">
+                  {link.value}
+                </span>
+                <span className="text-[10px] text-muted-foreground">
+                  {link.title}
+                </span>
+              </div>
+              <ArrowRight className="ml-auto size-3 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
+            </Link>
+          );
+        })}
+      </div>
+
+      {/* Main Content - Chart + Activity */}
+      <div className="grid w-full min-w-0 gap-4 lg:grid-cols-3">
+        {/* Revenue Trend Chart */}
+        <Card className="min-w-0 overflow-hidden p-0 lg:col-span-2">
+          <div className="flex items-center justify-between border-border/30 border-b px-5 py-4">
+            <div>
+              <h3 className="font-semibold text-foreground text-sm">
+                Revenue Trend
+              </h3>
+              <p className="text-muted-foreground text-xs">
+                GMV over the last 12 months
+              </p>
+            </div>
+            <Link
+              className="flex items-center gap-1 font-medium text-primary-violet text-xs hover:underline"
+              href="/admin/analytics"
+            >
+              View details
+              <ArrowRight className="size-3" />
             </Link>
           </div>
-          <div className="divide-y divide-border/30">
-            {RECENT_SELLERS.map((seller) => {
-              const status =
-                sellerStatusConfig[
-                  seller.status as keyof typeof sellerStatusConfig
-                ];
-              return (
-                <div
-                  className="flex items-center justify-between px-5 py-4 transition-colors hover:bg-muted/50"
-                  key={seller.name}
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="flex size-9 items-center justify-center rounded-full bg-primary-violet font-medium text-sm text-white">
-                      {seller.name.charAt(0)}
-                    </div>
-                    <div className="flex flex-col gap-0.5">
-                      <p className="font-medium text-foreground text-sm">
-                        {seller.name}
-                      </p>
-                      <p className="text-muted-foreground text-xs">
-                        {seller.products} products
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex flex-col items-end gap-1">
-                    <p className="font-semibold text-foreground text-sm tabular-nums">
-                      {seller.revenue}
-                    </p>
-                    <span
-                      className={cn(
-                        "font-medium text-xs capitalize",
-                        status.text
-                      )}
-                    >
-                      {seller.status}
-                    </span>
-                  </div>
-                </div>
-              );
-            })}
+          <div className="min-w-0 p-4" style={{ height: 220 }}>
+            <ResponsiveContainer height="100%" width="100%">
+              <AreaChart
+                data={adminData.gmvRevenueTimeSeries}
+                margin={{ top: 5, right: 5, left: 0, bottom: 0 }}
+              >
+                <defs>
+                  <linearGradient id="gmvFill" x1="0" x2="0" y1="0" y2="1">
+                    <stop offset="0%" stopColor="#8b5cf6" stopOpacity={0.3} />
+                    <stop offset="100%" stopColor="#8b5cf6" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <XAxis
+                  axisLine={false}
+                  dataKey="month"
+                  fontSize={10}
+                  stroke="var(--gray-400)"
+                  tickLine={false}
+                />
+                <YAxis
+                  axisLine={false}
+                  fontSize={9}
+                  stroke="var(--gray-400)"
+                  tickFormatter={(v) => `${(v / 1_000_000).toFixed(1)}M`}
+                  tickLine={false}
+                  width={40}
+                />
+                <Tooltip
+                  content={({ active, payload }) => {
+                    if (!(active && payload?.length)) {
+                      return null;
+                    }
+                    return (
+                      <div className="rounded-lg border border-border bg-background px-3 py-2 shadow-lg">
+                        <p className="font-semibold text-foreground text-sm tabular-nums">
+                          $
+                          {(
+                            (payload[0].value as number) / 1000
+                          ).toLocaleString()}
+                          K
+                        </p>
+                        <p className="text-muted-foreground text-xs">
+                          {payload[0].payload.month}
+                        </p>
+                      </div>
+                    );
+                  }}
+                />
+                <Area
+                  dataKey="gmv"
+                  fill="url(#gmvFill)"
+                  stroke="#8b5cf6"
+                  strokeWidth={2}
+                  type="monotone"
+                />
+              </AreaChart>
+            </ResponsiveContainer>
           </div>
         </Card>
 
+        {/* Top Performers - Compact list */}
         <Card className="overflow-hidden p-0">
           <div className="flex items-center justify-between border-border/30 border-b px-5 py-4">
             <h3 className="font-semibold text-foreground text-sm">
-              Pending Payouts
+              Top Performers
             </h3>
             <Link
-              className="font-medium text-muted-foreground text-sm hover:text-foreground"
-              href="/admin/payouts"
+              className="font-medium text-primary-violet text-xs hover:underline"
+              href="/admin/analytics"
             >
-              View all →
+              View all
             </Link>
           </div>
           <div className="divide-y divide-border/30">
-            {PENDING_PAYOUTS.map((payout) => (
+            {adminData.topPerformers.slice(0, 5).map((performer, index) => (
               <div
-                className="flex items-center justify-between px-5 py-4 transition-colors hover:bg-muted/50"
-                key={payout.seller}
+                className="flex items-center gap-3 px-5 py-3 transition-colors hover:bg-muted/30"
+                key={performer.id}
               >
-                <div className="flex items-center gap-3">
-                  <CreditCard className="size-5 text-muted-foreground" />
-                  <div className="flex flex-col gap-0.5">
-                    <p className="font-medium text-foreground text-sm">
-                      {payout.seller}
-                    </p>
-                    <p className="text-muted-foreground text-xs">
-                      Due {payout.date}
-                    </p>
-                  </div>
+                <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-muted font-semibold text-muted-foreground text-xs">
+                  {index + 1}
+                </span>
+                <div className="flex flex-1 flex-col overflow-hidden">
+                  <span className="truncate font-medium text-foreground text-sm">
+                    {performer.name}
+                  </span>
+                  <span className="text-muted-foreground text-xs">
+                    {performer.category}
+                  </span>
                 </div>
-                <p className="font-semibold text-foreground text-sm tabular-nums">
-                  {payout.amount}
-                </p>
+                <div className="flex flex-col items-end">
+                  <span className="font-semibold text-foreground text-sm tabular-nums">
+                    ${(performer.gmv / 1000).toFixed(0)}K
+                  </span>
+                  <span
+                    className={`text-xs tabular-nums ${performer.trend >= 0 ? "text-emerald-500" : "text-red-500"}`}
+                  >
+                    {performer.trend >= 0 ? "+" : ""}
+                    {performer.trend}%
+                  </span>
+                </div>
               </div>
             ))}
           </div>
         </Card>
+      </div>
+
+      {/* New Sellers - Grid layout */}
+      <div>
+        <div className="mb-3 flex items-center justify-between">
+          <h3 className="font-semibold text-foreground text-sm">New Sellers</h3>
+          <Link
+            className="font-medium text-primary-violet text-xs hover:underline"
+            href="/admin/sellers"
+          >
+            View all →
+          </Link>
+        </div>
+        <div className="grid w-full grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
+          {adminData.recentSellers.slice(0, 3).map((seller) => (
+            <div
+              className="flex min-w-0 items-center gap-2 rounded-lg border border-border/50 bg-card p-3 transition-colors hover:border-border"
+              key={seller.id}
+            >
+              <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary-violet font-medium text-white text-xs">
+                {seller.name.charAt(0)}
+              </div>
+              <div className="flex flex-1 flex-col overflow-hidden">
+                <span className="truncate font-medium text-foreground text-sm">
+                  {seller.name}
+                </span>
+                <span className="text-muted-foreground text-xs">
+                  {seller.category}
+                </span>
+              </div>
+              <span
+                className={`shrink-0 rounded-full px-2 py-0.5 font-medium text-xs capitalize ${getStatusBadgeColor(seller.status)}`}
+              >
+                {seller.status}
+              </span>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );

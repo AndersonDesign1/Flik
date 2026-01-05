@@ -1,7 +1,14 @@
 "use client";
 
-import { MoreHorizontal } from "lucide-react";
+import {
+  DollarSign,
+  MoreHorizontal,
+  Store,
+  TrendingUp,
+  UserCheck,
+} from "lucide-react";
 import { useState } from "react";
+import { StatsGrid } from "@/components/shared/stats-grid";
 import { TableToolbar } from "@/components/shared/table-toolbar";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -95,6 +102,37 @@ const sellerStatusConfig = {
   },
 } as const;
 
+const SELLER_METRICS = [
+  {
+    title: "Total Sellers",
+    value: SELLERS.length.toString(),
+    change: "Registered creators",
+    changeType: "neutral" as const,
+    icon: Store,
+  },
+  {
+    title: "Active Sellers",
+    value: SELLERS.filter((s) => s.status === "active").length.toString(),
+    change: "Currently selling",
+    changeType: "positive" as const,
+    icon: UserCheck,
+  },
+  {
+    title: "Pending Approval",
+    value: SELLERS.filter((s) => s.status === "pending").length.toString(),
+    change: "Awaiting review",
+    changeType: "neutral" as const,
+    icon: TrendingUp,
+  },
+  {
+    title: "Total Revenue",
+    value: "$104.3K",
+    change: "Platform-wide",
+    changeType: "positive" as const,
+    icon: DollarSign,
+  },
+];
+
 export default function AdminSellersPage() {
   const [selectedSeller, setSelectedSeller] = useState<
     (typeof SELLERS)[0] | null
@@ -115,6 +153,8 @@ export default function AdminSellersPage() {
           Manage all sellers on the platform.
         </p>
       </div>
+
+      <StatsGrid metrics={SELLER_METRICS} />
 
       <Card className="overflow-hidden p-0">
         <TableToolbar
