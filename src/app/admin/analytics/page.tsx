@@ -585,58 +585,58 @@ export default function AnalyticsPage() {
             title="Marketplace Stats"
           />
           <div className="grid grid-cols-2 gap-4 p-5">
-            <div className="rounded-lg bg-muted/50 p-4">
+            <div className="flex flex-col gap-2 rounded-lg bg-muted/50 p-4">
               <div className="flex items-center gap-2 text-muted-foreground">
                 <Users className="size-4" />
                 <span className="text-xs">Buyer-to-Seller Ratio</span>
               </div>
-              <div className="mt-2 font-bold text-2xl text-foreground tabular-nums">
+              <div className="font-bold text-2xl text-foreground tabular-nums">
                 {adminData.marketplaceLiquidity.buyerToSellerRatio}:1
               </div>
             </div>
-            <div className="rounded-lg bg-muted/50 p-4">
+            <div className="flex flex-col gap-2 rounded-lg bg-muted/50 p-4">
               <div className="flex items-center gap-2 text-muted-foreground">
                 <ShoppingCart className="size-4" />
                 <span className="text-xs">Avg Order Value</span>
               </div>
-              <div className="mt-2 font-bold text-2xl text-foreground tabular-nums">
+              <div className="font-bold text-2xl text-foreground tabular-nums">
                 ${adminData.marketplaceLiquidity.avgOrderValue}
               </div>
             </div>
-            <div className="rounded-lg bg-muted/50 p-4">
+            <div className="flex flex-col gap-2 rounded-lg bg-muted/50 p-4">
               <div className="flex items-center gap-2 text-muted-foreground">
                 <TrendingUp className="size-4" />
                 <span className="text-xs">Repeat Purchase Rate</span>
               </div>
-              <div className="mt-2 font-bold text-2xl text-foreground tabular-nums">
+              <div className="font-bold text-2xl text-foreground tabular-nums">
                 {adminData.marketplaceLiquidity.repeatPurchaseRate}%
               </div>
             </div>
-            <div className="rounded-lg bg-muted/50 p-4">
+            <div className="flex flex-col gap-2 rounded-lg bg-muted/50 p-4">
               <div className="flex items-center gap-2 text-muted-foreground">
                 <BarChart3 className="size-4" />
                 <span className="text-xs">Search-to-Fill Rate</span>
               </div>
-              <div className="mt-2 font-bold text-2xl text-foreground tabular-nums">
+              <div className="font-bold text-2xl text-foreground tabular-nums">
                 {adminData.marketplaceLiquidity.searchToFillRate}%
               </div>
             </div>
             <div className="col-span-2 rounded-lg bg-muted/50 p-4">
               <div className="flex items-center justify-between">
-                <div>
+                <div className="flex flex-col gap-2">
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <ShoppingCart className="size-4" />
                     <span className="text-xs">Cart Abandonment Rate</span>
                   </div>
-                  <div className="mt-2 font-bold text-2xl text-amber-500 tabular-nums">
+                  <div className="font-bold text-2xl text-amber-500 tabular-nums">
                     {adminData.marketplaceLiquidity.cartAbandonmentRate}%
                   </div>
                 </div>
-                <div className="text-right">
+                <div className="flex flex-col gap-2 text-right">
                   <div className="text-muted-foreground text-xs">
                     Avg Time to First Sale
                   </div>
-                  <div className="mt-2 font-bold text-foreground text-lg">
+                  <div className="font-bold text-foreground text-lg">
                     {adminData.marketplaceLiquidity.avgTimeToFirstSale}
                   </div>
                 </div>
