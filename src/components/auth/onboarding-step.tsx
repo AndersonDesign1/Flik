@@ -88,7 +88,7 @@ export function OnboardingStep({
             className={cn(
               "group relative flex flex-col items-center gap-4 rounded-2xl border-2 p-6 text-center transition-all duration-200",
               selectedId === option.id
-                ? "border-primary-violet bg-primary-violet-50 shadow-lg shadow-primary-violet/10"
+                ? "border-primary-violet bg-primary-violet-50/50 shadow-sm shadow-primary-violet/5"
                 : "border-border bg-card hover:border-primary-violet/50 hover:shadow-md"
             )}
             initial={{ opacity: 0, y: 20 }}

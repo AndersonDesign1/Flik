@@ -190,8 +190,8 @@ export function OnboardingFlow() {
     <div className="relative flex min-h-screen flex-col overflow-hidden bg-background">
       {/* Background gradients */}
       <div className="pointer-events-none absolute inset-0 -z-10">
-        <div className="absolute top-0 left-1/2 h-[600px] w-[800px] -translate-x-1/2 rounded-full bg-gradient-to-b from-primary-violet-100/50 to-transparent blur-3xl dark:from-primary-violet-900/20" />
-        <div className="absolute right-1/4 bottom-0 h-[400px] w-[600px] rounded-full bg-gradient-to-t from-secondary-magenta-100/30 to-transparent blur-3xl dark:from-secondary-magenta-900/10" />
+        <div className="absolute top-0 left-1/2 h-[600px] w-[800px] -translate-x-1/2 rounded-full bg-gradient-to-b from-primary-violet-100/20 to-transparent blur-3xl dark:from-primary-violet-900/10" />
+        <div className="absolute right-1/4 bottom-0 h-[400px] w-[600px] rounded-full bg-gradient-to-t from-secondary-magenta-100/10 to-transparent blur-3xl dark:from-secondary-magenta-900/5" />
       </div>
 
       {/* Header with progress */}
@@ -255,7 +255,7 @@ export function OnboardingFlow() {
                     className={cn(
                       "group relative flex flex-col items-center gap-4 rounded-2xl border-2 bg-card p-6 text-center transition-all duration-200",
                       selected
-                        ? "border-primary-violet bg-primary-violet-50 shadow-lg shadow-primary-violet/10 dark:bg-primary-violet-50/10"
+                        ? "border-primary-violet bg-primary-violet-50/50 shadow-sm shadow-primary-violet/5 dark:bg-primary-violet-50/5"
                         : "border-border hover:border-primary-violet/50 hover:shadow-md"
                     )}
                     initial={{ opacity: 0, y: 20 }}
