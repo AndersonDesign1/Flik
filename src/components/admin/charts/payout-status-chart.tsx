@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
+import { ClientOnly } from "@/components/shared/client-only";
 import { Card } from "@/components/ui/card";
 
 interface PayoutSummary {
@@ -63,45 +64,56 @@ export function PayoutStatusChart({
       <div className="p-5" style={{ height: 220 }}>
         <div className="flex h-full items-center gap-6">
           <div className="relative flex-1">
-            <ResponsiveContainer height={180} width="100%">
-              <PieChart>
-                <Pie
-                  cx="50%"
-                  cy="50%"
-                  data={chartData}
-                  dataKey="value"
-                  innerRadius={50}
-                  outerRadius={70}
-                  paddingAngle={2}
-                  strokeWidth={0}
-                >
-                  {chartData.map((entry) => (
-                    <Cell fill={entry.color} key={entry.name} />
-                  ))}
-                </Pie>
-                <Tooltip
-                  content={({ active, payload }) => {
-                    if (!(active && payload?.length)) {
-                      return null;
-                    }
-                    const item = payload[0].payload as (typeof chartData)[0];
-                    return (
-                      <div className="rounded-lg border border-border bg-background px-3 py-2 shadow-lg">
-                        <div className="flex items-center gap-2">
-                          <div
-                            className="size-2 rounded-full"
-                            style={{ backgroundColor: item.color }}
-                          />
-                          <span className="font-medium text-foreground text-xs">
-                            {item.name}: {item.value}
-                          </span>
+            <ClientOnly
+              fallback={
+                <div className="h-full w-full animate-pulse bg-muted/20" />
+              }
+            >
+              <ResponsiveContainer
+                height={180}
+                minHeight={0}
+                minWidth={0}
+                width="100%"
+              >
+                <PieChart>
+                  <Pie
+                    cx="50%"
+                    cy="50%"
+                    data={chartData}
+                    dataKey="value"
+                    innerRadius={50}
+                    outerRadius={70}
+                    paddingAngle={2}
+                    strokeWidth={0}
+                  >
+                    {chartData.map((entry) => (
+                      <Cell fill={entry.color} key={entry.name} />
+                    ))}
+                  </Pie>
+                  <Tooltip
+                    content={({ active, payload }) => {
+                      if (!(active && payload?.length)) {
+                        return null;
+                      }
+                      const item = payload[0].payload as (typeof chartData)[0];
+                      return (
+                        <div className="rounded-lg border border-border bg-background px-3 py-2 shadow-lg">
+                          <div className="flex items-center gap-2">
+                            <div
+                              className="size-2 rounded-full"
+                              style={{ backgroundColor: item.color }}
+                            />
+                            <span className="font-medium text-foreground text-xs">
+                              {item.name}: {item.value}
+                            </span>
+                          </div>
                         </div>
-                      </div>
-                    );
-                  }}
-                />
-              </PieChart>
-            </ResponsiveContainer>
+                      );
+                    }}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+            </ClientOnly>
             <div className="absolute inset-0 flex flex-col items-center justify-center">
               <span className="font-bold text-foreground text-lg tabular-nums">
                 ${(totalPending / 1000).toFixed(0)}K

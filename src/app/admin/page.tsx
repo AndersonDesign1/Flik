@@ -22,6 +22,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { ClientOnly } from "@/components/shared/client-only";
 import { StatsGrid } from "@/components/shared/stats-grid";
 import {
   TimeframeSelector,
@@ -201,63 +202,74 @@ export default function AdminDashboardPage() {
             </div>
           </div>
           <div className="min-w-0 p-4" style={{ height: 220 }}>
-            <ResponsiveContainer height="100%" width="100%">
-              <AreaChart
-                data={chartData}
-                margin={{ top: 5, right: 5, left: 0, bottom: 0 }}
+            <ClientOnly
+              fallback={
+                <div className="h-full w-full animate-pulse bg-muted/20" />
+              }
+            >
+              <ResponsiveContainer
+                height="100%"
+                minHeight={0}
+                minWidth={0}
+                width="100%"
               >
-                <defs>
-                  <linearGradient id="gmvFill" x1="0" x2="0" y1="0" y2="1">
-                    <stop offset="0%" stopColor="#8b5cf6" stopOpacity={0.3} />
-                    <stop offset="100%" stopColor="#8b5cf6" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <XAxis
-                  axisLine={false}
-                  dataKey="month"
-                  fontSize={10}
-                  stroke="var(--gray-400)"
-                  tickLine={false}
-                />
-                <YAxis
-                  axisLine={false}
-                  domain={[0, "auto"]}
-                  fontSize={9}
-                  stroke="var(--gray-400)"
-                  tickFormatter={(v) => `${(v / 1_000_000).toFixed(1)}M`}
-                  tickLine={false}
-                  width={40}
-                />
-                <Tooltip
-                  content={({ active, payload }) => {
-                    if (!(active && payload?.length)) {
-                      return null;
-                    }
-                    return (
-                      <div className="rounded-lg border border-border bg-background px-3 py-2 shadow-lg">
-                        <p className="font-semibold text-foreground text-sm tabular-nums">
-                          $
-                          {(
-                            (payload[0].value as number) / 1000
-                          ).toLocaleString()}
-                          K
-                        </p>
-                        <p className="text-muted-foreground text-xs">
-                          {payload[0].payload.month}
-                        </p>
-                      </div>
-                    );
-                  }}
-                />
-                <Area
-                  dataKey="gmv"
-                  fill="url(#gmvFill)"
-                  stroke="#8b5cf6"
-                  strokeWidth={2}
-                  type="monotone"
-                />
-              </AreaChart>
-            </ResponsiveContainer>
+                <AreaChart
+                  data={chartData}
+                  margin={{ top: 5, right: 5, left: 0, bottom: 0 }}
+                >
+                  <defs>
+                    <linearGradient id="gmvFill" x1="0" x2="0" y1="0" y2="1">
+                      <stop offset="0%" stopColor="#8b5cf6" stopOpacity={0.3} />
+                      <stop offset="100%" stopColor="#8b5cf6" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <XAxis
+                    axisLine={false}
+                    dataKey="month"
+                    fontSize={10}
+                    stroke="var(--gray-400)"
+                    tickLine={false}
+                  />
+                  <YAxis
+                    axisLine={false}
+                    domain={[0, "auto"]}
+                    fontSize={9}
+                    stroke="var(--gray-400)"
+                    tickFormatter={(v) => `${(v / 1_000_000).toFixed(1)}M`}
+                    tickLine={false}
+                    width={40}
+                  />
+                  <Tooltip
+                    content={({ active, payload }) => {
+                      if (!(active && payload?.length)) {
+                        return null;
+                      }
+                      return (
+                        <div className="rounded-lg border border-border bg-background px-3 py-2 shadow-lg">
+                          <p className="font-semibold text-foreground text-sm tabular-nums">
+                            $
+                            {(
+                              (payload[0].value as number) / 1000
+                            ).toLocaleString()}
+                            K
+                          </p>
+                          <p className="text-muted-foreground text-xs">
+                            {payload[0].payload.month}
+                          </p>
+                        </div>
+                      );
+                    }}
+                  />
+                  <Area
+                    dataKey="gmv"
+                    fill="url(#gmvFill)"
+                    stroke="#8b5cf6"
+                    strokeWidth={2}
+                    type="monotone"
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            </ClientOnly>
           </div>
         </Card>
 
@@ -308,9 +320,8 @@ export default function AdminDashboardPage() {
         </Card>
       </div>
 
-      {/* New Sellers - Grid layout */}
-      <div>
-        <div className="mb-3 flex items-center justify-between">
+      <div className="flex flex-col gap-3">
+        <div className="flex items-center justify-between">
           <h3 className="font-semibold text-foreground text-sm">New Sellers</h3>
           <Link
             className="font-medium text-primary-violet text-xs hover:underline"

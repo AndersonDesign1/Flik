@@ -1,7 +1,11 @@
 "use client";
 
-import { ChevronDown } from "lucide-react";
-import { useState } from "react";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 
 const FAQ_ITEMS = [
   {
@@ -32,8 +36,6 @@ const FAQ_ITEMS = [
 ];
 
 export function FAQ() {
-  const [openIndex, setOpenIndex] = useState<number | null>(0);
-
   return (
     <section className="w-full px-4 py-24 sm:px-6 lg:px-8">
       <div className="mx-auto flex w-full max-w-3xl flex-col gap-12">
@@ -49,36 +51,27 @@ export function FAQ() {
           </p>
         </div>
 
-        <div className="flex flex-col gap-3">
+        <Accordion
+          className="flex flex-col gap-3"
+          collapsible
+          defaultValue="item-0"
+          type="single"
+        >
           {FAQ_ITEMS.map((item, index) => (
-            <div
-              className="overflow-hidden rounded-xl border border-border bg-card"
+            <AccordionItem
+              className="overflow-hidden rounded-xl border border-border bg-card px-5"
               key={item.question}
+              value={`item-${index}`}
             >
-              <button
-                className="flex w-full items-center justify-between p-5 text-left transition-colors hover:bg-muted"
-                onClick={() => setOpenIndex(openIndex === index ? null : index)}
-                type="button"
-              >
-                <span className="font-medium text-foreground">
-                  {item.question}
-                </span>
-                <ChevronDown
-                  className={`size-5 text-muted-foreground transition-transform ${
-                    openIndex === index ? "rotate-180" : ""
-                  }`}
-                />
-              </button>
-              {openIndex === index && (
-                <div className="border-border border-t px-5 pt-4 pb-5">
-                  <p className="text-muted-foreground leading-relaxed">
-                    {item.answer}
-                  </p>
-                </div>
-              )}
-            </div>
+              <AccordionTrigger className="py-5 font-medium text-base text-foreground hover:no-underline">
+                {item.question}
+              </AccordionTrigger>
+              <AccordionContent className="text-muted-foreground leading-relaxed">
+                {item.answer}
+              </AccordionContent>
+            </AccordionItem>
           ))}
-        </div>
+        </Accordion>
       </div>
     </section>
   );

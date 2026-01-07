@@ -14,6 +14,7 @@ import {
   getChartXAxis,
   getChartYAxis,
 } from "@/components/shared/chart-card";
+import { ClientOnly } from "@/components/shared/client-only";
 
 interface DataPoint {
   month: string;
@@ -33,51 +34,60 @@ export function GMVRevenueChart({ data }: GMVRevenueChartProps) {
       subtitle="Platform gross merchandise value vs your 10% take rate"
       title="GMV vs Net Revenue"
     >
-      <ResponsiveContainer height="100%" width="100%">
-        <ComposedChart
-          data={data}
-          margin={{ top: 5, right: 10, left: 5, bottom: 0 }}
+      <ClientOnly
+        fallback={<div className="h-full w-full animate-pulse bg-muted/20" />}
+      >
+        <ResponsiveContainer
+          height="100%"
+          minHeight={0}
+          minWidth={0}
+          width="100%"
         >
-          <defs>
-            <linearGradient id="gmvGradient" x1="0" x2="0" y1="0" y2="1">
-              <stop offset="0%" stopColor="#8b5cf6" stopOpacity={0.3} />
-              <stop offset="100%" stopColor="#8b5cf6" stopOpacity={0} />
-            </linearGradient>
-          </defs>
-          {getChartGrid()}
-          {getChartXAxis("month")}
-          {getChartYAxis((v) => `$${(v / 1_000_000).toFixed(1)}M`)}
-          <Tooltip
-            content={({ active, payload }) => (
-              <ChartTooltip
-                active={active}
-                formatter={(v, name) =>
-                  name === "gmv" || name === "revenue"
-                    ? `$${(v / 1000).toFixed(0)}K`
-                    : v.toLocaleString()
-                }
-                payload={payload}
-              />
-            )}
-          />
-          <Area
-            dataKey="gmv"
-            fill="url(#gmvGradient)"
-            name="gmv"
-            stroke="#8b5cf6"
-            strokeWidth={2}
-            type="monotone"
-          />
-          <Line
-            dataKey="revenue"
-            dot={false}
-            name="revenue"
-            stroke="#10b981"
-            strokeWidth={2}
-            type="monotone"
-          />
-        </ComposedChart>
-      </ResponsiveContainer>
+          <ComposedChart
+            data={data}
+            margin={{ top: 5, right: 10, left: 5, bottom: 0 }}
+          >
+            <defs>
+              <linearGradient id="gmvGradient" x1="0" x2="0" y1="0" y2="1">
+                <stop offset="0%" stopColor="#8b5cf6" stopOpacity={0.3} />
+                <stop offset="100%" stopColor="#8b5cf6" stopOpacity={0} />
+              </linearGradient>
+            </defs>
+            {getChartGrid()}
+            {getChartXAxis("month")}
+            {getChartYAxis((v) => `$${(v / 1_000_000).toFixed(1)}M`)}
+            <Tooltip
+              content={({ active, payload }) => (
+                <ChartTooltip
+                  active={active}
+                  formatter={(v, name) =>
+                    name === "gmv" || name === "revenue"
+                      ? `$${(v / 1000).toFixed(0)}K`
+                      : v.toLocaleString()
+                  }
+                  payload={payload}
+                />
+              )}
+            />
+            <Area
+              dataKey="gmv"
+              fill="url(#gmvGradient)"
+              name="gmv"
+              stroke="#8b5cf6"
+              strokeWidth={2}
+              type="monotone"
+            />
+            <Line
+              dataKey="revenue"
+              dot={false}
+              name="revenue"
+              stroke="#10b981"
+              strokeWidth={2}
+              type="monotone"
+            />
+          </ComposedChart>
+        </ResponsiveContainer>
+      </ClientOnly>
     </ChartCard>
   );
 }

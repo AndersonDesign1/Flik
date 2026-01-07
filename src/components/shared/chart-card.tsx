@@ -33,7 +33,7 @@ export function ChartCard({
         </div>
         {headerAction}
       </div>
-      <div className="p-5" style={{ height }}>
+      <div className="min-h-0 min-w-0 p-5" style={{ height }}>
         {children}
       </div>
     </Card>

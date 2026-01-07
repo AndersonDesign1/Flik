@@ -26,6 +26,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { ClientOnly } from "@/components/shared/client-only";
 import { StatsGrid } from "@/components/shared/stats-grid";
 import {
   type TimeframeOption,
@@ -244,64 +245,75 @@ export default function AnalyticsPage() {
           title="Revenue Trends"
         />
         <div className="p-5" style={{ height: 320 }}>
-          <ResponsiveContainer height="100%" width="100%">
-            <ComposedChart
-              data={revenueData}
-              margin={{ top: 5, right: 10, left: 5, bottom: 0 }}
+          <ClientOnly
+            fallback={
+              <div className="h-full w-full animate-pulse bg-muted/20" />
+            }
+          >
+            <ResponsiveContainer
+              height="100%"
+              minHeight={0}
+              minWidth={0}
+              width="100%"
             >
-              <defs>
-                <linearGradient id="gmvGradient" x1="0" x2="0" y1="0" y2="1">
-                  <stop offset="0%" stopColor="#8b5cf6" stopOpacity={0.3} />
-                  <stop offset="100%" stopColor="#8b5cf6" stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <XAxis
-                axisLine={false}
-                dataKey="month"
-                fontSize={11}
-                stroke="var(--gray-400)"
-                tickLine={false}
-              />
-              <YAxis
-                axisLine={false}
-                domain={[0, "auto"]}
-                fontSize={11}
-                stroke="var(--gray-400)"
-                tickFormatter={(v) => `$${(v / 1_000_000).toFixed(1)}M`}
-                tickLine={false}
-                width={55}
-              />
-              <Tooltip
-                content={({ active, payload }) => (
-                  <CustomTooltip
-                    active={active}
-                    formatter={(v, name) =>
-                      name === "gmv" || name === "revenue"
-                        ? `$${(v / 1000).toFixed(0)}K`
-                        : v.toLocaleString()
-                    }
-                    payload={payload}
-                  />
-                )}
-              />
-              <Area
-                dataKey="gmv"
-                fill="url(#gmvGradient)"
-                name="gmv"
-                stroke="#8b5cf6"
-                strokeWidth={2}
-                type="monotone"
-              />
-              <Line
-                dataKey="revenue"
-                dot={false}
-                name="revenue"
-                stroke="#10b981"
-                strokeWidth={2}
-                type="monotone"
-              />
-            </ComposedChart>
-          </ResponsiveContainer>
+              <ComposedChart
+                data={revenueData}
+                margin={{ top: 5, right: 10, left: 5, bottom: 0 }}
+              >
+                <defs>
+                  <linearGradient id="gmvGradient" x1="0" x2="0" y1="0" y2="1">
+                    <stop offset="0%" stopColor="#8b5cf6" stopOpacity={0.3} />
+                    <stop offset="100%" stopColor="#8b5cf6" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <XAxis
+                  axisLine={false}
+                  dataKey="month"
+                  fontSize={11}
+                  stroke="var(--gray-400)"
+                  tickLine={false}
+                />
+                <YAxis
+                  axisLine={false}
+                  domain={[0, "auto"]}
+                  fontSize={11}
+                  stroke="var(--gray-400)"
+                  tickFormatter={(v) => `$${(v / 1_000_000).toFixed(1)}M`}
+                  tickLine={false}
+                  width={55}
+                />
+                <Tooltip
+                  content={({ active, payload }) => (
+                    <CustomTooltip
+                      active={active}
+                      formatter={(v, name) =>
+                        name === "gmv" || name === "revenue"
+                          ? `$${(v / 1000).toFixed(0)}K`
+                          : v.toLocaleString()
+                      }
+                      payload={payload}
+                    />
+                  )}
+                />
+                <Area
+                  dataKey="gmv"
+                  fill="url(#gmvGradient)"
+                  name="gmv"
+                  stroke="#8b5cf6"
+                  strokeWidth={2}
+                  type="monotone"
+                />
+                <Line
+                  dataKey="revenue"
+                  dot={false}
+                  name="revenue"
+                  stroke="#10b981"
+                  strokeWidth={2}
+                  type="monotone"
+                />
+              </ComposedChart>
+            </ResponsiveContainer>
+          </ClientOnly>
         </div>
       </Card>
 
@@ -315,49 +327,60 @@ export default function AnalyticsPage() {
           />
           <div className="flex items-center gap-6 p-5" style={{ height: 280 }}>
             <div className="relative flex-1">
-              <ResponsiveContainer height={220} width="100%">
-                <PieChart>
-                  <Pie
-                    cx="50%"
-                    cy="50%"
-                    data={categoryData}
-                    dataKey="value"
-                    innerRadius={55}
-                    outerRadius={80}
-                    paddingAngle={2}
-                    strokeWidth={0}
-                  >
-                    {categoryData.map((entry) => (
-                      <Cell fill={entry.color} key={entry.name} />
-                    ))}
-                  </Pie>
-                  <Tooltip
-                    content={({ active, payload }) => {
-                      if (!(active && payload?.length)) {
-                        return null;
-                      }
-                      const item = payload[0]
-                        .payload as (typeof categoryData)[0];
-                      return (
-                        <div className="rounded-lg border border-border bg-background px-3 py-2 shadow-lg">
-                          <p className="font-medium text-foreground text-sm">
-                            {item.name}
-                          </p>
-                          <p className="text-muted-foreground text-xs">
-                            GMV: ${(item.value / 1000).toFixed(0)}K
-                          </p>
-                          <p className="text-muted-foreground text-xs">
-                            {item.products.toLocaleString()} products
-                          </p>
-                          <p className="text-muted-foreground text-xs">
-                            {item.sellers} sellers
-                          </p>
-                        </div>
-                      );
-                    }}
-                  />
-                </PieChart>
-              </ResponsiveContainer>
+              <ClientOnly
+                fallback={
+                  <div className="h-full w-full animate-pulse bg-muted/20" />
+                }
+              >
+                <ResponsiveContainer
+                  height={220}
+                  minHeight={0}
+                  minWidth={0}
+                  width="100%"
+                >
+                  <PieChart>
+                    <Pie
+                      cx="50%"
+                      cy="50%"
+                      data={categoryData}
+                      dataKey="value"
+                      innerRadius={55}
+                      outerRadius={80}
+                      paddingAngle={2}
+                      strokeWidth={0}
+                    >
+                      {categoryData.map((entry) => (
+                        <Cell fill={entry.color} key={entry.name} />
+                      ))}
+                    </Pie>
+                    <Tooltip
+                      content={({ active, payload }) => {
+                        if (!(active && payload?.length)) {
+                          return null;
+                        }
+                        const item = payload[0]
+                          .payload as (typeof categoryData)[0];
+                        return (
+                          <div className="rounded-lg border border-border bg-background px-3 py-2 shadow-lg">
+                            <p className="font-medium text-foreground text-sm">
+                              {item.name}
+                            </p>
+                            <p className="text-muted-foreground text-xs">
+                              GMV: ${(item.value / 1000).toFixed(0)}K
+                            </p>
+                            <p className="text-muted-foreground text-xs">
+                              {item.products.toLocaleString()} products
+                            </p>
+                            <p className="text-muted-foreground text-xs">
+                              {item.sellers} sellers
+                            </p>
+                          </div>
+                        );
+                      }}
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
+              </ClientOnly>
               <div className="absolute inset-0 flex flex-col items-center justify-center">
                 <span className="font-bold text-foreground text-lg tabular-nums">
                   9
@@ -398,59 +421,70 @@ export default function AnalyticsPage() {
             title="Transactions"
           />
           <div className="p-5" style={{ height: 280 }}>
-            <ResponsiveContainer height="100%" width="100%">
-              <AreaChart
-                data={transactionsData}
-                margin={{ top: 5, right: 10, left: 5, bottom: 0 }}
+            <ClientOnly
+              fallback={
+                <div className="h-full w-full animate-pulse bg-muted/20" />
+              }
+            >
+              <ResponsiveContainer
+                height="100%"
+                minHeight={0}
+                minWidth={0}
+                width="100%"
               >
-                <defs>
-                  <linearGradient
-                    id="transGradient"
-                    x1="0"
-                    x2="0"
-                    y1="0"
-                    y2="1"
-                  >
-                    <stop offset="0%" stopColor="#f97316" stopOpacity={0.4} />
-                    <stop offset="100%" stopColor="#f97316" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <XAxis
-                  axisLine={false}
-                  dataKey="hour"
-                  fontSize={10}
-                  interval={3}
-                  stroke="var(--gray-400)"
-                  tickLine={false}
-                />
-                <YAxis
-                  axisLine={false}
-                  domain={[0, "auto"]}
-                  fontSize={11}
-                  stroke="var(--gray-400)"
-                  tickFormatter={(v) => v.toLocaleString()}
-                  tickLine={false}
-                  width={45}
-                />
-                <Tooltip
-                  content={({ active, payload }) => (
-                    <CustomTooltip
-                      active={active}
-                      formatter={(v) => v.toLocaleString()}
-                      payload={payload}
-                    />
-                  )}
-                />
-                <Area
-                  dataKey="transactions"
-                  fill="url(#transGradient)"
-                  name="transactions"
-                  stroke="#f97316"
-                  strokeWidth={2}
-                  type="monotone"
-                />
-              </AreaChart>
-            </ResponsiveContainer>
+                <AreaChart
+                  data={transactionsData}
+                  margin={{ top: 5, right: 10, left: 5, bottom: 0 }}
+                >
+                  <defs>
+                    <linearGradient
+                      id="transGradient"
+                      x1="0"
+                      x2="0"
+                      y1="0"
+                      y2="1"
+                    >
+                      <stop offset="0%" stopColor="#f97316" stopOpacity={0.4} />
+                      <stop offset="100%" stopColor="#f97316" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <XAxis
+                    axisLine={false}
+                    dataKey="hour"
+                    fontSize={10}
+                    interval={3}
+                    stroke="var(--gray-400)"
+                    tickLine={false}
+                  />
+                  <YAxis
+                    axisLine={false}
+                    domain={[0, "auto"]}
+                    fontSize={11}
+                    stroke="var(--gray-400)"
+                    tickFormatter={(v) => v.toLocaleString()}
+                    tickLine={false}
+                    width={45}
+                  />
+                  <Tooltip
+                    content={({ active, payload }) => (
+                      <CustomTooltip
+                        active={active}
+                        formatter={(v) => v.toLocaleString()}
+                        payload={payload}
+                      />
+                    )}
+                  />
+                  <Area
+                    dataKey="transactions"
+                    fill="url(#transGradient)"
+                    name="transactions"
+                    stroke="#f97316"
+                    strokeWidth={2}
+                    type="monotone"
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            </ClientOnly>
           </div>
         </Card>
       </div>
@@ -469,60 +503,71 @@ export default function AnalyticsPage() {
           title="Creator Ecosystem"
         />
         <div className="p-5" style={{ height: 300 }}>
-          <ResponsiveContainer height="100%" width="100%">
-            <ComposedChart
-              data={creatorData}
-              margin={{ top: 5, right: 10, left: 5, bottom: 0 }}
+          <ClientOnly
+            fallback={
+              <div className="h-full w-full animate-pulse bg-muted/20" />
+            }
+          >
+            <ResponsiveContainer
+              height="100%"
+              minHeight={0}
+              minWidth={0}
+              width="100%"
             >
-              <XAxis
-                axisLine={false}
-                dataKey="month"
-                fontSize={11}
-                stroke="var(--gray-400)"
-                tickLine={false}
-              />
-              <YAxis
-                axisLine={false}
-                domain={[0, "auto"]}
-                fontSize={11}
-                stroke="var(--gray-400)"
-                tickFormatter={(v) => v.toLocaleString()}
-                tickLine={false}
-                width={50}
-              />
-              <Tooltip
-                content={({ active, payload }) => (
-                  <CustomTooltip
-                    active={active}
-                    formatter={(v) => v.toLocaleString()}
-                    payload={payload}
-                  />
-                )}
-              />
-              <Bar
-                barSize={16}
-                dataKey="signups"
-                fill="#10b981"
-                name="signups"
-                radius={[4, 4, 0, 0]}
-              />
-              <Bar
-                barSize={16}
-                dataKey="churned"
-                fill="#ef4444"
-                name="churned"
-                radius={[4, 4, 0, 0]}
-              />
-              <Line
-                dataKey="active"
-                dot={false}
-                name="active"
-                stroke="#8b5cf6"
-                strokeWidth={2}
-                type="monotone"
-              />
-            </ComposedChart>
-          </ResponsiveContainer>
+              <ComposedChart
+                data={creatorData}
+                margin={{ top: 5, right: 10, left: 5, bottom: 0 }}
+              >
+                <XAxis
+                  axisLine={false}
+                  dataKey="month"
+                  fontSize={11}
+                  stroke="var(--gray-400)"
+                  tickLine={false}
+                />
+                <YAxis
+                  axisLine={false}
+                  domain={[0, "auto"]}
+                  fontSize={11}
+                  stroke="var(--gray-400)"
+                  tickFormatter={(v) => v.toLocaleString()}
+                  tickLine={false}
+                  width={50}
+                />
+                <Tooltip
+                  content={({ active, payload }) => (
+                    <CustomTooltip
+                      active={active}
+                      formatter={(v) => v.toLocaleString()}
+                      payload={payload}
+                    />
+                  )}
+                />
+                <Bar
+                  barSize={16}
+                  dataKey="signups"
+                  fill="#10b981"
+                  name="signups"
+                  radius={[4, 4, 0, 0]}
+                />
+                <Bar
+                  barSize={16}
+                  dataKey="churned"
+                  fill="#ef4444"
+                  name="churned"
+                  radius={[4, 4, 0, 0]}
+                />
+                <Line
+                  dataKey="active"
+                  dot={false}
+                  name="active"
+                  stroke="#8b5cf6"
+                  strokeWidth={2}
+                  type="monotone"
+                />
+              </ComposedChart>
+            </ResponsiveContainer>
+          </ClientOnly>
         </div>
       </Card>
 
