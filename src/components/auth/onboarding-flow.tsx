@@ -251,30 +251,44 @@ export function OnboardingFlow() {
                 const selected = isSelected(option.id);
                 return (
                   <motion.button
-                    animate={{ opacity: 1, y: 0 }}
+                    animate={{
+                      borderColor: selected
+                        ? "var(--primary-violet)"
+                        : "var(--border)",
+                    }}
                     className={cn(
                       "group relative flex flex-col items-center gap-4 rounded-2xl border-2 bg-card p-6 text-center transition-all duration-200",
                       selected
-                        ? "border-primary-violet bg-primary-violet-50/50 shadow-sm shadow-primary-violet/5 dark:bg-primary-violet-50/5"
-                        : "border-border hover:border-primary-violet/50 hover:shadow-md"
+                        ? "bg-primary-violet-50 shadow-primary-violet/5 shadow-sm dark:bg-primary-violet-50/10"
+                        : "hover:border-primary-violet/50 hover:shadow-md"
                     )}
-                    initial={{ opacity: 0, y: 20 }}
+                    initial={false}
                     key={option.id}
                     onClick={() => handleSelect(option.id)}
-                    transition={{ duration: 0.2, delay: index * 0.05 }}
+                    transition={{ duration: 0.2 }}
                     type="button"
+                    whileTap={{ scale: 0.98 }}
                   >
                     {/* Icon */}
-                    <div
+                    <motion.div
+                      animate={{
+                        scale: selected ? [1, 1.15, 1] : 1,
+                      }}
                       className={cn(
                         "flex size-14 items-center justify-center rounded-xl transition-colors duration-200",
                         selected
                           ? "bg-primary-violet text-white"
                           : "bg-muted text-muted-foreground group-hover:bg-primary-violet-50 group-hover:text-primary-violet"
                       )}
+                      transition={{
+                        type: "spring",
+                        stiffness: 300,
+                        damping: 15,
+                        duration: 0.4,
+                      }}
                     >
                       {option.icon}
-                    </div>
+                    </motion.div>
 
                     {/* Title */}
                     <span className="font-medium text-foreground">
@@ -289,7 +303,7 @@ export function OnboardingFlow() {
       </div>
 
       {/* Footer */}
-      <div className="flex items-center justify-between border-border border-t bg-card/50 px-6 py-4 backdrop-blur-sm">
+      <div className="sticky bottom-0 z-20 flex items-center justify-between border-border border-t bg-background/80 px-6 py-4 backdrop-blur-md sm:bg-card/50">
         <button
           className="text-muted-foreground text-sm transition-colors hover:text-foreground"
           onClick={handleSkip}

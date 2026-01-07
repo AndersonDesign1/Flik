@@ -84,18 +84,24 @@ export function OnboardingStep({
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {options.map((option, index) => (
           <motion.button
-            animate={{ opacity: 1, y: 0 }}
+            animate={{
+              borderColor:
+                selectedId === option.id
+                  ? "var(--primary-violet)"
+                  : "var(--border)",
+            }}
             className={cn(
               "group relative flex flex-col items-center gap-4 rounded-2xl border-2 p-6 text-center transition-all duration-200",
               selectedId === option.id
-                ? "border-primary-violet bg-primary-violet-50/50 shadow-sm shadow-primary-violet/5"
-                : "border-border bg-card hover:border-primary-violet/50 hover:shadow-md"
+                ? "bg-primary-violet-50/50 shadow-primary-violet/5 shadow-sm"
+                : "bg-card hover:border-primary-violet/50 hover:shadow-md"
             )}
-            initial={{ opacity: 0, y: 20 }}
+            initial={false}
             key={option.id}
             onClick={() => onSelect(option.id)}
-            transition={{ duration: 0.3, delay: index * 0.1 }}
+            transition={{ duration: 0.2 }}
             type="button"
+            whileTap={{ scale: 0.98 }}
           >
             {/* Selection indicator */}
             <div
@@ -108,16 +114,17 @@ export function OnboardingStep({
             >
               {selectedId === option.id && (
                 <motion.svg
-                  animate={{ scale: 1 }}
+                  animate={{ scale: 1, rotate: 0 }}
                   aria-label="Selected"
                   className="size-3 text-white"
                   fill="none"
-                  initial={{ scale: 0 }}
+                  initial={{ scale: 0, rotate: -45 }}
                   role="img"
                   stroke="currentColor"
                   strokeLinecap="round"
                   strokeLinejoin="round"
                   strokeWidth={3}
+                  transition={{ type: "spring", stiffness: 500, damping: 20 }}
                   viewBox="0 0 24 24"
                 >
                   <title>Selected</title>
@@ -127,16 +134,25 @@ export function OnboardingStep({
             </div>
 
             {/* Icon */}
-            <div
+            <motion.div
+              animate={{
+                scale: selectedId === option.id ? [1, 1.15, 1] : 1,
+              }}
               className={cn(
                 "flex size-14 items-center justify-center rounded-xl transition-colors duration-200",
                 selectedId === option.id
                   ? "bg-primary-violet text-white"
                   : "bg-muted text-muted-foreground group-hover:bg-primary-violet-50 group-hover:text-primary-violet"
               )}
+              transition={{
+                type: "spring",
+                stiffness: 300,
+                damping: 15,
+                duration: 0.4,
+              }}
             >
               {option.icon}
-            </div>
+            </motion.div>
 
             {/* Content */}
             <div className="flex flex-col gap-1">
