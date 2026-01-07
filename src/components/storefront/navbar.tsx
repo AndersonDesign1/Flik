@@ -60,7 +60,7 @@ export function Navbar() {
               Log in
             </Link>
             <Button asChild className="rounded-full px-5" size="sm">
-              <Link href="/signup">Get Started</Link>
+              <Link href="/onboarding">Get Started</Link>
             </Button>
           </div>
 
@@ -110,7 +110,7 @@ export function Navbar() {
                     className="h-12 w-full rounded-xl"
                     onClick={() => setIsOpen(false)}
                   >
-                    <Link href="/signup">Get Started</Link>
+                    <Link href="/onboarding">Get Started</Link>
                   </Button>
                 </div>
               </SheetContent>
