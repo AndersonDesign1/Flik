@@ -59,7 +59,7 @@ const USERS = [
   {
     id: "4",
     name: "Admin User",
-    email: "admin@overlay.com",
+    email: "admin@flik.xyz",
     purchases: 0,
     spent: "$0",
     role: "admin",
@@ -68,7 +68,7 @@ const USERS = [
   {
     id: "5",
     name: "Support Staff",
-    email: "support@overlay.com",
+    email: "support@flik.xyz",
     purchases: 0,
     spent: "$0",
     role: "staff",

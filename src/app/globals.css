@@ -379,6 +379,26 @@
     line-height: var(--line-height-normal);
   }
 
+  /* Global cursor styles for interactive elements */
+  button,
+  [role="button"],
+  a[href],
+  select,
+  input[type="submit"],
+  input[type="button"],
+  input[type="reset"],
+  input[type="checkbox"],
+  input[type="radio"],
+  label[for] {
+    cursor: pointer;
+  }
+
+  button:disabled,
+  [role="button"]:disabled,
+  input:disabled {
+    cursor: not-allowed;
+  }
+
   @keyframes fadeIn {
     from {
       opacity: 0;

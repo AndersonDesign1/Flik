@@ -1,20 +1,43 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { toast } from "sonner";
 import { OAuthButtons } from "@/components/auth/oauth-buttons";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { authClient } from "@/lib/auth-client";
 
 export function LoginForm() {
+  const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    // TODO: Implement actual login
-    setTimeout(() => setIsLoading(false), 1500);
+
+    try {
+      const result = await authClient.signIn.email({
+        email: email.trim(),
+        password,
+      });
+
+      if (result.error) {
+        toast.error(result.error.message ?? "Failed to sign in");
+        return;
+      }
+
+      toast.success("Signed in successfully!");
+      router.push("/dashboard");
+    } catch {
+      toast.error("An unexpected error occurred");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -26,20 +49,17 @@ export function LoginForm() {
         </p>
       </div>
 
-      {/* OAuth */}
       <OAuthButtons isLoading={isLoading} />
 
-      {/* Divider */}
       <div className="relative flex items-center justify-center">
         <div className="absolute inset-0 flex items-center">
           <div className="w-full border-border border-t" />
         </div>
-        <div className="relative flex bg-card px-4 text-muted-foreground text-sm">
-          or continue with
-        </div>
+        <span className="relative bg-card px-4 text-muted-foreground text-sm">
+          or continue with email
+        </span>
       </div>
 
-      {/* Form */}
       <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
         <div className="flex flex-col gap-2">
           <Label htmlFor="email">Email</Label>
@@ -47,9 +67,13 @@ export function LoginForm() {
             autoComplete="email"
             className="h-11"
             id="email"
+            name="email"
+            onChange={(e) => setEmail(e.target.value)}
             placeholder="you@example.com"
             required
+            spellCheck={false}
             type="email"
+            value={email}
           />
         </div>
 
@@ -67,9 +91,12 @@ export function LoginForm() {
             autoComplete="current-password"
             className="h-11"
             id="password"
-            placeholder="Enter your password"
+            name="password"
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="Enter your password…"
             required
             type="password"
+            value={password}
           />
         </div>
 
@@ -81,22 +108,21 @@ export function LoginForm() {
           {isLoading ? (
             <div className="flex items-center gap-2">
               <span className="size-4 animate-spin rounded-full border-2 border-white/20 border-t-white" />
-              Sign in
+              Signing in…
             </div>
           ) : (
-            "Sign in"
+            "Sign In"
           )}
         </Button>
       </form>
 
-      {/* Footer */}
       <p className="text-center text-muted-foreground text-sm">
         Don't have an account?{" "}
         <Link
           className="font-medium text-primary-violet hover:underline"
           href="/signup"
         >
-          Sign up
+          Sign Up
         </Link>
       </p>
     </div>

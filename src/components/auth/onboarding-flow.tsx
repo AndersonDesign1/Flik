@@ -1,5 +1,6 @@
 "use client";
 
+import { useMutation } from "convex/react";
 import {
   ArrowLeft,
   ArrowRight,
@@ -16,8 +17,10 @@ import { AnimatePresence, motion } from "motion/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { api } from "../../../convex/_generated/api";
 
 type UserType = "seller" | "buyer" | "both";
 
@@ -37,7 +40,7 @@ interface StepData {
 
 const STEPS: StepData[] = [
   {
-    title: "What brings you to Overlay?",
+    title: "What brings you to Flik?",
     subtitle: "We'll personalize your experience based on your goals",
     options: [
       {
@@ -105,6 +108,9 @@ export function OnboardingFlow() {
   const [selections, setSelections] = useState<
     Record<number, string | string[]>
   >({});
+  const [isSaving, setIsSaving] = useState(false);
+
+  const updateProfile = useMutation(api.profiles.updateProfile);
 
   const currentStepData = STEPS[currentStep];
   const currentSelection = selections[currentStep];
@@ -115,7 +121,7 @@ export function OnboardingFlow() {
   const hasSelection = isMultiSelect
     ? Array.isArray(currentSelection) && currentSelection.length > 0
     : currentSelection !== undefined;
-  const canContinue = hasSelection;
+  const canContinue = hasSelection && !isSaving;
 
   // Check if user selected "buyer" in step 0 - skip step 2 for buyers
   const isBuyerPath = selections[0] === "buy";
@@ -152,14 +158,30 @@ export function OnboardingFlow() {
     }
   };
 
-  const handleContinue = () => {
+  const saveProfileAndRedirect = async (userType: UserType) => {
+    setIsSaving(true);
+    try {
+      await updateProfile({
+        userType,
+        offerTypes: Array.isArray(selections[1]) ? selections[1] : [],
+      });
+      toast.success("Profile updated!");
+      router.push("/dashboard");
+    } catch {
+      toast.error("Failed to save profile. Please try again.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleContinue = async () => {
     if (!canContinue) {
       return;
     }
 
-    // If buyer, skip to signup after first step
+    // If buyer, save and go to dashboard
     if (currentStep === 0 && isBuyerPath) {
-      router.push("/signup?userType=buyer");
+      await saveProfileAndRedirect("buyer");
       return;
     }
 
@@ -171,15 +193,16 @@ export function OnboardingFlow() {
       );
       const userType = selectedOption?.userType ?? "seller";
 
-      // Redirect to signup with user type
-      router.push(`/signup?userType=${userType}`);
+      // Save profile and redirect to dashboard
+      await saveProfileAndRedirect(userType);
     } else {
       setCurrentStep((prev) => prev + 1);
     }
   };
 
-  const handleSkip = () => {
-    router.push("/signup");
+  const handleSkip = async () => {
+    // Skip onboarding, set default user type
+    await saveProfileAndRedirect("buyer");
   };
 
   // Calculate progress percentage
@@ -247,7 +270,7 @@ export function OnboardingFlow() {
 
             {/* Options grid */}
             <div className="grid w-full grid-cols-2 gap-4 sm:grid-cols-3">
-              {currentStepData.options.map((option, index) => {
+              {currentStepData.options.map((option) => {
                 const selected = isSelected(option.id);
                 return (
                   <motion.button
@@ -281,10 +304,9 @@ export function OnboardingFlow() {
                           : "bg-muted text-muted-foreground group-hover:bg-primary-violet-50 group-hover:text-primary-violet"
                       )}
                       transition={{
-                        type: "spring",
-                        stiffness: 300,
-                        damping: 15,
+                        type: "tween",
                         duration: 0.4,
+                        ease: "easeInOut",
                       }}
                     >
                       {option.icon}
@@ -306,6 +328,7 @@ export function OnboardingFlow() {
       <div className="sticky bottom-0 z-20 flex items-center justify-between border-border border-t bg-background/80 px-6 py-4 backdrop-blur-md sm:bg-card/50">
         <button
           className="text-muted-foreground text-sm transition-colors hover:text-foreground"
+          disabled={isSaving}
           onClick={handleSkip}
           type="button"
         >
@@ -324,8 +347,17 @@ export function OnboardingFlow() {
           size="lg"
           type="button"
         >
-          Continue
-          <ArrowRight className="size-4" />
+          {isSaving ? (
+            <>
+              <span className="size-4 animate-spin rounded-full border-2 border-white/20 border-t-white" />
+              Saving…
+            </>
+          ) : (
+            <>
+              Continue
+              <ArrowRight className="size-4" />
+            </>
+          )}
         </Button>
       </div>
     </div>

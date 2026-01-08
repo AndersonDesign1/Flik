@@ -13,26 +13,23 @@ export default function AuthLayout({
         <div className="absolute right-1/4 bottom-0 h-[400px] w-[600px] rounded-full bg-gradient-to-t from-secondary-magenta-100/30 to-transparent blur-3xl dark:from-secondary-magenta-900/10" />
       </div>
 
-      {/* Logo */}
       <Link className="mb-8 flex items-center gap-2.5" href="/">
         <div className="flex size-10 items-center justify-center rounded-xl bg-primary-violet text-white shadow-lg shadow-primary-violet/25">
-          <span className="font-bold text-lg">O</span>
+          <span className="font-bold text-lg">F</span>
         </div>
         <span className="font-bold text-2xl text-foreground tracking-tight">
-          Overlay
+          Flik
         </span>
       </Link>
 
-      {/* Auth Card */}
       <div className="w-full max-w-md">
         <div className="rounded-2xl border border-border bg-card p-8 shadow-lg shadow-primary-violet/5">
           {children}
         </div>
       </div>
 
-      {/* Footer */}
       <p className="mt-8 text-center text-muted-foreground text-sm">
-        © {new Date().getFullYear()} Overlay. All rights reserved.
+        © {new Date().getFullYear()} Flik. All rights reserved.
       </p>
     </div>
   );

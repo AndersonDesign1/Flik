@@ -63,10 +63,10 @@ export function DashboardSidebar() {
           onClick={handleLinkClick}
         >
           <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary-violet text-white">
-            <span className="font-bold text-xs">O</span>
+            <span className="font-bold text-xs">F</span>
           </div>
           <span className="font-semibold text-sm group-data-[collapsible=icon]:hidden">
-            Overlay
+            Flik
           </span>
         </Link>
       </SidebarHeader>

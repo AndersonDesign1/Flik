@@ -39,7 +39,7 @@ export function Testimonials() {
             Loved by creators worldwide
           </h2>
           <p className="text-lg text-muted-foreground">
-            Join thousands of creators who are already selling with Overlay.
+            Join thousands of creators who are already selling with Flik.
           </p>
         </div>
 

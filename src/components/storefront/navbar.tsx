@@ -24,9 +24,9 @@ export function Navbar() {
           href="/"
         >
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-violet text-white">
-            <span className="font-bold text-sm">O</span>
+            <span className="font-bold text-sm">F</span>
           </div>
-          Overlay
+          Flik
         </Link>
 
         <div className="hidden items-center gap-8 md:flex">

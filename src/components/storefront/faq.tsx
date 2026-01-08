@@ -47,7 +47,7 @@ export function FAQ() {
             Frequently asked questions
           </h2>
           <p className="text-lg text-muted-foreground">
-            Everything you need to know about selling with Overlay.
+            Everything you need to know about selling with Flik.
           </p>
         </div>
 

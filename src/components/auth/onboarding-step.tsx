@@ -82,7 +82,7 @@ export function OnboardingStep({
 
       {/* Options */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {options.map((option, index) => (
+        {options.map((option) => (
           <motion.button
             animate={{
               borderColor:
@@ -145,10 +145,9 @@ export function OnboardingStep({
                   : "bg-muted text-muted-foreground group-hover:bg-primary-violet-50 group-hover:text-primary-violet"
               )}
               transition={{
-                type: "spring",
-                stiffness: 300,
-                damping: 15,
+                type: "tween",
                 duration: 0.4,
+                ease: "easeInOut",
               }}
             >
               {option.icon}

@@ -35,9 +35,9 @@ export function Footer() {
               href="/"
             >
               <div className="flex size-8 items-center justify-center rounded-lg bg-primary-violet text-white">
-                <span className="font-bold text-sm">O</span>
+                <span className="font-bold text-sm">F</span>
               </div>
-              Overlay
+              Flik
             </Link>
             <p className="max-w-xs text-muted-foreground text-sm">
               The creator-friendly platform for selling digital products,
@@ -82,7 +82,7 @@ export function Footer() {
 
         <div className="flex flex-col items-center justify-between gap-4 border-border border-t pt-8 md:flex-row">
           <p className="text-muted-foreground text-sm">
-            © {new Date().getFullYear()} Overlay. All rights reserved.
+            © {new Date().getFullYear()} Flik. All rights reserved.
           </p>
           <p className="text-muted-foreground/60 text-sm">
             Made with ❤️ for creators everywhere
