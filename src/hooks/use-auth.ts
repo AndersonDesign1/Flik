@@ -10,7 +10,12 @@ type Role = "user" | "staff" | "admin";
 
 export function useSession() {
   const [session, setSession] = useState<{
-    user: { id: string; name: string; email: string } | null;
+    user: {
+      id: string;
+      name: string;
+      email: string;
+      image?: string | null;
+    } | null;
     isLoading: boolean;
   }>({ user: null, isLoading: true });
 
