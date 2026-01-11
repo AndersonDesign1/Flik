@@ -1,6 +1,7 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import { authComponent } from "./auth";
+import { inviteToRoleSchema, updateProfileSchema } from "./validation";
 
 export const getProfile = query({
   args: {},
@@ -104,6 +105,9 @@ export const updateProfile = mutation({
   },
   returns: v.id("profiles"),
   handler: async (ctx, args) => {
+    // Validate input with Zod
+    const validated = updateProfileSchema.parse(args);
+
     const user = await authComponent.getAuthUser(ctx);
     if (!user) {
       throw new Error("Not authenticated");
@@ -118,21 +122,35 @@ export const updateProfile = mutation({
 
     if (existingProfile) {
       await ctx.db.patch(existingProfile._id, {
-        userType: args.userType ?? existingProfile.userType,
-        storeName: args.storeName ?? existingProfile.storeName,
-        offerTypes: args.offerTypes ?? existingProfile.offerTypes,
+        userType: validated.userType ?? existingProfile.userType,
+        storeName: validated.storeName ?? existingProfile.storeName,
+        offerTypes: validated.offerTypes ?? existingProfile.offerTypes,
         onboardingCompleted: true,
         updatedAt: now,
       });
       return existingProfile._id;
     }
 
+    // Check for pending role invite before creating profile
+    const pendingInvite = await ctx.db
+      .query("role_invites")
+      .withIndex("by_email", (q) => q.eq("email", user.email))
+      .first();
+
+    // Use invited role if exists, otherwise default to "user"
+    const role = pendingInvite?.role ?? "user";
+
+    // Delete the invite if claimed during profile creation
+    if (pendingInvite) {
+      await ctx.db.delete(pendingInvite._id);
+    }
+
     return ctx.db.insert("profiles", {
       userId: user._id,
-      userType: args.userType ?? "buyer",
-      role: "user",
-      storeName: args.storeName,
-      offerTypes: args.offerTypes,
+      userType: validated.userType ?? "buyer",
+      role,
+      storeName: validated.storeName,
+      offerTypes: validated.offerTypes,
       onboardingCompleted: true,
       createdAt: now,
       updatedAt: now,
@@ -149,6 +167,11 @@ export const claimRoleInvite = mutation({
       throw new Error("Not authenticated");
     }
 
+    // Defense-in-depth: require email verification
+    if (!user.emailVerified) {
+      throw new Error("Email must be verified to claim role invite");
+    }
+
     const invite = await ctx.db
       .query("role_invites")
       .withIndex("by_email", (q) => q.eq("email", user.email))
@@ -157,6 +180,9 @@ export const claimRoleInvite = mutation({
     if (!invite) {
       return null;
     }
+
+    // Store the role before any operations
+    const invitedRole = invite.role;
 
     const existingProfile = await ctx.db
       .query("profiles")
@@ -171,11 +197,11 @@ export const claimRoleInvite = mutation({
       const currentLevel =
         roleHierarchy[currentRole as keyof typeof roleHierarchy] ?? 0;
       const inviteLevel =
-        roleHierarchy[invite.role as keyof typeof roleHierarchy] ?? 0;
+        roleHierarchy[invitedRole as keyof typeof roleHierarchy] ?? 0;
 
       if (inviteLevel > currentLevel) {
         await ctx.db.patch(existingProfile._id, {
-          role: invite.role,
+          role: invitedRole,
           updatedAt: now,
         });
       }
@@ -183,15 +209,16 @@ export const claimRoleInvite = mutation({
       await ctx.db.insert("profiles", {
         userId: user._id,
         userType: "buyer",
-        role: invite.role,
+        role: invitedRole,
         onboardingCompleted: false,
         createdAt: now,
         updatedAt: now,
       });
     }
 
+    // Delete invite AFTER profile update (Convex mutations are transactional)
     await ctx.db.delete(invite._id);
-    return invite.role;
+    return invitedRole;
   },
 });
 
@@ -203,6 +230,9 @@ export const inviteToRole = mutation({
   },
   returns: v.id("role_invites"),
   handler: async (ctx, args) => {
+    // Validate input with Zod (includes email format check and normalization)
+    const validated = inviteToRoleSchema.parse(args);
+
     const user = await authComponent.getAuthUser(ctx);
     if (!user) {
       throw new Error("Not authenticated");
@@ -218,16 +248,16 @@ export const inviteToRole = mutation({
       throw new Error("Only admins can invite users to roles");
     }
 
-    // Check if invite already exists
+    // Check if invite already exists (email already normalized by Zod)
     const existingInvite = await ctx.db
       .query("role_invites")
-      .withIndex("by_email", (q) => q.eq("email", args.email))
+      .withIndex("by_email", (q) => q.eq("email", validated.email))
       .first();
 
     if (existingInvite) {
       // Update existing invite
       await ctx.db.patch(existingInvite._id, {
-        role: args.role,
+        role: validated.role,
         invitedBy: user._id,
         createdAt: Date.now(),
       });
@@ -235,8 +265,8 @@ export const inviteToRole = mutation({
     }
 
     return ctx.db.insert("role_invites", {
-      email: args.email,
-      role: args.role,
+      email: validated.email,
+      role: validated.role,
       invitedBy: user._id,
       createdAt: Date.now(),
     });

@@ -53,8 +53,7 @@ export function ResetPasswordForm() {
 
       setIsSuccess(true);
       toast.success("Password reset successfully!");
-    } catch (error) {
-      console.error("[Auth] Password reset failed:", error);
+    } catch {
       toast.error("Failed to reset password");
     } finally {
       setIsLoading(false);

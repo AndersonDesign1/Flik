@@ -2,39 +2,23 @@
 
 import { useQuery } from "convex/react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { authClient } from "@/lib/auth-client";
 import { api } from "../../convex/_generated/api";
 
 type Role = "user" | "staff" | "admin";
 
+/**
+ * Session hook using Better Auth's built-in nanostore caching.
+ * This eliminates redundant API calls across components.
+ */
 export function useSession() {
-  const [session, setSession] = useState<{
-    user: {
-      id: string;
-      name: string;
-      email: string;
-      image?: string | null;
-    } | null;
-    isLoading: boolean;
-  }>({ user: null, isLoading: true });
+  const { data, isPending } = authClient.useSession();
 
-  useEffect(() => {
-    authClient
-      .getSession()
-      .then((result) => {
-        setSession({
-          user: result.data?.user ?? null,
-          isLoading: false,
-        });
-      })
-      .catch((error) => {
-        console.error("[Auth] Failed to get session:", error);
-        setSession({ user: null, isLoading: false });
-      });
-  }, []);
-
-  return session;
+  return {
+    user: data?.user ?? null,
+    isLoading: isPending,
+  };
 }
 
 export function useRequireAuth(redirectTo = "/login") {

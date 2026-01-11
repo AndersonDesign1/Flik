@@ -15,6 +15,12 @@ export default async function DashboardLayout({
     redirect("/login?redirect=/dashboard");
   }
 
+  // Defense-in-depth: verify email is confirmed
+  const user = await fetchAuthQuery(api.auth.getCurrentUser);
+  if (user && !user.emailVerified) {
+    redirect(`/verify-email?email=${encodeURIComponent(user.email)}`);
+  }
+
   const profile = await fetchAuthQuery(api.profiles.getProfile);
 
   if (!profile?.onboardingCompleted) {

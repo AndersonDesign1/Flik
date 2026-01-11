@@ -39,8 +39,7 @@ export function OTPVerificationForm() {
 
       toast.success("Verified!");
       router.push("/dashboard");
-    } catch (error) {
-      console.error("[Auth] 2FA OTP verification failed:", error);
+    } catch {
       toast.error("Failed to verify code");
     } finally {
       setIsLoading(false);
@@ -58,8 +57,7 @@ export function OTPVerificationForm() {
       }
 
       toast.success("Code sent!");
-    } catch (error) {
-      console.error("[Auth] 2FA OTP resend failed:", error);
+    } catch {
       toast.error("Failed to resend code");
     } finally {
       setIsResending(false);

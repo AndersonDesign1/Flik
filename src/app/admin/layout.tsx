@@ -17,6 +17,12 @@ export default async function AdminLayout({
     redirect("/login?redirect=/admin");
   }
 
+  // Defense-in-depth: verify email is confirmed
+  const user = await fetchAuthQuery(api.auth.getCurrentUser);
+  if (user && !user.emailVerified) {
+    redirect(`/verify-email?email=${encodeURIComponent(user.email)}`);
+  }
+
   // Server-side role check via Convex
   const role = await fetchAuthQuery(api.profiles.getRole);
 
