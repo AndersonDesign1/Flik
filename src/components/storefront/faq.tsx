@@ -1,11 +1,18 @@
 "use client";
 
+import { motion } from "motion/react";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { useScrollReveal } from "@/hooks/use-scroll-reveal";
+import {
+  createStaggerContainer,
+  ENTRANCE_VARIANTS,
+  STAGGERS,
+} from "@/lib/design-system";
 
 const FAQ_ITEMS = [
   {
@@ -36,42 +43,73 @@ const FAQ_ITEMS = [
 ];
 
 export function FAQ() {
+  const { ref: headerRef, isInView: headerInView } = useScrollReveal();
+  const { ref: accordionRef, isInView: accordionInView } = useScrollReveal({
+    threshold: 0.1,
+  });
+
   return (
     <section className="w-full px-4 py-24 sm:px-6 lg:px-8">
       <div className="mx-auto flex w-full max-w-3xl flex-col gap-12">
-        <div className="flex w-full flex-col items-center gap-4 text-center">
-          <span className="inline-block rounded-full border border-border bg-muted px-3 py-1 font-medium text-muted-foreground text-sm">
-            FAQ
-          </span>
-          <h2 className="font-bold text-3xl text-foreground tracking-tight sm:text-4xl">
-            Frequently asked questions
-          </h2>
-          <p className="text-lg text-muted-foreground">
-            Everything you need to know about selling with Flik.
-          </p>
-        </div>
-
-        <Accordion
-          className="flex flex-col gap-3"
-          collapsible
-          defaultValue="item-0"
-          type="single"
+        {/* Header */}
+        <motion.div
+          animate={headerInView ? "visible" : "hidden"}
+          className="flex w-full flex-col items-center gap-4 text-center"
+          initial="hidden"
+          ref={headerRef}
+          variants={createStaggerContainer(STAGGERS.section, 0)}
         >
-          {FAQ_ITEMS.map((item, index) => (
-            <AccordionItem
-              className="overflow-hidden rounded-xl border border-border bg-card px-5"
-              key={item.question}
-              value={`item-${index}`}
-            >
-              <AccordionTrigger className="py-5 font-medium text-base text-foreground hover:no-underline">
-                {item.question}
-              </AccordionTrigger>
-              <AccordionContent className="text-muted-foreground leading-relaxed">
-                {item.answer}
-              </AccordionContent>
-            </AccordionItem>
-          ))}
-        </Accordion>
+          <motion.span
+            className="inline-block rounded-full border border-border bg-muted px-3 py-1 font-medium text-muted-foreground text-sm"
+            variants={ENTRANCE_VARIANTS.slideDown}
+          >
+            FAQ
+          </motion.span>
+          <motion.h2
+            className="font-bold text-3xl text-foreground tracking-tight sm:text-4xl"
+            variants={ENTRANCE_VARIANTS.slideUp}
+          >
+            Frequently asked questions
+          </motion.h2>
+          <motion.p
+            className="text-lg text-muted-foreground"
+            variants={ENTRANCE_VARIANTS.fade}
+          >
+            Everything you need to know about selling with Flik.
+          </motion.p>
+        </motion.div>
+
+        {/* Accordion */}
+        <motion.div
+          animate={
+            accordionInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }
+          }
+          initial={{ opacity: 0, y: 20 }}
+          ref={accordionRef}
+          transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+        >
+          <Accordion
+            className="flex flex-col gap-3"
+            collapsible
+            defaultValue="item-0"
+            type="single"
+          >
+            {FAQ_ITEMS.map((item, index) => (
+              <AccordionItem
+                className="overflow-hidden rounded-xl border border-border bg-card px-5 transition-colors data-[state=open]:bg-primary-violet-50/30"
+                key={item.question}
+                value={`item-${index}`}
+              >
+                <AccordionTrigger className="py-5 font-medium text-base text-foreground hover:no-underline">
+                  {item.question}
+                </AccordionTrigger>
+                <AccordionContent className="text-muted-foreground leading-relaxed">
+                  {item.answer}
+                </AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
+        </motion.div>
       </div>
     </section>
   );

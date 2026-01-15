@@ -38,7 +38,7 @@ export function MetricCard({
   return (
     <div
       className={cn(
-        "min-w-0 rounded-xl border border-border bg-card p-5 transition-all hover:shadow-md",
+        "min-w-0 rounded-xl border border-border bg-card p-5 transition-all hover:bg-primary-violet-50",
         primary && "border-primary-violet/20 bg-primary-violet-50",
         className
       )}

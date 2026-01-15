@@ -22,7 +22,7 @@ export function ProductCard({ product, index }: ProductCardProps) {
       initial={{ opacity: 0, y: 20 }}
       transition={{ ...SPRING_PHYSICS.default, delay: index * 0.05 }}
     >
-      <div className="relative h-full overflow-hidden rounded-xl border border-border bg-card shadow-sm transition-all hover:translate-y-[-4px] hover:shadow-card-hover">
+      <div className="relative h-full overflow-hidden rounded-xl border border-border bg-card shadow-sm transition-all hover:bg-primary-violet-50">
         <Link className="flex h-full flex-col" href={`/p/${product.slug}`}>
           <div className="relative aspect-[4/3] w-full overflow-hidden bg-muted">
             <Image

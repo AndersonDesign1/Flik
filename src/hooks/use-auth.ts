@@ -2,7 +2,7 @@
 
 import { useQuery } from "convex/react";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { authClient } from "@/lib/auth-client";
 import { api } from "../../convex/_generated/api";
 
@@ -11,13 +11,21 @@ type Role = "user" | "staff" | "admin";
 /**
  * Session hook using Better Auth's built-in nanostore caching.
  * This eliminates redundant API calls across components.
+ * Tracks hydration to prevent showing loading state on tab refocus.
  */
 export function useSession() {
   const { data, isPending } = authClient.useSession();
+  const hasHydratedRef = useRef(false);
+
+  // Once we get data (or confirm no session), mark as hydrated
+  if (!(isPending || hasHydratedRef.current)) {
+    hasHydratedRef.current = true;
+  }
 
   return {
     user: data?.user ?? null,
-    isLoading: isPending,
+    // Only show loading on initial mount, not on refocus
+    isLoading: isPending && !hasHydratedRef.current,
   };
 }
 

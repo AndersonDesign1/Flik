@@ -153,7 +153,7 @@ export default function AdminDashboardPage() {
           const Icon = link.icon;
           return (
             <Link
-              className="group flex items-center gap-3 rounded-lg px-3 py-3 transition-all hover:bg-background hover:shadow-sm"
+              className="group flex items-center gap-3 rounded-lg px-3 py-3 transition-all hover:bg-primary-violet-50"
               href={link.href}
               key={link.title}
             >

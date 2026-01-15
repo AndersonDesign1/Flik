@@ -296,7 +296,7 @@ export function OnboardingFlow() {
                       "group relative flex flex-col items-center gap-4 rounded-2xl border-2 bg-card p-6 text-center transition-all duration-200",
                       selected
                         ? "bg-primary-violet-50 shadow-primary-violet/5 shadow-sm dark:bg-primary-violet-50/10"
-                        : "hover:border-primary-violet/50 hover:shadow-md"
+                        : "hover:bg-primary-violet-50"
                     )}
                     initial={false}
                     key={option.id}
