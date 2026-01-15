@@ -99,7 +99,7 @@ export default function DiscoverPage() {
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {CATEGORIES.map((cat) => (
             <Link
-              className="flex items-center gap-3 rounded-xl border border-gray-200 bg-white p-4 transition-all hover:border-gray-300 hover:shadow-md"
+              className="flex items-center gap-3 rounded-xl border border-gray-200 bg-white p-4 transition-all hover:bg-primary-violet-50"
               href={`/categories/${cat.slug}`}
               key={cat.slug}
             >

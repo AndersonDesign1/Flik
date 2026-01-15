@@ -108,7 +108,7 @@ export default async function StorePage({ params }: StorePageProps) {
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {PRODUCTS.map((product) => (
             <Link href={`/products/${product.id}`} key={product.id}>
-              <Card className="group overflow-hidden transition-all hover:shadow-lg">
+              <Card className="group overflow-hidden transition-all hover:bg-primary-violet-50">
                 {/* Product Image */}
                 <div className="aspect-[4/3] bg-gray-100">
                   <div className="flex h-full items-center justify-center text-gray-400 transition-transform group-hover:scale-105">

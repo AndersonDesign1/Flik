@@ -97,9 +97,12 @@ export function Navbar() {
         <div className="flex items-center gap-3">
           <CartButton />
           <div className="hidden items-center gap-3 sm:flex">
-            {isLoading && (
-              <div className="size-8 animate-pulse rounded-full bg-muted" />
-            )}
+            {isLoading ? (
+              <div className="flex items-center gap-3">
+                <div className="h-5 w-12 animate-pulse rounded bg-muted" />
+                <div className="h-8 w-24 animate-pulse rounded-full bg-muted" />
+              </div>
+            ) : null}
             {!isLoading && user && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>

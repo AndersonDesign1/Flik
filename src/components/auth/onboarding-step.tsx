@@ -94,7 +94,7 @@ export function OnboardingStep({
               "group relative flex flex-col items-center gap-4 rounded-2xl border-2 p-6 text-center transition-all duration-200",
               selectedId === option.id
                 ? "bg-primary-violet-50/50 shadow-primary-violet/5 shadow-sm"
-                : "bg-card hover:border-primary-violet/50 hover:shadow-md"
+                : "bg-card hover:bg-primary-violet-50"
             )}
             initial={false}
             key={option.id}

@@ -104,7 +104,7 @@ export default function HelpCenterPage() {
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {HELP_CATEGORIES.map((category) => (
             <Link href={category.href} key={category.title}>
-              <Card className="h-full p-5 transition-all hover:border-border hover:shadow-md">
+              <Card className="h-full p-5 transition-all hover:bg-primary-violet-50">
                 <category.icon className="h-8 w-8 text-muted-foreground" />
                 <h4 className="mt-3 font-semibold text-foreground text-sm">
                   {category.title}

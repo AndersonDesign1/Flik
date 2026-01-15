@@ -280,7 +280,7 @@ export default function PricingPage() {
         <div className="grid gap-8 lg:grid-cols-3">
           {PLANS.map((plan) => (
             <div
-              className={`relative flex flex-col rounded-3xl border border-border bg-card p-10 shadow-sm transition-all hover:shadow-xl ${
+              className={`relative flex flex-col rounded-3xl border border-border bg-card p-10 shadow-sm transition-all hover:bg-primary-violet-50 ${
                 plan.popular
                   ? "scale-105 border-transparent ring-2 ring-primary-violet"
                   : ""

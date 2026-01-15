@@ -78,7 +78,7 @@ export default function CategoriesPage() {
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
         {CATEGORIES.map((category) => (
           <Link
-            className="group rounded-2xl border border-gray-200 bg-white p-6 transition-all hover:border-gray-300 hover:shadow-lg"
+            className="group rounded-2xl border border-gray-200 bg-white p-6 transition-all hover:bg-primary-violet-50"
             href={`/categories/${category.slug}`}
             key={category.slug}
           >
