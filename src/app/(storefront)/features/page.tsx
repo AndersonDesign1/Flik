@@ -1,4 +1,7 @@
+import { FeatureDetailSection } from "@/components/marketing/feature-detail-section";
 import { FeatureGrid } from "@/components/marketing/feature-grid";
+import { FeatureHero } from "@/components/marketing/feature-hero";
+import { IntegrationShowcase } from "@/components/marketing/integration-showcase";
 import { FinalCTA } from "@/components/storefront/final-cta";
 
 export const metadata = {
@@ -9,51 +12,69 @@ export const metadata = {
 
 export default function FeaturesPage() {
   return (
-    <div className="flex flex-col gap-20 pt-24 pb-12 lg:pt-32 lg:pb-20">
-      <div className="mx-auto max-w-4xl px-6 text-center">
-        <h1 className="font-bold text-4xl text-foreground tracking-tight sm:text-5xl lg:text-6xl">
-          Everything you need to{" "}
-          <span className="text-primary-violet">scale fast.</span>
-        </h1>
-        <p className="mt-6 text-lg text-muted-foreground lg:text-xl">
-          We've built Flik to be the fastest, most intuitive platform for
-          digital creators. No bloat. No complex setups. Just the tools you need
-          to succeed.
-        </p>
+    <div className="flex flex-col">
+      {/* Hero Section */}
+      <FeatureHero
+        badge="Platform Overview"
+        subtitle="We've built Flik to be the fastest, most intuitive platform for digital creators. Discover the tools designed to help you scale without the complexity."
+        title="Everything you need to scale fast."
+      />
+
+      {/* Categories & Deep Dives */}
+      <div className="flex flex-col gap-8 lg:gap-16">
+        {/* Category 1: Payments & Revenue */}
+        <FeatureDetailSection
+          category="Unified Payments"
+          description="Get paid how you want, when you want. We handle the complex financial infrastructure so you can focus on building your brand."
+          features={[
+            "Flik-Speed Payouts (within 24 hours)",
+            "Automatic Digital VAT & Sales Tax",
+            "195+ Countries support",
+            "Apple Pay & Google Pay ready",
+          ]}
+          imageAlt="Payments dashboard showing revenue and payouts"
+          imagePath="/payments-mockup.png"
+          title="Revenue that arrives in a Flik."
+        />
+
+        {/* Category 2: Global Operations */}
+        <FeatureDetailSection
+          category="Global Operations"
+          description="Scale your reach across borders with confidence. Our platform adapts to your customers' locale, currency, and preferences automatically."
+          features={[
+            "Multi-currency conversion",
+            "Localized checkout experiences",
+            "Built-in Fraud Protection",
+            "Automatic SEO generation",
+          ]}
+          imageAlt="Global map showing sales distribution"
+          imagePath="/global-map-mockup.png"
+          reversed
+          title="Sell to anyone, anywhere on Earth."
+        />
+
+        {/* Integration Showcase */}
+        <IntegrationShowcase />
+
+        {/* Category 3: Creator Experience */}
+        <FeatureDetailSection
+          category="Creator Experience"
+          description="Your products deserve a premium home. Our dashboard and delivery systems are crafted to be as beautiful as the products you create."
+          features={[
+            "Custom Domain Support",
+            "Beautiful, optimized storefronts",
+            "Secure File Delivery",
+            "AI-Powered Growth Insights",
+          ]}
+          imageAlt="Clean dashboard interface for creators"
+          imagePath="/creator-dashboard-mockup.png"
+          title="Built for the modern digital creator."
+        />
       </div>
 
-      <FeatureGrid />
-
-      <div className="mx-auto max-w-7xl px-6">
-        <div className="grid gap-12 border-border border-t pt-20 md:grid-cols-2 lg:grid-cols-3">
-          <div className="flex flex-col gap-4">
-            <h3 className="font-semibold text-foreground text-xl">
-              Custom Domains
-            </h3>
-            <p className="text-muted-foreground">
-              Make Flik your own with custom domain support. Brand your
-              storefront exactly how you want it.
-            </p>
-          </div>
-          <div className="flex flex-col gap-4">
-            <h3 className="font-semibold text-foreground text-xl">
-              Advanced SEO
-            </h3>
-            <p className="text-muted-foreground">
-              Built-in SEO optimizations ensure your products are discoverable
-              by everyone, everywhere.
-            </p>
-          </div>
-          <div className="flex flex-col gap-4">
-            <h3 className="font-semibold text-foreground text-xl">
-              Automated Taxes
-            </h3>
-            <p className="text-muted-foreground">
-              We handle the complex world of digital VAT and sales tax so you
-              don't have to worry about compliance.
-            </p>
-          </div>
-        </div>
+      {/* Secondary Feature Grid for smaller details */}
+      <div className="mt-20 border-border border-t">
+        <FeatureGrid />
       </div>
 
       <FinalCTA />
