@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { ConvexClientProvider } from "@/components/providers/convex-provider";
+import { DevTools } from "@/components/dev/dev-tools";
 import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 
@@ -31,15 +32,9 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <ConvexClientProvider>{children}</ConvexClientProvider>
-        {process.env.NODE_ENV === "development" && <DevRoleSwitcherLazy />}
+        <DevTools />
         <Toaster />
       </body>
     </html>
   );
-}
-
-function DevRoleSwitcherLazy() {
-  // Dynamic import to avoid including in production bundle
-  const { DevRoleSwitcher } = require("@/components/dev/role-switcher");
-  return <DevRoleSwitcher />;
 }

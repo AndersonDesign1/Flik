@@ -262,27 +262,27 @@ const FEATURES_COMPARISON = [
 
 export default function PricingPage() {
   return (
-    <div className="flex flex-col gap-24 pt-24 pb-12 lg:pt-32 lg:pb-24">
+    <div className="flex flex-col gap-16 pt-20 pb-12 sm:gap-24 lg:pt-32 lg:pb-24">
       {/* Hero */}
-      <div className="mx-auto max-w-4xl px-6 text-center">
-        <h1 className="font-bold text-4xl text-foreground tracking-tight sm:text-5xl lg:text-7xl">
+      <div className="mx-auto max-w-4xl px-4 text-center sm:px-6">
+        <h1 className="font-bold text-3xl text-foreground tracking-tight sm:text-5xl lg:text-7xl">
           Simple pricing for{" "}
           <span className="text-primary-violet">limitless creators.</span>
         </h1>
-        <p className="mt-8 text-lg text-muted-foreground lg:text-xl">
+        <p className="mt-4 text-base text-muted-foreground sm:mt-8 sm:text-lg lg:text-xl">
           Scale from your first sale to your first million without the
           complexity. No hidden fees. Every feature is built for speed.
         </p>
       </div>
 
       {/* Pricing Cards */}
-      <div className="mx-auto max-w-7xl px-6">
-        <div className="grid gap-8 lg:grid-cols-3">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6">
+        <div className="grid gap-6 sm:gap-8 lg:grid-cols-3">
           {PLANS.map((plan) => (
             <div
-              className={`relative flex flex-col rounded-3xl border border-border bg-card p-10 shadow-sm transition-all hover:bg-primary-violet-50 ${
+              className={`relative flex flex-col rounded-2xl border border-border bg-card p-6 shadow-sm transition-all hover:bg-primary-violet-50 sm:rounded-3xl sm:p-10 ${
                 plan.popular
-                  ? "scale-105 border-transparent ring-2 ring-primary-violet"
+                  ? "border-transparent ring-2 ring-primary-violet lg:scale-105"
                   : ""
               }`}
               key={plan.name}
@@ -295,30 +295,32 @@ export default function PricingPage() {
                 </div>
               )}
 
-              <div className="mb-8">
-                <h3 className="font-bold text-2xl text-foreground tracking-tight">
+              <div className="mb-6 sm:mb-8">
+                <h3 className="font-bold text-foreground text-xl tracking-tight sm:text-2xl">
                   {plan.name}
                 </h3>
-                <p className="mt-2 text-muted-foreground">{plan.description}</p>
+                <p className="mt-1.5 text-muted-foreground text-sm sm:mt-2 sm:text-base">
+                  {plan.description}
+                </p>
               </div>
 
-              <div className="mb-8 border-border border-t pt-8">
+              <div className="mb-6 border-border border-t pt-6 sm:mb-8 sm:pt-8">
                 <div className="flex items-baseline gap-1">
-                  <span className="font-bold text-5xl text-foreground tracking-tight">
+                  <span className="font-bold text-4xl text-foreground tracking-tight sm:text-5xl">
                     {plan.price}
                   </span>
                   <span className="font-medium text-muted-foreground">
                     {plan.period}
                   </span>
                 </div>
-                <p className="mt-2 font-medium text-primary-violet text-sm">
+                <p className="mt-1.5 font-medium text-primary-violet text-sm sm:mt-2">
                   {plan.fee}
                 </p>
               </div>
 
               <Button
                 asChild
-                className={`mb-8 h-12 rounded-full font-bold transition-all ${
+                className={`mb-6 h-11 rounded-full font-bold transition-all sm:mb-8 sm:h-12 ${
                   plan.popular
                     ? "bg-primary-violet shadow-lg shadow-primary-violet/20 hover:bg-primary-violet/90"
                     : "border-border hover:bg-muted"
@@ -329,13 +331,16 @@ export default function PricingPage() {
                 <Link href={plan.href}>{plan.cta}</Link>
               </Button>
 
-              <ul className="flex flex-col gap-4">
+              <ul className="flex flex-col gap-3 sm:gap-4">
                 {plan.features.map((feature) => (
-                  <li className="flex items-start gap-3" key={feature}>
+                  <li
+                    className="flex items-start gap-2.5 sm:gap-3"
+                    key={feature}
+                  >
                     <Check
-                      className={`mt-0.5 size-5 shrink-0 ${plan.popular ? "text-primary-violet" : "text-muted-foreground"}`}
+                      className={`mt-0.5 size-4 shrink-0 sm:size-5 ${plan.popular ? "text-primary-violet" : "text-muted-foreground"}`}
                     />
-                    <span className="text-foreground/80 text-sm leading-snug">
+                    <span className="text-foreground/80 text-xs leading-snug sm:text-sm">
                       {feature}
                     </span>
                   </li>
@@ -347,107 +352,109 @@ export default function PricingPage() {
       </div>
 
       {/* Comparison Table */}
-      <div className="mx-auto max-w-7xl px-6 py-32 lg:py-40">
-        <div className="mb-24 text-center">
-          <h2 className="font-bold text-4xl text-foreground tracking-tight sm:text-5xl">
+      <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-32 lg:py-40">
+        <div className="mb-12 text-center sm:mb-24">
+          <h2 className="font-bold text-2xl text-foreground tracking-tight sm:text-4xl lg:text-5xl">
             Compare every feature
           </h2>
-          <p className="mt-6 text-lg text-muted-foreground lg:text-xl">
+          <p className="mt-3 text-base text-muted-foreground sm:mt-6 sm:text-lg lg:text-xl">
             See exactly what's included in each plan.
           </p>
         </div>
 
-        <div className="overflow-x-auto">
-          <Table className="w-full table-fixed border-collapse text-left">
-            <TableHeader>
-              <TableRow className="border-border border-b-2 hover:bg-transparent">
-                <TableHead className="w-[40%] py-10 font-bold text-foreground text-xl">
-                  Features
-                </TableHead>
-                <TableHead className="w-[20%] py-10 text-center font-bold text-foreground text-xl">
-                  Starter
-                </TableHead>
-                <TableHead className="w-[20%] py-10 text-center font-bold text-foreground text-xl">
-                  Pro
-                </TableHead>
-                <TableHead className="w-[20%] py-10 text-center font-bold text-foreground text-xl">
-                  Business
-                </TableHead>
-              </TableRow>
-            </TableHeader>
-            {FEATURES_COMPARISON.map((section) => (
-              <TableBody key={section.category}>
-                <TableRow className="hover:bg-transparent">
-                  <TableCell
-                    className="px-2 py-16 font-bold text-primary-violet text-sm uppercase tracking-[0.2em]"
-                    colSpan={4}
-                  >
-                    {section.category}
-                  </TableCell>
+        <div className="max-w-full overflow-x-auto">
+          <div className="min-w-[640px]">
+            <Table className="w-full table-fixed border-collapse text-left">
+              <TableHeader>
+                <TableRow className="border-border border-b-2 hover:bg-transparent">
+                  <TableHead className="w-[35%] py-6 font-bold text-base text-foreground sm:w-[40%] sm:py-10 sm:text-xl">
+                    Features
+                  </TableHead>
+                  <TableHead className="w-[21.67%] py-6 text-center font-bold text-base text-foreground sm:w-[20%] sm:py-10 sm:text-xl">
+                    Starter
+                  </TableHead>
+                  <TableHead className="w-[21.67%] py-6 text-center font-bold text-base text-foreground sm:w-[20%] sm:py-10 sm:text-xl">
+                    Pro
+                  </TableHead>
+                  <TableHead className="w-[21.67%] py-6 text-center font-bold text-base text-foreground sm:w-[20%] sm:py-10 sm:text-xl">
+                    Business
+                  </TableHead>
                 </TableRow>
-                {section.features.map((feature) => (
-                  <TableRow
-                    className="border-border border-b transition-colors hover:bg-muted/5"
-                    key={feature.name}
-                  >
-                    <TableCell className="py-12 pr-6">
-                      <div className="flex items-center gap-2">
-                        <span className="font-semibold text-foreground text-lg">
-                          {feature.name}
-                        </span>
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <button
-                                className="inline-flex cursor-help items-center text-muted-foreground/50 transition-colors hover:text-muted-foreground"
-                                type="button"
-                              >
-                                <HelpCircle className="size-4" />
-                                <span className="sr-only">
-                                  Explain {feature.name}
-                                </span>
-                              </button>
-                            </TooltipTrigger>
-                            <TooltipContent
-                              className="max-w-[200px] border bg-popover text-center text-popover-foreground shadow-sm"
-                              sideOffset={8}
-                            >
-                              <p>{feature.description}</p>
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-                      </div>
-                    </TableCell>
-
-                    <TableCell className="py-12 text-center">
-                      <FeatureValue value={feature.starter} />
-                    </TableCell>
-                    <TableCell className="py-12 text-center">
-                      <FeatureValue value={feature.pro} />
-                    </TableCell>
-                    <TableCell className="py-12 text-center">
-                      <FeatureValue value={feature.business} />
+              </TableHeader>
+              {FEATURES_COMPARISON.map((section) => (
+                <TableBody key={section.category}>
+                  <TableRow className="hover:bg-transparent">
+                    <TableCell
+                      className="px-1 py-8 font-bold text-primary-violet text-xs uppercase tracking-[0.15em] sm:px-2 sm:py-16 sm:text-sm sm:tracking-[0.2em]"
+                      colSpan={4}
+                    >
+                      {section.category}
                     </TableCell>
                   </TableRow>
-                ))}
-              </TableBody>
-            ))}
-          </Table>
+                  {section.features.map((feature) => (
+                    <TableRow
+                      className="border-border border-b transition-colors hover:bg-muted/5"
+                      key={feature.name}
+                    >
+                      <TableCell className="py-6 pr-3 sm:py-12 sm:pr-6">
+                        <div className="flex items-center gap-1.5 sm:gap-2">
+                          <span className="font-semibold text-foreground text-sm sm:text-lg">
+                            {feature.name}
+                          </span>
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <button
+                                  className="inline-flex cursor-help items-center text-muted-foreground/50 transition-colors hover:text-muted-foreground"
+                                  type="button"
+                                >
+                                  <HelpCircle className="size-3.5 sm:size-4" />
+                                  <span className="sr-only">
+                                    Explain {feature.name}
+                                  </span>
+                                </button>
+                              </TooltipTrigger>
+                              <TooltipContent
+                                className="max-w-[200px] border bg-popover text-center text-popover-foreground shadow-sm"
+                                sideOffset={8}
+                              >
+                                <p>{feature.description}</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        </div>
+                      </TableCell>
+
+                      <TableCell className="py-6 text-center sm:py-12">
+                        <FeatureValue value={feature.starter} />
+                      </TableCell>
+                      <TableCell className="py-6 text-center sm:py-12">
+                        <FeatureValue value={feature.pro} />
+                      </TableCell>
+                      <TableCell className="py-6 text-center sm:py-12">
+                        <FeatureValue value={feature.business} />
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              ))}
+            </Table>
+          </div>
         </div>
       </div>
 
       {/* Enterprise / Special Case */}
-      <div className="mx-auto max-w-5xl px-6">
-        <div className="relative overflow-hidden rounded-3xl border border-border bg-card p-12 lg:p-16">
-          <div className="relative z-10 flex flex-col items-center gap-8 text-center">
-            <div className="flex size-16 items-center justify-center rounded-2xl bg-primary-violet/10">
-              <Info className="size-8 text-primary-violet" />
+      <div className="mx-auto max-w-5xl px-4 sm:px-6">
+        <div className="relative overflow-hidden rounded-2xl border border-border bg-card p-6 sm:rounded-3xl sm:p-12 lg:p-16">
+          <div className="relative z-10 flex flex-col items-center gap-5 text-center sm:gap-8">
+            <div className="flex size-12 items-center justify-center rounded-xl bg-primary-violet/10 sm:size-16 sm:rounded-2xl">
+              <Info className="size-6 text-primary-violet sm:size-8" />
             </div>
-            <div className="flex flex-col gap-4">
-              <h2 className="font-bold text-3xl text-foreground tracking-tight">
+            <div className="flex flex-col gap-2 sm:gap-4">
+              <h2 className="font-bold text-foreground text-xl tracking-tight sm:text-3xl">
                 Need something special?
               </h2>
-              <p className="mx-auto max-w-2xl text-lg text-muted-foreground">
+              <p className="mx-auto max-w-2xl text-muted-foreground text-sm sm:text-lg">
                 For high-volume sellers (over $1M/year), non-profits, or
                 educational institutions, we offer custom transaction rates and
                 dedicated support structures.
@@ -455,15 +462,15 @@ export default function PricingPage() {
             </div>
             <Button
               asChild
-              className="h-12 rounded-full px-8"
+              className="h-10 rounded-full px-6 sm:h-12 sm:px-8"
               size="lg"
               variant="outline"
             >
               <Link href="/contact">Contact Our Sales Team</Link>
             </Button>
           </div>
-          <div className="absolute top-0 right-0 h-64 w-64 translate-x-1/2 -translate-y-1/2 rounded-full bg-primary-violet/5 blur-3xl" />
-          <div className="absolute bottom-0 left-0 h-48 w-48 -translate-x-1/2 translate-y-1/2 rounded-full bg-primary-violet/5 blur-3xl" />
+          <div className="absolute top-0 right-0 hidden h-64 w-64 translate-x-1/2 -translate-y-1/2 rounded-full bg-primary-violet/5 blur-3xl sm:block" />
+          <div className="absolute bottom-0 left-0 hidden h-48 w-48 -translate-x-1/2 translate-y-1/2 rounded-full bg-primary-violet/5 blur-3xl sm:block" />
         </div>
       </div>
 
@@ -477,9 +484,13 @@ function FeatureValue({ value }: { value: boolean | string }) {
   if (typeof value === "boolean") {
     return value ? (
       <div className="flex justify-center">
-        <Check className="size-5 text-primary-violet" />
+        <Check className="size-4 text-primary-violet sm:size-5" />
       </div>
     ) : null;
   }
-  return <span className="font-medium text-foreground text-sm">{value}</span>;
+  return (
+    <span className="font-medium text-foreground text-xs sm:text-sm">
+      {value}
+    </span>
+  );
 }

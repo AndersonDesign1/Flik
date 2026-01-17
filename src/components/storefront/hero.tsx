@@ -61,15 +61,13 @@ export function Hero() {
       </div>
 
       {/* Main hero content */}
-      <motion.div
-        animate="visible"
-        className="mx-auto flex w-full max-w-5xl flex-col items-center gap-8 text-center"
-        initial="hidden"
-        variants={createStaggerContainer(STAGGERS.section, 0)}
-      >
+      <div className="mx-auto flex w-full max-w-5xl flex-col items-center gap-8 text-center">
         {/* Badge */}
         <motion.div
+          animate="visible"
           className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-1.5 text-sm shadow-sm"
+          initial="hidden"
+          transition={{ delay: 0.1 }}
           variants={ENTRANCE_VARIANTS.slideDown}
         >
           <span className="rounded-full bg-primary-violet px-2 py-0.5 font-medium text-white text-xs">
@@ -81,11 +79,8 @@ export function Hero() {
           <ArrowRight className="size-3 text-muted-foreground" />
         </motion.div>
 
-        {/* Headline + Subline */}
-        <motion.div
-          className="flex w-full flex-col gap-6"
-          variants={ENTRANCE_VARIANTS.slideUp}
-        >
+        {/* Headline + Subline - Static for LCP */}
+        <div className="flex w-full flex-col gap-6">
           <h1 className="font-bold text-4xl text-foreground tracking-tight sm:text-5xl lg:text-6xl">
             Sell your digital products in a{" "}
             <span className="text-primary-violet">Flik.</span>
@@ -95,11 +90,14 @@ export function Hero() {
             A simplified platform designed to help you launch your store before
             your coffee gets cold.
           </p>
-        </motion.div>
+        </div>
 
         {/* CTA Buttons */}
         <motion.div
+          animate="visible"
           className="flex w-full flex-col items-center justify-center gap-4 sm:flex-row"
+          initial="hidden"
+          transition={{ delay: 0.2 }}
           variants={ENTRANCE_VARIANTS.slideUp}
         >
           <Button
@@ -138,7 +136,7 @@ export function Hero() {
             </motion.div>
           ))}
         </motion.div>
-      </motion.div>
+      </div>
 
       {/* Dashboard image and logos */}
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-16 pt-16">
