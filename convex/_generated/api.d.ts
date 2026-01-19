@@ -12,6 +12,7 @@ import type * as auth from "../auth.js";
 import type * as http from "../http.js";
 import type * as profiles from "../profiles.js";
 import type * as resend from "../resend.js";
+import type * as users from "../users.js";
 import type * as validation from "../validation.js";
 
 import type {
@@ -25,6 +26,7 @@ declare const fullApi: ApiFromModules<{
   http: typeof http;
   profiles: typeof profiles;
   resend: typeof resend;
+  users: typeof users;
   validation: typeof validation;
 }>;
 
