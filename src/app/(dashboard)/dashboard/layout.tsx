@@ -16,7 +16,7 @@ export default async function DashboardLayout({
   }
 
   // Defense-in-depth: verify email is confirmed
-  const user = await fetchAuthQuery(api.auth.getCurrentUser);
+  const user = await fetchAuthQuery(api.users.getCurrentUser);
   if (user && !user.emailVerified) {
     redirect(`/verify-email?email=${encodeURIComponent(user.email)}`);
   }

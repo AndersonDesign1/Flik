@@ -34,7 +34,7 @@ export function proxy(request: NextRequest) {
   }
 
   // Public auth routes - redirect authenticated users
-  const authRoutes = ["/login", "/signup"];
+  const authRoutes = ["/login", "/signup", "/forgot-password"];
   const isAuthRoute = authRoutes.some((route) => pathname === route);
 
   if (isAuthRoute) {
@@ -57,5 +57,6 @@ export const config = {
     "/onboarding",
     "/login",
     "/signup",
+    "/forgot-password",
   ],
 };

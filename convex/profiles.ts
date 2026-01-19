@@ -113,6 +113,10 @@ export const updateProfile = mutation({
       throw new Error("Not authenticated");
     }
 
+    if (!user.emailVerified) {
+      throw new Error("Email must be verified to update profile");
+    }
+
     const existingProfile = await ctx.db
       .query("profiles")
       .withIndex("by_user_id", (q) => q.eq("userId", user._id))

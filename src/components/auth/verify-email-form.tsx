@@ -81,7 +81,8 @@ export function VerifyEmailForm() {
 
     setIsLoading(true);
     try {
-      const result = await authClient.signIn.emailOtp({
+      // Use emailOtp.verifyEmail for email verification (not signIn.emailOtp which is for passwordless login)
+      const result = await authClient.emailOtp.verifyEmail({
         email,
         otp: value,
       });

@@ -8,6 +8,8 @@ const DevRoleSwitcher = dynamic(
 );
 
 export function DevTools() {
-  if (process.env.NODE_ENV === "production") return null;
+  if (process.env.NODE_ENV === "production") {
+    return null;
+  }
   return <DevRoleSwitcher />;
 }
