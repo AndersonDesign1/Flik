@@ -1,3 +1,5 @@
+"use node";
+
 import { createClient, type GenericCtx } from "@convex-dev/better-auth";
 import { convex } from "@convex-dev/better-auth/plugins";
 import { render } from "@react-email/render";
@@ -35,7 +37,7 @@ const convexSiteUrl = getRequiredEnv("CONVEX_SITE_URL");
 export const authComponent = createClient<DataModel>(components.betterAuth);
 
 // Initialize Resend SDK
-const resend = new Resend(process.env.RESEND_API_KEY);
+const resend = new Resend(getRequiredEnv("RESEND_API_KEY"));
 const FROM_EMAIL = "Flik <noreply@notification.flikapp.xyz>";
 
 /**
@@ -86,6 +88,8 @@ export const createAuth = (ctx: GenericCtx<DataModel>) => {
     ],
     emailAndPassword: {
       enabled: true,
+      // Intentional: we enforce verification in UI/Layouts & mutations 
+      // to allow a smoother "Signup -> Auto-login -> Verify" flow.
       requireEmailVerification: false,
     },
     socialProviders: {
