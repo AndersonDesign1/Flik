@@ -1,7 +1,6 @@
 "use client";
 
 import { Check, HelpCircle } from "lucide-react";
-import { cn } from "@/lib/utils";
 import {
   Table,
   TableBody,
@@ -16,6 +15,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { cn } from "@/lib/utils";
 
 const PLANS = [
   { key: "starter", name: "Starter" },
@@ -215,14 +215,19 @@ function FeatureValue({
 }) {
   if (typeof value === "boolean") {
     return value ? (
-      <Check className={cn("size-4 text-primary-violet md:size-5", className)} />
+      <Check
+        className={cn("size-4 text-primary-violet md:size-5", className)}
+      />
     ) : (
       <span className="text-muted-foreground/50">—</span>
     );
   }
   return (
     <span
-      className={cn("font-medium text-foreground text-xs md:text-sm", className)}
+      className={cn(
+        "font-medium text-foreground text-xs md:text-sm",
+        className
+      )}
     >
       {value}
     </span>

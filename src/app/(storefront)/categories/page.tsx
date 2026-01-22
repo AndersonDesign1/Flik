@@ -62,42 +62,55 @@ const CATEGORIES = [
 
 export default function CategoriesPage() {
   return (
-    <div className="mx-auto max-w-6xl px-6 py-12">
-      {/* Header */}
-      <div className="mb-12 text-center">
-        <h1 className="mb-4 font-bold text-4xl text-gray-900">
-          Browse Categories
-        </h1>
-        <p className="mx-auto max-w-xl text-gray-600 text-lg">
-          Discover thousands of digital products from talented creators around
-          the world.
-        </p>
+    <section className="relative w-full overflow-hidden px-4 py-24 sm:px-6 lg:px-8">
+      {/* Background gradient */}
+      <div className="pointer-events-none absolute inset-0 -z-10">
+        <div className="absolute top-0 left-1/2 h-[500px] w-[700px] -translate-x-1/2 rounded-full bg-gradient-to-b from-primary-violet-100/40 to-transparent blur-3xl" />
       </div>
 
-      {/* Categories Grid */}
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-        {CATEGORIES.map((category) => (
-          <Link
-            className="group rounded-2xl border border-gray-200 bg-white p-6 transition-all hover:bg-primary-violet-50"
-            href={`/categories/${category.slug}`}
-            key={category.slug}
-          >
-            <div aria-hidden="true" className="mb-4 text-4xl">
-              {category.icon}
-            </div>
-            <h2 className="mb-1 font-semibold text-gray-900 text-lg group-hover:text-gray-700">
-              {category.name}
-            </h2>
-            <p className="mb-4 text-gray-500 text-sm">{category.description}</p>
-            <div className="flex items-center justify-between">
-              <span className="text-gray-400 text-sm">
-                {category.count} products
-              </span>
-              <ArrowRight className="h-4 w-4 text-gray-400 transition-transform group-hover:translate-x-1" />
-            </div>
-          </Link>
-        ))}
+      <div className="mx-auto max-w-6xl">
+        {/* Header */}
+        <div className="mb-16 text-center animate-in fade-in slide-in-from-bottom-4 duration-500">
+          <span className="mb-4 inline-block rounded-full border border-border bg-card px-3 py-1 font-medium text-muted-foreground text-sm">
+            Explore Categories
+          </span>
+          <h1 className="mb-4 font-bold text-4xl text-foreground tracking-tight">
+            Browse Categories
+          </h1>
+          <p className="mx-auto max-w-xl text-lg text-muted-foreground">
+            Discover thousands of digital products from talented creators around
+            the world.
+          </p>
+        </div>
+
+        {/* Categories Grid */}
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          {CATEGORIES.map((category, index) => (
+            <Link
+              className="group block h-full rounded-2xl border border-border bg-card p-6 transition-all hover:bg-primary-violet-50 dark:hover:bg-primary-violet-50/10 animate-in fade-in slide-in-from-bottom-4 duration-500"
+              href={`/categories/${category.slug}`}
+              key={category.slug}
+              style={{ animationDelay: `${index * 50}ms`, animationFillMode: "backwards" }}
+            >
+              <div aria-hidden="true" className="mb-4 text-4xl">
+                {category.icon}
+              </div>
+              <h2 className="mb-1 font-semibold text-foreground text-lg group-hover:text-primary-violet">
+                {category.name}
+              </h2>
+              <p className="mb-4 text-muted-foreground text-sm">
+                {category.description}
+              </p>
+              <div className="flex items-center justify-between">
+                <span className="text-muted-foreground text-sm">
+                  {category.count} products
+                </span>
+                <ArrowRight className="h-4 w-4 text-muted-foreground transition-transform group-hover:translate-x-1 group-hover:text-primary-violet" />
+              </div>
+            </Link>
+          ))}
+        </div>
       </div>
-    </div>
+    </section>
   );
 }

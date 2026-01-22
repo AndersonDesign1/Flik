@@ -5,12 +5,10 @@ import { convex } from "@convex-dev/better-auth/plugins";
 import { render } from "@react-email/render";
 import { betterAuth } from "better-auth";
 import { emailOTP, twoFactor } from "better-auth/plugins";
-import { v } from "convex/values";
 import { Resend } from "resend";
 import { OTPEmail } from "../emails/otp-email";
 import { components } from "./_generated/api";
 import type { DataModel } from "./_generated/dataModel";
-import { query } from "./_generated/server";
 import authConfig from "./auth.config";
 
 function getRequiredEnv(name: string): string {
@@ -88,7 +86,7 @@ export const createAuth = (ctx: GenericCtx<DataModel>) => {
     ],
     emailAndPassword: {
       enabled: true,
-      // Intentional: we enforce verification in UI/Layouts & mutations 
+      // Intentional: we enforce verification in UI/Layouts & mutations
       // to allow a smoother "Signup -> Auto-login -> Verify" flow.
       requireEmailVerification: false,
     },
