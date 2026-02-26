@@ -19,15 +19,38 @@ function getRequiredEnv(name: string): string {
   return value;
 }
 
-function getOAuthEnv(name: string): string {
-  const value = process.env[name];
-  if (!value) {
+function getOAuthEnv(name: string): string | undefined {
+  const value = process.env[name]?.trim();
+  return value || undefined;
+}
+
+interface OAuthProviderConfig {
+  clientId: string;
+  clientSecret: string;
+}
+
+function getOAuthProvider(
+  provider: "google" | "github",
+  clientIdEnv: string,
+  clientSecretEnv: string
+): OAuthProviderConfig | undefined {
+  const clientId = getOAuthEnv(clientIdEnv);
+  const clientSecret = getOAuthEnv(clientSecretEnv);
+
+  if (!(clientId || clientSecret)) {
     console.warn(
-      `[Auth Warning] OAuth env var ${name} is not set. ` +
-        "The corresponding OAuth provider will not work."
+      `[Auth Warning] ${provider} OAuth is disabled because ${clientIdEnv} and ${clientSecretEnv} are not set.`
+    );
+    return undefined;
+  }
+
+  if (!(clientId && clientSecret)) {
+    throw new Error(
+      `Incomplete ${provider} OAuth configuration: both ${clientIdEnv} and ${clientSecretEnv} must be set in the active Convex deployment.`
     );
   }
-  return value ?? "";
+
+  return { clientId, clientSecret };
 }
 
 const convexSiteUrl = getRequiredEnv("CONVEX_SITE_URL");
@@ -66,6 +89,17 @@ async function sendEmailWithResend(
 }
 
 export const createAuth = (ctx: GenericCtx<DataModel>) => {
+  const googleProvider = getOAuthProvider(
+    "google",
+    "GOOGLE_CLIENT_ID",
+    "GOOGLE_CLIENT_SECRET"
+  );
+  const githubProvider = getOAuthProvider(
+    "github",
+    "GITHUB_CLIENT_ID",
+    "GITHUB_CLIENT_SECRET"
+  );
+
   return betterAuth({
     appName: "Flik",
     baseURL: process.env.BETTER_AUTH_URL ?? convexSiteUrl,
@@ -91,14 +125,8 @@ export const createAuth = (ctx: GenericCtx<DataModel>) => {
       requireEmailVerification: false,
     },
     socialProviders: {
-      google: {
-        clientId: getOAuthEnv("GOOGLE_CLIENT_ID"),
-        clientSecret: getOAuthEnv("GOOGLE_CLIENT_SECRET"),
-      },
-      github: {
-        clientId: getOAuthEnv("GITHUB_CLIENT_ID"),
-        clientSecret: getOAuthEnv("GITHUB_CLIENT_SECRET"),
-      },
+      ...(googleProvider ? { google: googleProvider } : {}),
+      ...(githubProvider ? { github: githubProvider } : {}),
     },
     plugins: [
       convex({ authConfig }),

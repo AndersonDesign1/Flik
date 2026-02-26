@@ -1,7 +1,9 @@
 import { redirect } from "next/navigation";
+import { DemoModeBanner } from "@/components/dashboard/demo-mode-banner";
 import { DashboardSidebar } from "@/components/dashboard/sidebar";
 import { DashboardShell } from "@/components/shared/dashboard-shell";
 import { fetchAuthQuery, isAuthenticated } from "@/lib/auth-server";
+import { getViewerDashboardMode } from "@/lib/dashboard-mode";
 import { api } from "../../../../convex/_generated/api";
 
 export default async function DashboardLayout({
@@ -27,13 +29,18 @@ export default async function DashboardLayout({
     redirect("/onboarding");
   }
 
+  const dashboardMode = await getViewerDashboardMode();
+
   return (
     <DashboardShell
       searchRole="seller"
       sidebar={<DashboardSidebar />}
       title="Dashboard"
     >
-      {children}
+      <div className="space-y-4">
+        <DemoModeBanner mode={dashboardMode} />
+        {children}
+      </div>
     </DashboardShell>
   );
 }
