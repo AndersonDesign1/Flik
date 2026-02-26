@@ -20,6 +20,7 @@ export default function SettingsPage() {
     location,
     setLocation,
     fullName,
+    isProfileReady,
     isSavingProfile,
     saveProfile,
     isChangingPassword,
@@ -55,7 +56,7 @@ export default function SettingsPage() {
         </div>
         <Button
           className="gap-2"
-          disabled={isSavingProfile}
+          disabled={isSavingProfile || !isProfileReady}
           onClick={saveProfile}
         >
           {isSavingProfile ? (
@@ -71,7 +72,7 @@ export default function SettingsPage() {
         <h3 className="mb-4 font-semibold text-gray-900">Profile</h3>
         <div className="flex items-start gap-6">
           <div className="relative">
-            <div className="flex h-20 w-20 items-center justify-center rounded-full bg-gray-100 font-bold text-2xl text-gray-600">
+            <div className="flex size-20 items-center justify-center rounded-full bg-gray-100 font-bold text-2xl text-gray-600">
               {getInitials(fullName || user?.name)}
             </div>
             <button

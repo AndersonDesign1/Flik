@@ -21,6 +21,7 @@ export default function ProfilePage() {
     location,
     setLocation,
     fullName,
+    isProfileReady,
     isSavingProfile,
     saveProfile,
     isChangingPassword,
@@ -66,7 +67,7 @@ export default function ProfilePage() {
           </div>
           <div className="flex items-center gap-6 p-5">
             <div className="relative">
-              <Avatar className="h-20 w-20">
+              <Avatar className="size-20">
                 <AvatarImage alt="Profile" src={user?.image ?? ""} />
                 <AvatarFallback className="bg-gradient-to-br from-amber-400 to-orange-500 text-lg text-white">
                   {getInitials(fullName || user?.name)}
@@ -153,7 +154,6 @@ export default function ProfilePage() {
                   className="pl-9"
                   id="phone"
                   onChange={(event) => setPhone(event.target.value)}
-                  placeholder=""
                   type="tel"
                   value={phone}
                 />
@@ -168,14 +168,17 @@ export default function ProfilePage() {
                   className="pl-9"
                   id="location"
                   onChange={(event) => setLocation(event.target.value)}
-                  placeholder=""
                   value={location}
                 />
               </div>
             </div>
           </div>
           <div className="border-border/30 border-t bg-surface-2/30 px-5 py-4">
-            <Button disabled={isSavingProfile} onClick={saveProfile} size="sm">
+            <Button
+              disabled={isSavingProfile || !isProfileReady}
+              onClick={saveProfile}
+              size="sm"
+            >
               {isSavingProfile ? "Saving..." : "Save Changes"}
             </Button>
           </div>

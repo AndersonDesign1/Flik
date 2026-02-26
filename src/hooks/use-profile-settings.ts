@@ -1,7 +1,7 @@
 "use client";
 
 import { useMutation, useQuery } from "convex/react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { useSession } from "@/hooks/use-auth";
 import { authClient } from "@/lib/auth-client";
@@ -62,6 +62,7 @@ export function useProfileSettings() {
     location?: string;
   }) => Promise<unknown>;
 
+  const hasSeededFormRef = useRef(false);
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [phone, setPhone] = useState("");
@@ -69,13 +70,20 @@ export function useProfileSettings() {
   const [isSavingProfile, setIsSavingProfile] = useState(false);
   const [isChangingPassword, setIsChangingPassword] = useState(false);
 
+  const isProfileReady = profile !== undefined;
+
   useEffect(() => {
+    if (!(isProfileReady && !hasSeededFormRef.current)) {
+      return;
+    }
+
     const fromName = splitName(user?.name);
     setFirstName(profile?.firstName ?? fromName.firstName);
     setLastName(profile?.lastName ?? fromName.lastName);
     setPhone(profile?.phone ?? "");
     setLocation(profile?.location ?? "");
-  }, [profile, user?.name]);
+    hasSeededFormRef.current = true;
+  }, [isProfileReady, profile, user?.name]);
 
   const fullName = useMemo(
     () => `${firstName} ${lastName}`.trim(),
@@ -85,6 +93,11 @@ export function useProfileSettings() {
   const saveProfile = async () => {
     if (!user?.email) {
       toast.error("You must be signed in to update your profile");
+      return;
+    }
+
+    if (!isProfileReady) {
+      toast.error("Profile is still loading. Please try again.");
       return;
     }
 
@@ -103,11 +116,13 @@ export function useProfileSettings() {
       });
 
       if (updateUserResult.error) {
-        toast.error(updateUserResult.error.message ?? "Failed to update name");
-        return;
+        toast.warning(
+          updateUserResult.error.message ??
+            "Profile saved. Display name sync failed; please retry."
+        );
+      } else {
+        toast.success("Profile updated");
       }
-
-      toast.success("Profile updated");
     } catch {
       toast.error("Failed to update profile");
     } finally {
@@ -162,6 +177,7 @@ export function useProfileSettings() {
   return {
     user,
     profile,
+    isProfileReady,
     firstName,
     setFirstName,
     lastName,
