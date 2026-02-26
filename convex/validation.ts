@@ -1,5 +1,11 @@
 import { z } from "zod/v4";
 
+const optionalProfileString = z
+  .string()
+  .trim()
+  .max(100, "Value must be 100 characters or less")
+  .optional();
+
 /**
  * Schema for updating user profile during onboarding.
  */
@@ -14,6 +20,10 @@ export const updateProfileSchema = z.object({
     .array(z.string().max(50, "Offer type must be 50 characters or less"))
     .max(10, "Maximum 10 offer types allowed")
     .optional(),
+  firstName: optionalProfileString,
+  lastName: optionalProfileString,
+  phone: optionalProfileString,
+  location: optionalProfileString,
 });
 
 /**

@@ -10,6 +10,10 @@ export const getProfile = query({
       _id: v.id("profiles"),
       _creationTime: v.number(),
       userId: v.string(),
+      firstName: v.optional(v.string()),
+      lastName: v.optional(v.string()),
+      phone: v.optional(v.string()),
+      location: v.optional(v.string()),
       userType: v.optional(v.string()),
       role: v.optional(v.string()),
       storeName: v.optional(v.string()),
@@ -102,6 +106,10 @@ export const updateProfile = mutation({
     ),
     storeName: v.optional(v.string()),
     offerTypes: v.optional(v.array(v.string())),
+    firstName: v.optional(v.string()),
+    lastName: v.optional(v.string()),
+    phone: v.optional(v.string()),
+    location: v.optional(v.string()),
   },
   returns: v.id("profiles"),
   handler: async (ctx, args) => {
@@ -123,12 +131,18 @@ export const updateProfile = mutation({
       .first();
 
     const now = Date.now();
+    const normalizeOptional = (value: string | undefined) =>
+      value === undefined ? undefined : value.trim() || undefined;
 
     if (existingProfile) {
       await ctx.db.patch(existingProfile._id, {
         userType: validated.userType ?? existingProfile.userType,
         storeName: validated.storeName ?? existingProfile.storeName,
         offerTypes: validated.offerTypes ?? existingProfile.offerTypes,
+        firstName: normalizeOptional(validated.firstName),
+        lastName: normalizeOptional(validated.lastName),
+        phone: normalizeOptional(validated.phone),
+        location: normalizeOptional(validated.location),
         onboardingCompleted: true,
         updatedAt: now,
       });
@@ -155,6 +169,10 @@ export const updateProfile = mutation({
       role,
       storeName: validated.storeName,
       offerTypes: validated.offerTypes,
+      firstName: normalizeOptional(validated.firstName),
+      lastName: normalizeOptional(validated.lastName),
+      phone: normalizeOptional(validated.phone),
+      location: normalizeOptional(validated.location),
       onboardingCompleted: true,
       createdAt: now,
       updatedAt: now,
