@@ -4,6 +4,26 @@ import { z } from "zod/v4";
  * Schema for updating user profile during onboarding.
  */
 export const updateProfileSchema = z.object({
+  firstName: z
+    .string()
+    .trim()
+    .max(100, "First name must be 100 characters or less")
+    .optional(),
+  lastName: z
+    .string()
+    .trim()
+    .max(100, "Last name must be 100 characters or less")
+    .optional(),
+  phone: z
+    .string()
+    .trim()
+    .max(30, "Phone number must be 30 characters or less")
+    .optional(),
+  location: z
+    .string()
+    .trim()
+    .max(120, "Location must be 120 characters or less")
+    .optional(),
   userType: z.enum(["buyer", "seller", "both"]).optional(),
   storeName: z
     .string()

@@ -3,6 +3,21 @@ import { mutation, query } from "./_generated/server";
 import { authComponent } from "./auth";
 import { inviteToRoleSchema, updateProfileSchema } from "./validation";
 
+const WHITESPACE_REGEX = /\s+/;
+
+function splitName(fullName?: string | null) {
+  const trimmed = fullName?.trim();
+  if (!trimmed) {
+    return { firstName: undefined, lastName: undefined };
+  }
+
+  const [firstName, ...rest] = trimmed.split(WHITESPACE_REGEX).filter(Boolean);
+  return {
+    firstName,
+    lastName: rest.length > 0 ? rest.join(" ") : undefined,
+  };
+}
+
 export const getProfile = query({
   args: {},
   returns: v.union(
@@ -10,6 +25,10 @@ export const getProfile = query({
       _id: v.id("profiles"),
       _creationTime: v.number(),
       userId: v.string(),
+      firstName: v.optional(v.string()),
+      lastName: v.optional(v.string()),
+      phone: v.optional(v.string()),
+      location: v.optional(v.string()),
       userType: v.optional(v.string()),
       role: v.optional(v.string()),
       storeName: v.optional(v.string()),
@@ -97,6 +116,10 @@ export const getRole = query({
 
 export const updateProfile = mutation({
   args: {
+    firstName: v.optional(v.string()),
+    lastName: v.optional(v.string()),
+    phone: v.optional(v.string()),
+    location: v.optional(v.string()),
     userType: v.optional(
       v.union(v.literal("buyer"), v.literal("seller"), v.literal("both"))
     ),
@@ -123,9 +146,18 @@ export const updateProfile = mutation({
       .first();
 
     const now = Date.now();
+    const nameParts = splitName(user.name);
 
     if (existingProfile) {
       await ctx.db.patch(existingProfile._id, {
+        firstName:
+          validated.firstName ??
+          existingProfile.firstName ??
+          nameParts.firstName,
+        lastName:
+          validated.lastName ?? existingProfile.lastName ?? nameParts.lastName,
+        phone: validated.phone ?? existingProfile.phone,
+        location: validated.location ?? existingProfile.location,
         userType: validated.userType ?? existingProfile.userType,
         storeName: validated.storeName ?? existingProfile.storeName,
         offerTypes: validated.offerTypes ?? existingProfile.offerTypes,
@@ -151,6 +183,10 @@ export const updateProfile = mutation({
 
     return ctx.db.insert("profiles", {
       userId: user._id,
+      firstName: validated.firstName ?? nameParts.firstName,
+      lastName: validated.lastName ?? nameParts.lastName,
+      phone: validated.phone,
+      location: validated.location,
       userType: validated.userType ?? "buyer",
       role,
       storeName: validated.storeName,
@@ -194,6 +230,7 @@ export const claimRoleInvite = mutation({
       .first();
 
     const now = Date.now();
+    const nameParts = splitName(user.name);
 
     if (existingProfile) {
       const currentRole = existingProfile.role ?? "user";
@@ -212,6 +249,8 @@ export const claimRoleInvite = mutation({
     } else {
       await ctx.db.insert("profiles", {
         userId: user._id,
+        firstName: nameParts.firstName,
+        lastName: nameParts.lastName,
         userType: "buyer",
         role: invitedRole,
         onboardingCompleted: false,
