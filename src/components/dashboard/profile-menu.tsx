@@ -15,9 +15,14 @@ import {
 import { useSession } from "@/hooks/use-auth";
 import { authClient } from "@/lib/auth-client";
 
-function getInitials(name: string): string {
+function getInitials(name?: string | null): string {
+  if (!name) {
+    return "U";
+  }
+
   return name
     .split(" ")
+    .filter(Boolean)
     .map((part) => part[0])
     .join("")
     .toUpperCase()
@@ -52,7 +57,10 @@ export function ProfileMenu() {
           type="button"
         >
           <Avatar className="size-8">
-            <AvatarImage alt={user.name} src={user.image ?? undefined} />
+            <AvatarImage
+              alt={user.name ?? "Unnamed User"}
+              src={user.image ?? undefined}
+            />
             <AvatarFallback className="bg-gradient-to-br from-primary-violet to-secondary-magenta text-white">
               {initials}
             </AvatarFallback>
@@ -63,7 +71,9 @@ export function ProfileMenu() {
       <DropdownMenuContent align="end" className="w-56">
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col gap-1">
-            <p className="font-medium text-sm leading-none">{user.name}</p>
+            <p className="font-medium text-sm leading-none">
+              {user.name ?? "Unnamed User"}
+            </p>
             <p className="text-muted-foreground text-xs leading-none">
               {user.email}
             </p>

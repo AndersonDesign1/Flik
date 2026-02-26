@@ -1,5 +1,6 @@
 import { promises as fs } from "node:fs";
 import path from "node:path";
+import type { DashboardDataMode } from "@/lib/dashboard-mode";
 
 // Dashboard data types
 export interface DashboardData {
@@ -126,24 +127,147 @@ async function readDataFile<T>(filename: string): Promise<T> {
   return JSON.parse(content) as T;
 }
 
+function getEmptyDashboardData(): DashboardData {
+  return {
+    metrics: [
+      { title: "Revenue", value: "$0", subtext: "No sales yet" },
+      { title: "Orders", value: "0", subtext: "No orders yet" },
+      { title: "Customers", value: "0", subtext: "No customers yet" },
+      { title: "Conversion", value: "0%", subtext: "No traffic yet" },
+    ],
+    countries: [],
+    transactions: [],
+    totalRevenue: "$0",
+  };
+}
+
+function getEmptyProductsData(): ProductsData {
+  return { products: [] };
+}
+
+function getEmptyCustomersData(): CustomersData {
+  return {
+    customers: [],
+    metrics: [
+      {
+        title: "Total Customers",
+        value: "0",
+        subtext: "No customers yet",
+        icon: "Users",
+      },
+      {
+        title: "Active Customers",
+        value: "0",
+        subtext: "No active customers",
+        icon: "UserCheck",
+      },
+      {
+        title: "New This Month",
+        value: "0",
+        subtext: "No new customers",
+        icon: "UserPlus",
+      },
+      {
+        title: "Growth Rate",
+        value: "0%",
+        subtext: "No growth data",
+        icon: "TrendingUp",
+      },
+    ],
+    segments: [],
+  };
+}
+
+function getEmptyAnalyticsData(): AnalyticsData {
+  return {
+    metrics: [
+      { title: "Visitors", value: "0", subtext: "No traffic yet" },
+      { title: "Sessions", value: "0", subtext: "No sessions yet" },
+      { title: "Bounce Rate", value: "0%", subtext: "No data yet" },
+      { title: "Conversion", value: "0%", subtext: "No conversions yet" },
+    ],
+    trafficSources: [],
+    topPages: [],
+    salesRevenue: "$0",
+  };
+}
+
+function getEmptyPayoutsData(): PayoutsData {
+  return {
+    metrics: [
+      {
+        title: "Available Balance",
+        value: "$0",
+        subtext: "No payouts yet",
+        icon: "Wallet",
+      },
+      {
+        title: "Total Paid Out",
+        value: "$0",
+        subtext: "No payout history",
+        icon: "Banknote",
+      },
+      {
+        title: "Pending",
+        value: "$0",
+        subtext: "No pending payouts",
+        icon: "TrendingUp",
+      },
+      {
+        title: "Payment Methods",
+        value: "0",
+        subtext: "No methods linked",
+        icon: "CreditCard",
+      },
+    ],
+    paymentMethods: [],
+    transactions: [],
+  };
+}
+
 // Data fetching functions
-export async function getDashboardData(): Promise<DashboardData> {
+export async function getDashboardData(
+  mode: DashboardDataMode = "demo"
+): Promise<DashboardData> {
+  if (mode === "empty") {
+    return getEmptyDashboardData();
+  }
   return await readDataFile<DashboardData>("dashboard.json");
 }
 
-export async function getProductsData(): Promise<ProductsData> {
+export async function getProductsData(
+  mode: DashboardDataMode = "demo"
+): Promise<ProductsData> {
+  if (mode === "empty") {
+    return getEmptyProductsData();
+  }
   return await readDataFile<ProductsData>("products.json");
 }
 
-export async function getCustomersData(): Promise<CustomersData> {
+export async function getCustomersData(
+  mode: DashboardDataMode = "demo"
+): Promise<CustomersData> {
+  if (mode === "empty") {
+    return getEmptyCustomersData();
+  }
   return await readDataFile<CustomersData>("customers.json");
 }
 
-export async function getAnalyticsData(): Promise<AnalyticsData> {
+export async function getAnalyticsData(
+  mode: DashboardDataMode = "demo"
+): Promise<AnalyticsData> {
+  if (mode === "empty") {
+    return getEmptyAnalyticsData();
+  }
   return await readDataFile<AnalyticsData>("analytics.json");
 }
 
-export async function getPayoutsData(): Promise<PayoutsData> {
+export async function getPayoutsData(
+  mode: DashboardDataMode = "demo"
+): Promise<PayoutsData> {
+  if (mode === "empty") {
+    return getEmptyPayoutsData();
+  }
   return await readDataFile<PayoutsData>("payouts.json");
 }
 
