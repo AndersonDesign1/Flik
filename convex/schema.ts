@@ -4,6 +4,10 @@ import { v } from "convex/values";
 export default defineSchema({
   profiles: defineTable({
     userId: v.string(),
+    firstName: v.optional(v.string()),
+    lastName: v.optional(v.string()),
+    phone: v.optional(v.string()),
+    location: v.optional(v.string()),
     userType: v.optional(
       v.union(v.literal("buyer"), v.literal("seller"), v.literal("both"))
     ),

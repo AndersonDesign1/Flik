@@ -1,13 +1,51 @@
 "use client";
 
 import { Camera, Mail, MapPin, Phone, User } from "lucide-react";
+import { useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { getInitials, useProfileSettings } from "@/hooks/use-profile-settings";
 
 export default function ProfilePage() {
+  const {
+    user,
+    firstName,
+    setFirstName,
+    lastName,
+    setLastName,
+    phone,
+    setPhone,
+    location,
+    setLocation,
+    fullName,
+    isProfileReady,
+    isSavingProfile,
+    saveProfile,
+    isChangingPassword,
+    changePassword,
+  } = useProfileSettings();
+
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+
+  const handlePasswordSubmit = async () => {
+    const changed = await changePassword({
+      currentPassword,
+      newPassword,
+      confirmPassword,
+    });
+
+    if (changed) {
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+    }
+  };
+
   return (
     <div className="flex-1 space-y-6">
       <div>
@@ -18,7 +56,6 @@ export default function ProfilePage() {
       </div>
 
       <div className="max-w-2xl space-y-6">
-        {/* Profile Picture */}
         <Card>
           <div className="border-border/30 border-b px-5 py-4">
             <h3 className="font-semibold text-foreground text-sm">
@@ -30,10 +67,10 @@ export default function ProfilePage() {
           </div>
           <div className="flex items-center gap-6 p-5">
             <div className="relative">
-              <Avatar className="h-20 w-20">
-                <AvatarImage alt="Profile" src="" />
+              <Avatar className="size-20">
+                <AvatarImage alt="Profile" src={user?.image ?? ""} />
                 <AvatarFallback className="bg-gradient-to-br from-amber-400 to-orange-500 text-lg text-white">
-                  JA
+                  {getInitials(fullName || user?.name)}
                 </AvatarFallback>
               </Avatar>
               <button
@@ -45,16 +82,16 @@ export default function ProfilePage() {
             </div>
             <div>
               <p className="font-medium text-foreground text-sm">
-                John Anderson
+                {fullName || user?.name || "Unnamed User"}
               </p>
               <p className="text-muted-foreground text-xs">
                 Upload a new avatar or remove the current one.
               </p>
               <div className="mt-2 flex items-center gap-2">
-                <Button size="sm" variant="outline">
+                <Button disabled size="sm" variant="outline">
                   Upload
                 </Button>
-                <Button size="sm" variant="ghost">
+                <Button disabled size="sm" variant="ghost">
                   Remove
                 </Button>
               </div>
@@ -62,7 +99,6 @@ export default function ProfilePage() {
           </div>
         </Card>
 
-        {/* Personal Information */}
         <Card>
           <div className="border-border/30 border-b px-5 py-4">
             <h3 className="font-semibold text-foreground text-sm">
@@ -78,12 +114,21 @@ export default function ProfilePage() {
                 <Label htmlFor="firstName">First Name</Label>
                 <div className="relative">
                   <User className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                  <Input className="pl-9" defaultValue="John" id="firstName" />
+                  <Input
+                    className="pl-9"
+                    id="firstName"
+                    onChange={(event) => setFirstName(event.target.value)}
+                    value={firstName}
+                  />
                 </div>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="lastName">Last Name</Label>
-                <Input defaultValue="Anderson" id="lastName" />
+                <Input
+                  id="lastName"
+                  onChange={(event) => setLastName(event.target.value)}
+                  value={lastName}
+                />
               </div>
             </div>
 
@@ -93,9 +138,10 @@ export default function ProfilePage() {
                 <Mail className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
                   className="pl-9"
-                  defaultValue="john@andycommerce.com"
                   id="email"
+                  readOnly
                   type="email"
+                  value={user?.email ?? ""}
                 />
               </div>
             </div>
@@ -106,9 +152,10 @@ export default function ProfilePage() {
                 <Phone className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
                   className="pl-9"
-                  defaultValue="+1 (555) 123-4567"
                   id="phone"
+                  onChange={(event) => setPhone(event.target.value)}
                   type="tel"
+                  value={phone}
                 />
               </div>
             </div>
@@ -119,18 +166,24 @@ export default function ProfilePage() {
                 <MapPin className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
                   className="pl-9"
-                  defaultValue="San Francisco, CA"
                   id="location"
+                  onChange={(event) => setLocation(event.target.value)}
+                  value={location}
                 />
               </div>
             </div>
           </div>
           <div className="border-border/30 border-t bg-surface-2/30 px-5 py-4">
-            <Button size="sm">Save Changes</Button>
+            <Button
+              disabled={isSavingProfile || !isProfileReady}
+              onClick={saveProfile}
+              size="sm"
+            >
+              {isSavingProfile ? "Saving..." : "Save Changes"}
+            </Button>
           </div>
         </Card>
 
-        {/* Password */}
         <Card>
           <div className="border-border/30 border-b px-5 py-4">
             <h3 className="font-semibold text-foreground text-sm">Password</h3>
@@ -141,21 +194,42 @@ export default function ProfilePage() {
           <div className="space-y-4 p-5">
             <div className="space-y-2">
               <Label htmlFor="currentPassword">Current Password</Label>
-              <Input id="currentPassword" type="password" />
+              <Input
+                id="currentPassword"
+                onChange={(event) => setCurrentPassword(event.target.value)}
+                type="password"
+                value={currentPassword}
+              />
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="newPassword">New Password</Label>
-                <Input id="newPassword" type="password" />
+                <Input
+                  id="newPassword"
+                  onChange={(event) => setNewPassword(event.target.value)}
+                  type="password"
+                  value={newPassword}
+                />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="confirmPassword">Confirm Password</Label>
-                <Input id="confirmPassword" type="password" />
+                <Input
+                  id="confirmPassword"
+                  onChange={(event) => setConfirmPassword(event.target.value)}
+                  type="password"
+                  value={confirmPassword}
+                />
               </div>
             </div>
           </div>
           <div className="border-border/30 border-t bg-surface-2/30 px-5 py-4">
-            <Button size="sm">Update Password</Button>
+            <Button
+              disabled={isChangingPassword}
+              onClick={handlePasswordSubmit}
+              size="sm"
+            >
+              {isChangingPassword ? "Updating..." : "Update Password"}
+            </Button>
           </div>
         </Card>
       </div>
