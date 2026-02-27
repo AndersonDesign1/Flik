@@ -1,7 +1,7 @@
 "use client";
 
 import { Eye, EyeOff } from "lucide-react";
-import { forwardRef, useState, type ComponentProps } from "react";
+import { type ComponentProps, forwardRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
@@ -29,7 +29,11 @@ export const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
           type="button"
           variant="ghost"
         >
-          {isVisible ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+          {isVisible ? (
+            <EyeOff className="size-4" />
+          ) : (
+            <Eye className="size-4" />
+          )}
         </Button>
       </div>
     );

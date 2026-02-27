@@ -107,7 +107,9 @@ export function useProfileSettings() {
   const setAvatar = useMutation(api.profiles.setAvatar) as (args: {
     storageId: Id<"_storage">;
   }) => Promise<string | null>;
-  const removeAvatarMutation = useMutation(api.profiles.removeAvatar) as () => Promise<null>;
+  const removeAvatarMutation = useMutation(
+    api.profiles.removeAvatar
+  ) as () => Promise<null>;
 
   const hasSeededFormRef = useRef(false);
   const [firstName, setFirstName] = useState("");
@@ -170,7 +172,7 @@ export function useProfileSettings() {
       }
     };
 
-    void loadAccounts();
+    loadAccounts();
 
     return () => {
       isMounted = false;
@@ -302,7 +304,9 @@ export function useProfileSettings() {
       const result = await authClient.updateUser({ image: avatarUrl ?? "" });
 
       if (result.error) {
-        toast.warning(result.error.message ?? "Avatar saved but account image sync failed");
+        toast.warning(
+          result.error.message ?? "Avatar saved but account image sync failed"
+        );
       }
 
       toast.success("Profile image updated");

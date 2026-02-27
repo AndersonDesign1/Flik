@@ -1,7 +1,7 @@
 "use client";
 
 import { Camera, Loader2, Save } from "lucide-react";
-import { useRef, useState, type ChangeEvent } from "react";
+import { type ChangeEvent, useRef, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -53,7 +53,9 @@ export default function SettingsPage() {
     }
   };
 
-  const handleAvatarFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
+  const handleAvatarFileChange = async (
+    event: ChangeEvent<HTMLInputElement>
+  ) => {
     const file = event.target.files?.[0];
     if (!file) {
       return;
@@ -163,7 +165,9 @@ export default function SettingsPage() {
                 Upload Image
               </Button>
               <Button
-                disabled={isUploadingAvatar || !(profile?.avatarUrl || user?.image)}
+                disabled={
+                  isUploadingAvatar || !(profile?.avatarUrl || user?.image)
+                }
                 onClick={removeAvatar}
                 size="sm"
                 type="button"
@@ -217,7 +221,10 @@ export default function SettingsPage() {
               </div>
             </div>
             <div>
-              <Button disabled={isChangingPassword} onClick={handlePasswordSave}>
+              <Button
+                disabled={isChangingPassword}
+                onClick={handlePasswordSave}
+              >
                 {isChangingPassword ? "Updating..." : "Update Password"}
               </Button>
             </div>

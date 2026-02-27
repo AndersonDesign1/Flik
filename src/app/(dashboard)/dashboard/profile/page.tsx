@@ -1,7 +1,7 @@
 "use client";
 
 import { Camera, Mail, MapPin, Phone, User } from "lucide-react";
-import { useRef, useState, type ChangeEvent } from "react";
+import { type ChangeEvent, useRef, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -53,7 +53,9 @@ export default function ProfilePage() {
     }
   };
 
-  const handleAvatarFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
+  const handleAvatarFileChange = async (
+    event: ChangeEvent<HTMLInputElement>
+  ) => {
     const file = event.target.files?.[0];
     if (!file) {
       return;
@@ -85,7 +87,10 @@ export default function ProfilePage() {
           <div className="flex items-center gap-6 p-5">
             <div className="relative">
               <Avatar className="size-20">
-                <AvatarImage alt="Profile" src={profile?.avatarUrl ?? user?.image ?? ""} />
+                <AvatarImage
+                  alt="Profile"
+                  src={profile?.avatarUrl ?? user?.image ?? ""}
+                />
                 <AvatarFallback className="bg-gradient-to-br from-amber-400 to-orange-500 text-lg text-white">
                   {getInitials(fullName || user?.name)}
                 </AvatarFallback>
@@ -123,7 +128,9 @@ export default function ProfilePage() {
                   Upload
                 </Button>
                 <Button
-                  disabled={isUploadingAvatar || !(profile?.avatarUrl || user?.image)}
+                  disabled={
+                    isUploadingAvatar || !(profile?.avatarUrl || user?.image)
+                  }
                   onClick={removeAvatar}
                   size="sm"
                   variant="ghost"
@@ -253,7 +260,9 @@ export default function ProfilePage() {
                     <Label htmlFor="confirmPassword">Confirm Password</Label>
                     <PasswordInput
                       id="confirmPassword"
-                      onChange={(event) => setConfirmPassword(event.target.value)}
+                      onChange={(event) =>
+                        setConfirmPassword(event.target.value)
+                      }
                       value={confirmPassword}
                     />
                   </div>

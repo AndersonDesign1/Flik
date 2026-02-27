@@ -20,8 +20,20 @@ export default function BillingPage() {
     renewsOn: "Jan 1, 2025",
   });
   const [paymentMethods, setPaymentMethods] = useState([
-    { id: "1", brand: "VISA", last4: "4242", expires: "12/2026", isDefault: true },
-    { id: "2", brand: "MC", last4: "8888", expires: "06/2025", isDefault: false },
+    {
+      id: "1",
+      brand: "VISA",
+      last4: "4242",
+      expires: "12/2026",
+      isDefault: true,
+    },
+    {
+      id: "2",
+      brand: "MC",
+      last4: "8888",
+      expires: "06/2025",
+      isDefault: false,
+    },
   ]);
   const [invoices, setInvoices] = useState([
     { id: "INV-001", date: "Dec 1, 2024", amount: "$29.00", status: "Paid" },
@@ -40,7 +52,9 @@ export default function BillingPage() {
       <div className="max-w-3xl space-y-6">
         <Card>
           <div className="border-border/30 border-b px-5 py-4">
-            <h3 className="font-semibold text-foreground text-sm">Current Plan</h3>
+            <h3 className="font-semibold text-foreground text-sm">
+              Current Plan
+            </h3>
           </div>
           <div className="flex items-center justify-between gap-4 p-5">
             <div className="flex items-center gap-4">
@@ -51,7 +65,10 @@ export default function BillingPage() {
                 <Input
                   className="h-8 max-w-44"
                   onChange={(event) =>
-                    setPlan((current) => ({ ...current, name: event.target.value }))
+                    setPlan((current) => ({
+                      ...current,
+                      name: event.target.value,
+                    }))
                   }
                   value={plan.name}
                 />
@@ -74,7 +91,9 @@ export default function BillingPage() {
         <Card>
           <div className="flex items-center justify-between border-border/30 border-b px-5 py-4">
             <div>
-              <h3 className="font-semibold text-foreground text-sm">Payment Methods</h3>
+              <h3 className="font-semibold text-foreground text-sm">
+                Payment Methods
+              </h3>
               <p className="mt-0.5 text-muted-foreground text-xs">
                 Manage your payment methods.
               </p>
@@ -102,7 +121,10 @@ export default function BillingPage() {
           </div>
           <div className="divide-y divide-border/40">
             {paymentMethods.map((method) => (
-              <div className="flex items-center justify-between p-4" key={method.id}>
+              <div
+                className="flex items-center justify-between p-4"
+                key={method.id}
+              >
                 <div className="flex items-center gap-4">
                   <div className="flex h-10 w-16 items-center justify-center rounded-md border border-border bg-white">
                     <span className="font-bold text-sm">{method.brand}</span>
@@ -111,7 +133,9 @@ export default function BillingPage() {
                     <p className="font-medium text-foreground text-sm">
                       {method.brand} ending in {method.last4}
                     </p>
-                    <p className="text-muted-foreground text-xs">Expires {method.expires}</p>
+                    <p className="text-muted-foreground text-xs">
+                      Expires {method.expires}
+                    </p>
                   </div>
                 </div>
                 <div className="flex items-center gap-1">
@@ -120,7 +144,7 @@ export default function BillingPage() {
                       Default
                     </span>
                   ) : null}
-                  {!method.isDefault ? (
+                  {method.isDefault ? null : (
                     <Button
                       onClick={() =>
                         setPaymentMethods((current) =>
@@ -135,7 +159,7 @@ export default function BillingPage() {
                     >
                       Set Default
                     </Button>
-                  ) : null}
+                  )}
                   <Button
                     onClick={() =>
                       setPaymentMethods((current) =>
@@ -156,7 +180,9 @@ export default function BillingPage() {
         <Card>
           <div className="flex items-center justify-between border-border/30 border-b px-5 py-4">
             <div>
-              <h3 className="font-semibold text-foreground text-sm">Billing History</h3>
+              <h3 className="font-semibold text-foreground text-sm">
+                Billing History
+              </h3>
               <p className="mt-0.5 text-muted-foreground text-xs">
                 View and download past invoices.
               </p>
@@ -189,14 +215,21 @@ export default function BillingPage() {
           </div>
           <div className="divide-y divide-border/40">
             {invoices.map((invoice) => (
-              <div className="flex items-center justify-between p-4" key={invoice.id}>
+              <div
+                className="flex items-center justify-between p-4"
+                key={invoice.id}
+              >
                 <div className="flex items-center gap-4">
                   <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-muted">
                     <Receipt className="h-4 w-4 text-muted-foreground" />
                   </div>
                   <div>
-                    <p className="font-medium text-foreground text-sm">{invoice.id}</p>
-                    <p className="text-muted-foreground text-xs">{invoice.date}</p>
+                    <p className="font-medium text-foreground text-sm">
+                      {invoice.id}
+                    </p>
+                    <p className="text-muted-foreground text-xs">
+                      {invoice.date}
+                    </p>
                   </div>
                 </div>
                 <div className="flex items-center gap-4">

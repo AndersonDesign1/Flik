@@ -1,7 +1,7 @@
 "use client";
 
 import { Plus, Trash2 } from "lucide-react";
-import { useState, type ChangeEvent } from "react";
+import { type ChangeEvent, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -35,7 +35,10 @@ export default function SettingsPage() {
   const updateStoreSettings =
     (field: keyof typeof storeSettings) =>
     (event: ChangeEvent<HTMLInputElement>) => {
-      setStoreSettings((current) => ({ ...current, [field]: event.target.value }));
+      setStoreSettings((current) => ({
+        ...current,
+        [field]: event.target.value,
+      }));
     };
 
   return (
@@ -50,7 +53,9 @@ export default function SettingsPage() {
       <div className="max-w-2xl space-y-6">
         <div className="overflow-hidden rounded-xl border border-border/40 bg-surface-1">
           <div className="border-border/30 border-b px-5 py-4">
-            <h3 className="font-semibold text-foreground text-sm">Store Profile</h3>
+            <h3 className="font-semibold text-foreground text-sm">
+              Store Profile
+            </h3>
             <p className="mt-0.5 text-muted-foreground text-xs">
               Your store's public information.
             </p>
@@ -61,13 +66,21 @@ export default function SettingsPage() {
                 <Label className="font-medium text-sm" htmlFor="name">
                   Store Name
                 </Label>
-                <Input id="name" onChange={updateStoreSettings("name")} value={storeSettings.name} />
+                <Input
+                  id="name"
+                  onChange={updateStoreSettings("name")}
+                  value={storeSettings.name}
+                />
               </div>
               <div className="space-y-2">
                 <Label className="font-medium text-sm" htmlFor="url">
                   Store URL
                 </Label>
-                <Input id="url" onChange={updateStoreSettings("url")} value={storeSettings.url} />
+                <Input
+                  id="url"
+                  onChange={updateStoreSettings("url")}
+                  value={storeSettings.url}
+                />
               </div>
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
@@ -99,7 +112,9 @@ export default function SettingsPage() {
 
         <div className="overflow-hidden rounded-xl border border-border/40 bg-surface-1">
           <div className="border-border/30 border-b px-5 py-4">
-            <h3 className="font-semibold text-foreground text-sm">Payment Settings</h3>
+            <h3 className="font-semibold text-foreground text-sm">
+              Payment Settings
+            </h3>
             <p className="mt-0.5 text-muted-foreground text-xs">
               Configure currency and payout preferences.
             </p>
@@ -110,7 +125,10 @@ export default function SettingsPage() {
                 <Label className="font-medium text-sm">Currency</Label>
                 <Select
                   onValueChange={(value) =>
-                    setStoreSettings((current) => ({ ...current, currency: value }))
+                    setStoreSettings((current) => ({
+                      ...current,
+                      currency: value,
+                    }))
                   }
                   value={storeSettings.currency}
                 >
@@ -129,7 +147,10 @@ export default function SettingsPage() {
                 <Label className="font-medium text-sm">Payout Schedule</Label>
                 <Select
                   onValueChange={(value) =>
-                    setStoreSettings((current) => ({ ...current, payoutSchedule: value }))
+                    setStoreSettings((current) => ({
+                      ...current,
+                      payoutSchedule: value,
+                    }))
                   }
                   value={storeSettings.payoutSchedule}
                 >
@@ -164,7 +185,9 @@ export default function SettingsPage() {
 
         <div className="overflow-hidden rounded-xl border border-border/40 bg-surface-1">
           <div className="border-border/30 border-b px-5 py-4">
-            <h3 className="font-semibold text-foreground text-sm">Notifications</h3>
+            <h3 className="font-semibold text-foreground text-sm">
+              Notifications
+            </h3>
             <p className="mt-0.5 text-muted-foreground text-xs">
               Manage email notifications for your store.
             </p>
@@ -173,7 +196,10 @@ export default function SettingsPage() {
             {notificationEmails.map((email, index) => (
               <div className="flex items-end gap-2" key={email.id}>
                 <div className="flex-1 space-y-2">
-                  <Label className="font-medium text-sm" htmlFor={`order-email-${index + 1}`}>
+                  <Label
+                    className="font-medium text-sm"
+                    htmlFor={`order-email-${index + 1}`}
+                  >
                     Order Notifications Email {index + 1}
                   </Label>
                   <Input
