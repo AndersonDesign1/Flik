@@ -21,6 +21,19 @@ interface LinkedAccount {
   password?: string | null;
 }
 
+function extractLinkedAccounts(value: unknown): LinkedAccount[] {
+  if (!(value && typeof value === "object" && "data" in value)) {
+    return [];
+  }
+
+  const data = (value as { data?: unknown }).data;
+  if (!Array.isArray(data)) {
+    return [];
+  }
+
+  return data as LinkedAccount[];
+}
+
 function splitName(name?: string | null) {
   const fullName = name?.trim();
   if (!fullName) {
@@ -112,21 +125,17 @@ export function useProfileSettings() {
     const loadAccounts = async () => {
       try {
         const authClientWithAccounts = authClient as typeof authClient & {
-          listAccounts?: () => Promise<{
-            data?: LinkedAccount[];
-            error?: { message?: string };
-          }>;
+          listAccounts?: () => Promise<unknown>;
         };
 
-        const result = (await authClientWithAccounts.listAccounts?.()) as
-          | { data?: LinkedAccount[]; error?: { message?: string } }
-          | undefined;
+        const result = await authClientWithAccounts.listAccounts?.();
+        const linkedAccounts = extractLinkedAccounts(result);
 
-        if (!(isMounted && result?.data)) {
+        if (!(isMounted && linkedAccounts.length > 0)) {
           return;
         }
 
-        const hasPasswordProvider = result.data.some((account) => {
+        const hasPasswordProvider = linkedAccounts.some((account) => {
           if (account.password) {
             return true;
           }
