@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { PasswordInput } from "@/components/ui/password-input";
 import { authClient } from "@/lib/auth-client";
 
 export function SignupForm() {
@@ -143,7 +144,7 @@ export function SignupForm() {
 
         <div className="flex flex-col gap-2">
           <Label htmlFor="password">Password</Label>
-          <Input
+          <PasswordInput
             autoComplete="new-password"
             className="h-11"
             id="password"
@@ -151,7 +152,6 @@ export function SignupForm() {
             onChange={(e) => setPassword(e.target.value)}
             placeholder="Create a password…"
             required
-            type="password"
             value={password}
           />
           <p className="text-muted-foreground text-xs">

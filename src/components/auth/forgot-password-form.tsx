@@ -1,5 +1,6 @@
 "use client";
 
+import { useConvex } from "convex/react";
 import { REGEXP_ONLY_DIGITS } from "input-otp";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
@@ -15,11 +16,13 @@ import {
 } from "@/components/ui/input-otp";
 import { Label } from "@/components/ui/label";
 import { authClient } from "@/lib/auth-client";
+import { api } from "../../../convex/_generated/api";
 
 type Step = "email" | "otp" | "password";
 
 export function ForgotPasswordForm() {
   const router = useRouter();
+  const convex = useConvex();
   const [step, setStep] = useState<Step>("email");
   const [email, setEmail] = useState("");
   const [otp, setOtp] = useState("");
@@ -32,9 +35,18 @@ export function ForgotPasswordForm() {
     setIsLoading(true);
 
     try {
-      const result = await authClient.emailOtp.sendVerificationOtp({
-        email: email.trim(),
-        type: "forget-password",
+      const normalizedEmail = email.trim().toLowerCase();
+      const hasAccount = await convex.query(api.users.checkEmailExists, {
+        email: normalizedEmail,
+      });
+
+      if (!hasAccount) {
+        toast.error("No account found for this email. Sign up first.");
+        return;
+      }
+
+      const result = await authClient.forgetPassword.emailOtp({
+        email: normalizedEmail,
       });
 
       if (result.error) {
@@ -51,28 +63,43 @@ export function ForgotPasswordForm() {
     }
   };
 
-  const handleVerifyOTP = async (e: React.FormEvent) => {
+  const handleVerifyOTP = (e: React.FormEvent) => {
     e.preventDefault();
     if (otp.length !== 6) {
       return;
     }
 
+    setStep("password");
+  };
+
+  const handleResendOTP = async () => {
     setIsLoading(true);
 
     try {
-      const result = await authClient.emailOtp.verifyEmail({
-        email: email.trim(),
-        otp,
+      const normalizedEmail = email.trim().toLowerCase();
+      const hasAccount = await convex.query(api.users.checkEmailExists, {
+        email: normalizedEmail,
       });
 
-      if (result.error) {
-        toast.error(result.error.message ?? "Invalid verification code");
+      if (!hasAccount) {
+        toast.error("No account found for this email. Sign up first.");
+        setStep("email");
         return;
       }
 
-      setStep("password");
+      const result = await authClient.forgetPassword.emailOtp({
+        email: normalizedEmail,
+      });
+
+      if (result.error) {
+        toast.error(result.error.message ?? "Failed to resend code");
+        return;
+      }
+
+      toast.success("A new code has been sent.");
+      setOtp("");
     } catch {
-      toast.error("Failed to verify code");
+      toast.error("Failed to resend code");
     } finally {
       setIsLoading(false);
     }
@@ -221,6 +248,16 @@ export function ForgotPasswordForm() {
             )}
           </Button>
         </form>
+
+        <Button
+          className="h-11 w-full"
+          disabled={isLoading}
+          onClick={handleResendOTP}
+          type="button"
+          variant="outline"
+        >
+          Resend Code
+        </Button>
 
         <button
           className="text-center font-medium text-muted-foreground text-sm hover:text-foreground"

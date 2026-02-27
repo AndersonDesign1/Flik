@@ -8,6 +8,7 @@ import { OAuthButtons } from "@/components/auth/oauth-buttons";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { PasswordInput } from "@/components/ui/password-input";
 import { authClient } from "@/lib/auth-client";
 
 export function LoginForm() {
@@ -15,6 +16,18 @@ export function LoginForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
+  const getLoginErrorMessage = (message?: string) => {
+    if (!message) {
+      return "Failed to sign in";
+    }
+
+    if (message.toLowerCase().includes("user not found")) {
+      return "No account found for this email. Sign up first.";
+    }
+
+    return message;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,7 +47,7 @@ export function LoginForm() {
           );
           return;
         }
-        toast.error(result.error.message ?? "Failed to sign in");
+        toast.error(getLoginErrorMessage(result.error.message));
         return;
       }
 
@@ -94,7 +107,7 @@ export function LoginForm() {
               Forgot password?
             </Link>
           </div>
-          <Input
+          <PasswordInput
             autoComplete="current-password"
             className="h-11"
             id="password"
@@ -102,7 +115,6 @@ export function LoginForm() {
             onChange={(e) => setPassword(e.target.value)}
             placeholder="Enter your password…"
             required
-            type="password"
             value={password}
           />
         </div>
