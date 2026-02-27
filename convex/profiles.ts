@@ -258,12 +258,23 @@ export const setAvatar = mutation({
       return await ctx.storage.getUrl(args.storageId);
     }
 
+    const pendingInvite = await ctx.db
+      .query("role_invites")
+      .withIndex("by_email", (q) => q.eq("email", user.email))
+      .first();
+
+    const role = pendingInvite?.role ?? "user";
+
+    if (pendingInvite) {
+      await ctx.db.delete(pendingInvite._id);
+    }
+
     await ctx.db.insert("profiles", {
       userId: user._id,
       firstName: nameParts.firstName,
       lastName: nameParts.lastName,
       userType: "buyer",
-      role: "user",
+      role,
       onboardingCompleted: false,
       avatarStorageId: args.storageId,
       createdAt: now,
