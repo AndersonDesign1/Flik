@@ -1,3 +1,7 @@
+"use client";
+
+import { Plus, Trash2 } from "lucide-react";
+import { type ChangeEvent, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,9 +14,35 @@ import {
 } from "@/components/ui/select";
 
 export default function SettingsPage() {
+  const createNotificationEmail = (email: string) => ({
+    id: crypto.randomUUID(),
+    value: email,
+  });
+
+  const [storeSettings, setStoreSettings] = useState({
+    name: "Andy Commerce",
+    url: "andy-commerce.vercel.app",
+    email: "support@andycommerce.com",
+    phone: "+1 (555) 123-4567",
+    currency: "usd",
+    payoutSchedule: "weekly",
+    payoutThreshold: "$100.00",
+  });
+  const [notificationEmails, setNotificationEmails] = useState(() => [
+    createNotificationEmail("orders@andycommerce.com"),
+  ]);
+
+  const updateStoreSettings =
+    (field: keyof typeof storeSettings) =>
+    (event: ChangeEvent<HTMLInputElement>) => {
+      setStoreSettings((current) => ({
+        ...current,
+        [field]: event.target.value,
+      }));
+    };
+
   return (
     <div className="flex-1 space-y-6">
-      {/* Header */}
       <div>
         <h2 className="font-semibold text-foreground text-lg">Settings</h2>
         <p className="text-muted-foreground text-sm">
@@ -21,7 +51,6 @@ export default function SettingsPage() {
       </div>
 
       <div className="max-w-2xl space-y-6">
-        {/* Store Profile */}
         <div className="overflow-hidden rounded-xl border border-border/40 bg-surface-1">
           <div className="border-border/30 border-b px-5 py-4">
             <h3 className="font-semibold text-foreground text-sm">
@@ -37,13 +66,21 @@ export default function SettingsPage() {
                 <Label className="font-medium text-sm" htmlFor="name">
                   Store Name
                 </Label>
-                <Input defaultValue="Andy Commerce" id="name" />
+                <Input
+                  id="name"
+                  onChange={updateStoreSettings("name")}
+                  value={storeSettings.name}
+                />
               </div>
               <div className="space-y-2">
                 <Label className="font-medium text-sm" htmlFor="url">
                   Store URL
                 </Label>
-                <Input defaultValue="andy-commerce.vercel.app" id="url" />
+                <Input
+                  id="url"
+                  onChange={updateStoreSettings("url")}
+                  value={storeSettings.url}
+                />
               </div>
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
@@ -52,22 +89,27 @@ export default function SettingsPage() {
                   Support Email
                 </Label>
                 <Input
-                  defaultValue="support@andycommerce.com"
                   id="email"
+                  onChange={updateStoreSettings("email")}
                   type="email"
+                  value={storeSettings.email}
                 />
               </div>
               <div className="space-y-2">
                 <Label className="font-medium text-sm" htmlFor="phone">
                   Support Phone
                 </Label>
-                <Input defaultValue="+1 (555) 123-4567" id="phone" type="tel" />
+                <Input
+                  id="phone"
+                  onChange={updateStoreSettings("phone")}
+                  type="tel"
+                  value={storeSettings.phone}
+                />
               </div>
             </div>
           </div>
         </div>
 
-        {/* Payment Settings */}
         <div className="overflow-hidden rounded-xl border border-border/40 bg-surface-1">
           <div className="border-border/30 border-b px-5 py-4">
             <h3 className="font-semibold text-foreground text-sm">
@@ -81,7 +123,15 @@ export default function SettingsPage() {
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label className="font-medium text-sm">Currency</Label>
-                <Select defaultValue="usd">
+                <Select
+                  onValueChange={(value) =>
+                    setStoreSettings((current) => ({
+                      ...current,
+                      currency: value,
+                    }))
+                  }
+                  value={storeSettings.currency}
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="Select currency" />
                   </SelectTrigger>
@@ -95,7 +145,15 @@ export default function SettingsPage() {
               </div>
               <div className="space-y-2">
                 <Label className="font-medium text-sm">Payout Schedule</Label>
-                <Select defaultValue="weekly">
+                <Select
+                  onValueChange={(value) =>
+                    setStoreSettings((current) => ({
+                      ...current,
+                      payoutSchedule: value,
+                    }))
+                  }
+                  value={storeSettings.payoutSchedule}
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="Select schedule" />
                   </SelectTrigger>
@@ -113,9 +171,10 @@ export default function SettingsPage() {
                 Minimum Payout Threshold
               </Label>
               <Input
-                defaultValue="$100.00"
                 id="payout-threshold"
+                onChange={updateStoreSettings("payoutThreshold")}
                 placeholder="$100.00"
+                value={storeSettings.payoutThreshold}
               />
               <p className="text-muted-foreground text-xs">
                 Payouts will only be processed when balance exceeds this amount.
@@ -124,7 +183,6 @@ export default function SettingsPage() {
           </div>
         </div>
 
-        {/* Notifications */}
         <div className="overflow-hidden rounded-xl border border-border/40 bg-surface-1">
           <div className="border-border/30 border-b px-5 py-4">
             <h3 className="font-semibold text-foreground text-sm">
@@ -135,49 +193,64 @@ export default function SettingsPage() {
             </p>
           </div>
           <div className="space-y-4 p-5">
-            <div className="space-y-2">
-              <Label className="font-medium text-sm" htmlFor="order-email">
-                Order Notifications Email
-              </Label>
-              <Input
-                defaultValue="orders@andycommerce.com"
-                id="order-email"
-                type="email"
-              />
-              <p className="text-muted-foreground text-xs">
-                Receive notifications for new orders and updates.
-              </p>
-            </div>
+            {notificationEmails.map((email, index) => (
+              <div className="flex items-end gap-2" key={email.id}>
+                <div className="flex-1 space-y-2">
+                  <Label
+                    className="font-medium text-sm"
+                    htmlFor={`order-email-${index + 1}`}
+                  >
+                    Order Notifications Email {index + 1}
+                  </Label>
+                  <Input
+                    id={`order-email-${index + 1}`}
+                    onChange={(event) => {
+                      setNotificationEmails((current) =>
+                        current.map((item, itemIndex) =>
+                          itemIndex === index
+                            ? { ...item, value: event.target.value }
+                            : item
+                        )
+                      );
+                    }}
+                    type="email"
+                    value={email.value}
+                  />
+                </div>
+                {notificationEmails.length > 1 ? (
+                  <Button
+                    className="shrink-0"
+                    onClick={() =>
+                      setNotificationEmails((current) =>
+                        current.filter((_, itemIndex) => itemIndex !== index)
+                      )
+                    }
+                    size="icon"
+                    type="button"
+                    variant="ghost"
+                  >
+                    <Trash2 className="size-4" />
+                  </Button>
+                ) : null}
+              </div>
+            ))}
+            <Button
+              className="w-fit gap-2"
+              onClick={() =>
+                setNotificationEmails((current) => [
+                  ...current,
+                  createNotificationEmail("notifications@yourstore.com"),
+                ])
+              }
+              type="button"
+              variant="outline"
+            >
+              <Plus className="size-4" />
+              Add Email
+            </Button>
           </div>
           <div className="border-border/30 border-t bg-surface-2/30 px-5 py-4">
             <Button size="sm">Save Changes</Button>
-          </div>
-        </div>
-
-        {/* Danger Zone */}
-        <div className="overflow-hidden rounded-xl border border-destructive-200 bg-surface-1 dark:border-destructive-100/50">
-          <div className="border-destructive-200/50 border-b px-5 py-4 dark:border-destructive-100/30">
-            <h3 className="font-semibold text-destructive-600 text-sm dark:text-destructive-500">
-              Danger Zone
-            </h3>
-            <p className="mt-0.5 text-muted-foreground text-xs">
-              Irreversible actions for your store.
-            </p>
-          </div>
-          <div className="p-5">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="font-medium text-foreground text-sm">
-                  Delete Store
-                </p>
-                <p className="mt-0.5 text-muted-foreground text-xs">
-                  Permanently remove your store and all data.
-                </p>
-              </div>
-              <Button size="sm" variant="destructive">
-                Delete Store
-              </Button>
-            </div>
           </div>
         </div>
       </div>

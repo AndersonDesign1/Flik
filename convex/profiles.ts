@@ -25,6 +25,8 @@ export const getProfile = query({
       _id: v.id("profiles"),
       _creationTime: v.number(),
       userId: v.string(),
+      avatarStorageId: v.optional(v.id("_storage")),
+      avatarUrl: v.optional(v.string()),
       firstName: v.optional(v.string()),
       lastName: v.optional(v.string()),
       phone: v.optional(v.string()),
@@ -45,10 +47,23 @@ export const getProfile = query({
       return null;
     }
 
-    return ctx.db
+    const profile = await ctx.db
       .query("profiles")
       .withIndex("by_user_id", (q) => q.eq("userId", user._id))
       .first();
+
+    if (!profile) {
+      return null;
+    }
+
+    const avatarUrl = profile.avatarStorageId
+      ? await ctx.storage.getUrl(profile.avatarStorageId)
+      : undefined;
+
+    return {
+      ...profile,
+      avatarUrl: avatarUrl ?? undefined,
+    };
   },
 });
 
@@ -195,6 +210,109 @@ export const updateProfile = mutation({
       createdAt: now,
       updatedAt: now,
     });
+  },
+});
+
+export const generateAvatarUploadUrl = mutation({
+  args: {},
+  returns: v.string(),
+  handler: async (ctx) => {
+    const user = await authComponent.getAuthUser(ctx);
+    if (!user) {
+      throw new Error("Not authenticated");
+    }
+
+    return await ctx.storage.generateUploadUrl();
+  },
+});
+
+export const setAvatar = mutation({
+  args: {
+    storageId: v.id("_storage"),
+  },
+  returns: v.union(v.string(), v.null()),
+  handler: async (ctx, args) => {
+    const user = await authComponent.getAuthUser(ctx);
+    if (!user) {
+      throw new Error("Not authenticated");
+    }
+
+    const existingProfile = await ctx.db
+      .query("profiles")
+      .withIndex("by_user_id", (q) => q.eq("userId", user._id))
+      .first();
+
+    const now = Date.now();
+    const nameParts = splitName(user.name);
+
+    if (existingProfile?.avatarStorageId) {
+      await ctx.storage.delete(existingProfile.avatarStorageId);
+    }
+
+    if (existingProfile) {
+      await ctx.db.patch(existingProfile._id, {
+        avatarStorageId: args.storageId,
+        updatedAt: now,
+      });
+
+      return await ctx.storage.getUrl(args.storageId);
+    }
+
+    const pendingInvite = await ctx.db
+      .query("role_invites")
+      .withIndex("by_email", (q) => q.eq("email", user.email))
+      .first();
+
+    const role = pendingInvite?.role ?? "user";
+
+    if (pendingInvite) {
+      await ctx.db.delete(pendingInvite._id);
+    }
+
+    await ctx.db.insert("profiles", {
+      userId: user._id,
+      firstName: nameParts.firstName,
+      lastName: nameParts.lastName,
+      userType: "buyer",
+      role,
+      onboardingCompleted: false,
+      avatarStorageId: args.storageId,
+      createdAt: now,
+      updatedAt: now,
+    });
+
+    return await ctx.storage.getUrl(args.storageId);
+  },
+});
+
+export const removeAvatar = mutation({
+  args: {},
+  returns: v.null(),
+  handler: async (ctx) => {
+    const user = await authComponent.getAuthUser(ctx);
+    if (!user) {
+      throw new Error("Not authenticated");
+    }
+
+    const existingProfile = await ctx.db
+      .query("profiles")
+      .withIndex("by_user_id", (q) => q.eq("userId", user._id))
+      .first();
+
+    if (!existingProfile) {
+      return null;
+    }
+
+    if (existingProfile.avatarStorageId) {
+      await ctx.storage.delete(existingProfile.avatarStorageId);
+    }
+
+    await ctx.db.patch(existingProfile._id, {
+      avatarStorageId: undefined,
+      updatedAt: Date.now(),
+    });
+
+    return null;
   },
 });
 

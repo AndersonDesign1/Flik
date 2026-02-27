@@ -70,7 +70,7 @@ export default function CategoriesPage() {
 
       <div className="mx-auto max-w-6xl">
         {/* Header */}
-        <div className="mb-16 text-center animate-in fade-in slide-in-from-bottom-4 duration-500">
+        <div className="fade-in slide-in-from-bottom-4 mb-16 animate-in text-center duration-500">
           <span className="mb-4 inline-block rounded-full border border-border bg-card px-3 py-1 font-medium text-muted-foreground text-sm">
             Explore Categories
           </span>
@@ -87,10 +87,13 @@ export default function CategoriesPage() {
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {CATEGORIES.map((category, index) => (
             <Link
-              className="group block h-full rounded-2xl border border-border bg-card p-6 transition-all hover:bg-primary-violet-50 dark:hover:bg-primary-violet-50/10 animate-in fade-in slide-in-from-bottom-4 duration-500"
+              className="group fade-in slide-in-from-bottom-4 block h-full animate-in rounded-2xl border border-border bg-card p-6 transition-all duration-500 hover:bg-primary-violet-50 dark:hover:bg-primary-violet-50/10"
               href={`/categories/${category.slug}`}
               key={category.slug}
-              style={{ animationDelay: `${index * 50}ms`, animationFillMode: "backwards" }}
+              style={{
+                animationDelay: `${index * 50}ms`,
+                animationFillMode: "backwards",
+              }}
             >
               <div aria-hidden="true" className="mb-4 text-4xl">
                 {category.icon}

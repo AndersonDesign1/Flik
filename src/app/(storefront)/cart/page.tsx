@@ -198,12 +198,16 @@ export default function CartPage() {
               <div className="flex gap-2">
                 <input
                   className="h-9 min-w-0 flex-1 rounded-lg border border-border bg-background px-3 text-foreground text-sm placeholder:text-muted-foreground focus:border-primary-violet focus:outline-none focus:ring-1 focus:ring-primary-violet disabled:cursor-not-allowed disabled:opacity-50"
+                  disabled
                   id="coupon-code"
                   placeholder="Enter code"
                   type="text"
-                  disabled
                 />
-                <Button className="h-9 shrink-0 rounded-lg" variant="outline" disabled>
+                <Button
+                  className="h-9 shrink-0 rounded-lg"
+                  disabled
+                  variant="outline"
+                >
                   Apply
                 </Button>
               </div>

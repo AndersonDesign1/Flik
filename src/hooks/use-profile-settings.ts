@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { useSession } from "@/hooks/use-auth";
 import { authClient } from "@/lib/auth-client";
 import { api } from "../../convex/_generated/api";
+import type { Id } from "../../convex/_generated/dataModel";
 
 const WHITESPACE_REGEX = /\s+/;
 
@@ -13,6 +14,44 @@ interface PasswordInput {
   currentPassword: string;
   newPassword: string;
   confirmPassword: string;
+}
+
+interface LinkedAccount {
+  providerId?: string;
+  password?: string | null;
+}
+
+function extractLinkedAccounts(value: unknown): LinkedAccount[] {
+  if (!(value && typeof value === "object" && "data" in value)) {
+    return [];
+  }
+
+  const data = (value as { data?: unknown }).data;
+  if (!Array.isArray(data)) {
+    return [];
+  }
+
+  const linkedAccounts: LinkedAccount[] = [];
+
+  for (const item of data) {
+    if (!(item && typeof item === "object")) {
+      continue;
+    }
+
+    const providerId =
+      "providerId" in item && typeof item.providerId === "string"
+        ? item.providerId
+        : undefined;
+    const password =
+      "password" in item &&
+      (typeof item.password === "string" || item.password === null)
+        ? item.password
+        : undefined;
+
+    linkedAccounts.push({ providerId, password });
+  }
+
+  return linkedAccounts;
 }
 
 function splitName(name?: string | null) {
@@ -48,6 +87,7 @@ export function useProfileSettings() {
   const { user } = useSession();
   const profile = useQuery(api.profiles.getProfile) as
     | {
+        avatarUrl?: string;
         firstName?: string;
         lastName?: string;
         phone?: string;
@@ -61,6 +101,15 @@ export function useProfileSettings() {
     phone?: string;
     location?: string;
   }) => Promise<unknown>;
+  const generateAvatarUploadUrl = useMutation(
+    api.profiles.generateAvatarUploadUrl
+  ) as () => Promise<string>;
+  const setAvatar = useMutation(api.profiles.setAvatar) as (args: {
+    storageId: Id<"_storage">;
+  }) => Promise<string | null>;
+  const removeAvatarMutation = useMutation(
+    api.profiles.removeAvatar
+  ) as () => Promise<null>;
 
   const hasSeededFormRef = useRef(false);
   const [firstName, setFirstName] = useState("");
@@ -69,6 +118,8 @@ export function useProfileSettings() {
   const [location, setLocation] = useState("");
   const [isSavingProfile, setIsSavingProfile] = useState(false);
   const [isChangingPassword, setIsChangingPassword] = useState(false);
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+  const [canChangePassword, setCanChangePassword] = useState(true);
 
   const isProfileReady = profile !== undefined;
 
@@ -89,6 +140,44 @@ export function useProfileSettings() {
     () => `${firstName} ${lastName}`.trim(),
     [firstName, lastName]
   );
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadAccounts = async () => {
+      try {
+        const authClientWithAccounts = authClient as typeof authClient & {
+          listAccounts?: () => Promise<unknown>;
+        };
+
+        const result = await authClientWithAccounts.listAccounts?.();
+        const linkedAccounts = extractLinkedAccounts(result);
+
+        if (!(isMounted && linkedAccounts.length > 0)) {
+          return;
+        }
+
+        const hasPasswordProvider = linkedAccounts.some((account) => {
+          if (account.password) {
+            return true;
+          }
+
+          const providerId = account.providerId?.toLowerCase();
+          return !providerId || providerId === "credential";
+        });
+
+        setCanChangePassword(hasPasswordProvider);
+      } catch {
+        setCanChangePassword(true);
+      }
+    };
+
+    loadAccounts();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const saveProfile = async () => {
     if (!user?.email) {
@@ -131,6 +220,11 @@ export function useProfileSettings() {
   };
 
   const changePassword = async (payload: PasswordInput) => {
+    if (!canChangePassword) {
+      toast.error("Password is managed by your sign-in provider");
+      return false;
+    }
+
     const currentPassword = payload.currentPassword.trim();
     const newPassword = payload.newPassword.trim();
     const confirmPassword = payload.confirmPassword.trim();
@@ -174,6 +268,80 @@ export function useProfileSettings() {
     }
   };
 
+  const uploadAvatar = async (file: File) => {
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please upload an image file");
+      return false;
+    }
+
+    setIsUploadingAvatar(true);
+
+    try {
+      const uploadUrl = await generateAvatarUploadUrl();
+      const uploadResponse = await fetch(uploadUrl, {
+        body: file,
+        method: "POST",
+        headers: {
+          "Content-Type": file.type,
+        },
+      });
+
+      if (!uploadResponse.ok) {
+        toast.error("Failed to upload profile image");
+        return false;
+      }
+
+      const { storageId } = (await uploadResponse.json()) as {
+        storageId?: Id<"_storage">;
+      };
+
+      if (!storageId) {
+        toast.error("Failed to process profile image");
+        return false;
+      }
+
+      const avatarUrl = await setAvatar({ storageId });
+      const result = await authClient.updateUser({ image: avatarUrl ?? "" });
+
+      if (result.error) {
+        toast.warning(
+          result.error.message ?? "Avatar saved but account image sync failed"
+        );
+      }
+
+      toast.success("Profile image updated");
+      return true;
+    } catch {
+      toast.error("Failed to upload profile image");
+      return false;
+    } finally {
+      setIsUploadingAvatar(false);
+    }
+  };
+
+  const removeAvatar = async () => {
+    setIsUploadingAvatar(true);
+
+    try {
+      await removeAvatarMutation();
+
+      const result = await authClient.updateUser({ image: "" });
+
+      if (result.error) {
+        toast.error(result.error.message ?? "Failed to remove profile image");
+        return false;
+      }
+
+      toast.success("Profile image removed");
+      return true;
+    } catch {
+      toast.error("Failed to remove profile image");
+      return false;
+    } finally {
+      setIsUploadingAvatar(false);
+    }
+  };
+
   return {
     user,
     profile,
@@ -189,7 +357,11 @@ export function useProfileSettings() {
     fullName,
     isSavingProfile,
     saveProfile,
+    isUploadingAvatar,
+    uploadAvatar,
+    removeAvatar,
     isChangingPassword,
+    canChangePassword,
     changePassword,
   };
 }
