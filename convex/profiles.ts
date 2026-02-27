@@ -47,10 +47,23 @@ export const getProfile = query({
       return null;
     }
 
-    return ctx.db
+    const profile = await ctx.db
       .query("profiles")
       .withIndex("by_user_id", (q) => q.eq("userId", user._id))
       .first();
+
+    if (!profile) {
+      return null;
+    }
+
+    const avatarUrl = profile.avatarStorageId
+      ? await ctx.storage.getUrl(profile.avatarStorageId)
+      : undefined;
+
+    return {
+      ...profile,
+      avatarUrl: avatarUrl ?? undefined,
+    };
   },
 });
 
@@ -224,8 +237,6 @@ export const setAvatar = mutation({
       throw new Error("Not authenticated");
     }
 
-    const avatarUrl = await ctx.storage.getUrl(args.storageId);
-
     const existingProfile = await ctx.db
       .query("profiles")
       .withIndex("by_user_id", (q) => q.eq("userId", user._id))
@@ -241,11 +252,10 @@ export const setAvatar = mutation({
     if (existingProfile) {
       await ctx.db.patch(existingProfile._id, {
         avatarStorageId: args.storageId,
-        avatarUrl: avatarUrl ?? undefined,
         updatedAt: now,
       });
 
-      return avatarUrl;
+      return await ctx.storage.getUrl(args.storageId);
     }
 
     await ctx.db.insert("profiles", {
@@ -256,12 +266,11 @@ export const setAvatar = mutation({
       role: "user",
       onboardingCompleted: false,
       avatarStorageId: args.storageId,
-      avatarUrl: avatarUrl ?? undefined,
       createdAt: now,
       updatedAt: now,
     });
 
-    return avatarUrl;
+    return await ctx.storage.getUrl(args.storageId);
   },
 });
 
@@ -289,7 +298,6 @@ export const removeAvatar = mutation({
 
     await ctx.db.patch(existingProfile._id, {
       avatarStorageId: undefined,
-      avatarUrl: undefined,
       updatedAt: Date.now(),
     });
 

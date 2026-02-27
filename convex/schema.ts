@@ -5,7 +5,6 @@ export default defineSchema({
   profiles: defineTable({
     userId: v.string(),
     avatarStorageId: v.optional(v.id("_storage")),
-    avatarUrl: v.optional(v.string()),
     firstName: v.optional(v.string()),
     lastName: v.optional(v.string()),
     phone: v.optional(v.string()),

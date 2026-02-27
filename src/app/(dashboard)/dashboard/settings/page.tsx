@@ -14,6 +14,11 @@ import {
 } from "@/components/ui/select";
 
 export default function SettingsPage() {
+  const createNotificationEmail = (email: string) => ({
+    id: crypto.randomUUID(),
+    value: email,
+  });
+
   const [storeSettings, setStoreSettings] = useState({
     name: "Andy Commerce",
     url: "andy-commerce.vercel.app",
@@ -23,8 +28,8 @@ export default function SettingsPage() {
     payoutSchedule: "weekly",
     payoutThreshold: "$100.00",
   });
-  const [notificationEmails, setNotificationEmails] = useState<string[]>([
-    "orders@andycommerce.com",
+  const [notificationEmails, setNotificationEmails] = useState(() => [
+    createNotificationEmail("orders@andycommerce.com"),
   ]);
 
   const updateStoreSettings =
@@ -166,7 +171,7 @@ export default function SettingsPage() {
           </div>
           <div className="space-y-4 p-5">
             {notificationEmails.map((email, index) => (
-              <div className="flex items-end gap-2" key={`${email}-${index + 1}`}>
+              <div className="flex items-end gap-2" key={email.id}>
                 <div className="flex-1 space-y-2">
                   <Label className="font-medium text-sm" htmlFor={`order-email-${index + 1}`}>
                     Order Notifications Email {index + 1}
@@ -176,12 +181,14 @@ export default function SettingsPage() {
                     onChange={(event) => {
                       setNotificationEmails((current) =>
                         current.map((item, itemIndex) =>
-                          itemIndex === index ? event.target.value : item
+                          itemIndex === index
+                            ? { ...item, value: event.target.value }
+                            : item
                         )
                       );
                     }}
                     type="email"
-                    value={email}
+                    value={email.value}
                   />
                 </div>
                 {notificationEmails.length > 1 ? (
@@ -204,7 +211,10 @@ export default function SettingsPage() {
             <Button
               className="w-fit gap-2"
               onClick={() =>
-                setNotificationEmails((current) => [...current, "notifications@yourstore.com"])
+                setNotificationEmails((current) => [
+                  ...current,
+                  createNotificationEmail("notifications@yourstore.com"),
+                ])
               }
               type="button"
               variant="outline"

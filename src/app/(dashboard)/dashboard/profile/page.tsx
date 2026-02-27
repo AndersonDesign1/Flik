@@ -91,12 +91,12 @@ export default function ProfilePage() {
                 </AvatarFallback>
               </Avatar>
               <button
-                className="absolute right-0 bottom-0 flex h-7 w-7 items-center justify-center rounded-full border border-border bg-background shadow-sm transition-colors hover:bg-muted"
+                className="absolute right-0 bottom-0 flex size-7 items-center justify-center rounded-full border border-border bg-background shadow-sm transition-colors hover:bg-muted"
                 disabled={isUploadingAvatar}
                 onClick={() => fileInputRef.current?.click()}
                 type="button"
               >
-                <Camera className="h-3.5 w-3.5 text-foreground" />
+                <Camera className="size-3.5 text-foreground" />
               </button>
               <input
                 accept="image/*"
@@ -149,7 +149,7 @@ export default function ProfilePage() {
               <div className="space-y-2">
                 <Label htmlFor="firstName">First Name</Label>
                 <div className="relative">
-                  <User className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                  <User className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
                   <Input
                     className="pl-9"
                     id="firstName"
@@ -171,7 +171,7 @@ export default function ProfilePage() {
             <div className="space-y-2">
               <Label htmlFor="email">Email Address</Label>
               <div className="relative">
-                <Mail className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Mail className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
                   className="pl-9"
                   id="email"
@@ -185,7 +185,7 @@ export default function ProfilePage() {
             <div className="space-y-2">
               <Label htmlFor="phone">Phone Number</Label>
               <div className="relative">
-                <Phone className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Phone className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
                   className="pl-9"
                   id="phone"
@@ -199,7 +199,7 @@ export default function ProfilePage() {
             <div className="space-y-2">
               <Label htmlFor="location">Location</Label>
               <div className="relative">
-                <MapPin className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <MapPin className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
                   className="pl-9"
                   id="location"

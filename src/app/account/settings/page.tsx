@@ -78,9 +78,9 @@ export default function SettingsPage() {
           onClick={saveProfile}
         >
           {isSavingProfile ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
+            <Loader2 className="size-4 animate-spin" />
           ) : (
-            <Save className="h-4 w-4" />
+            <Save className="size-4" />
           )}
           {isSavingProfile ? "Saving..." : "Save Changes"}
         </Button>
@@ -100,12 +100,12 @@ export default function SettingsPage() {
               </AvatarFallback>
             </Avatar>
             <button
-              className="absolute right-0 bottom-0 flex h-8 w-8 items-center justify-center rounded-full border border-gray-200 bg-white shadow-sm"
+              className="absolute right-0 bottom-0 flex size-8 items-center justify-center rounded-full border border-gray-200 bg-white shadow-sm"
               disabled={isUploadingAvatar}
               onClick={() => fileInputRef.current?.click()}
               type="button"
             >
-              <Camera className="h-4 w-4 text-gray-500" />
+              <Camera className="size-4 text-gray-500" />
             </button>
             <input
               accept="image/*"

@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { useSession } from "@/hooks/use-auth";
 import { authClient } from "@/lib/auth-client";
 import { api } from "../../convex/_generated/api";
+import type { Id } from "../../convex/_generated/dataModel";
 
 const WHITESPACE_REGEX = /\s+/;
 
@@ -71,7 +72,7 @@ export function useProfileSettings() {
     api.profiles.generateAvatarUploadUrl
   ) as () => Promise<string>;
   const setAvatar = useMutation(api.profiles.setAvatar) as (args: {
-    storageId: string;
+    storageId: Id<"_storage">;
   }) => Promise<string | null>;
   const removeAvatarMutation = useMutation(api.profiles.removeAvatar) as () => Promise<null>;
 
@@ -260,7 +261,7 @@ export function useProfileSettings() {
       }
 
       const { storageId } = (await uploadResponse.json()) as {
-        storageId?: string;
+        storageId?: Id<"_storage">;
       };
 
       if (!storageId) {
