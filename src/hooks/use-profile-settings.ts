@@ -31,7 +31,27 @@ function extractLinkedAccounts(value: unknown): LinkedAccount[] {
     return [];
   }
 
-  return data as LinkedAccount[];
+  const linkedAccounts: LinkedAccount[] = [];
+
+  for (const item of data) {
+    if (!(item && typeof item === "object")) {
+      continue;
+    }
+
+    const providerId =
+      "providerId" in item && typeof item.providerId === "string"
+        ? item.providerId
+        : undefined;
+    const password =
+      "password" in item &&
+      (typeof item.password === "string" || item.password === null)
+        ? item.password
+        : undefined;
+
+    linkedAccounts.push({ providerId, password });
+  }
+
+  return linkedAccounts;
 }
 
 function splitName(name?: string | null) {
