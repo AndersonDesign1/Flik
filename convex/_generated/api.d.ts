@@ -11,6 +11,7 @@
 import type * as auth from "../auth.js";
 import type * as http from "../http.js";
 import type * as profiles from "../profiles.js";
+import type * as products from "../products.js";
 import type * as users from "../users.js";
 import type * as validation from "../validation.js";
 
@@ -24,6 +25,7 @@ declare const fullApi: ApiFromModules<{
   auth: typeof auth;
   http: typeof http;
   profiles: typeof profiles;
+  products: typeof products;
   users: typeof users;
   validation: typeof validation;
 }>;
