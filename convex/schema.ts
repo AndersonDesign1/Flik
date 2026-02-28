@@ -28,4 +28,33 @@ export default defineSchema({
     invitedBy: v.string(),
     createdAt: v.float64(),
   }).index("by_email", ["email"]),
+
+  products: defineTable({
+    userId: v.string(),
+    name: v.string(),
+    description: v.string(),
+    category: v.string(),
+    tags: v.array(v.string()),
+    price: v.float64(),
+    compareAtPrice: v.optional(v.float64()),
+    allowCustomPrice: v.boolean(),
+    status: v.union(
+      v.literal("draft"),
+      v.literal("active"),
+      v.literal("archived")
+    ),
+    coverStorageId: v.optional(v.id("_storage")),
+    files: v.array(
+      v.object({
+        storageId: v.id("_storage"),
+        fileName: v.string(),
+        fileSize: v.float64(),
+        mimeType: v.optional(v.string()),
+      })
+    ),
+    createdAt: v.float64(),
+    updatedAt: v.float64(),
+  })
+    .index("by_user_id", ["userId"])
+    .index("by_user_id_status", ["userId", "status"]),
 });

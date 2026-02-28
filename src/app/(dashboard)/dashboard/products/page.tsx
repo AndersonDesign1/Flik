@@ -1,12 +1,23 @@
 import { ProductsContent } from "@/components/dashboard/products/products-content";
-import { getViewerDashboardMode } from "@/lib/dashboard-mode";
-import { getProductsData } from "@/lib/data";
+import { fetchAuthQuery } from "@/lib/auth-server";
+import { api } from "../../../../../convex/_generated/api";
 
-export const revalidate = 60;
+export const revalidate = 0;
 
 export default async function ProductsPage() {
-  const dashboardMode = await getViewerDashboardMode();
-  const data = await getProductsData(dashboardMode);
+  const products = await fetchAuthQuery(api.products.listMyProducts);
 
-  return <ProductsContent products={data.products} />;
+  return (
+    <ProductsContent
+      products={products.map((product) => ({
+        id: product._id,
+        name: product.name,
+        status: product.status,
+        price: product.price,
+        inventory: product.inventory,
+        sales: product.sales,
+        image: product.coverUrl ?? "",
+      }))}
+    />
+  );
 }
