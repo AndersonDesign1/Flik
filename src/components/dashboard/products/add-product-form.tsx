@@ -31,6 +31,7 @@ import type { Id } from "../../../../convex/_generated/dataModel";
 
 const MAX_IMAGE_SIZE_BYTES = 10 * 1024 * 1024;
 const MAX_PRODUCT_FILE_SIZE_BYTES = 250 * 1024 * 1024;
+const MAX_PRODUCT_FILES = 20;
 
 interface UploadedProductFile {
   storageId: Id<"_storage">;
@@ -171,7 +172,22 @@ export function AddProductForm() {
   };
 
   const uploadProductFiles = async (newFiles: File[]) => {
-    for (const file of newFiles) {
+    const availableSlots = Math.max(0, MAX_PRODUCT_FILES - files.length);
+
+    if (availableSlots <= 0) {
+      toast.error(`Maximum ${MAX_PRODUCT_FILES} files allowed per product`);
+      return;
+    }
+
+    if (newFiles.length > availableSlots) {
+      toast.error(
+        `Only ${availableSlots} file${availableSlots === 1 ? "" : "s"} can be added`
+      );
+    }
+
+    const filesToUpload = newFiles.slice(0, availableSlots);
+
+    for (const file of filesToUpload) {
       if (file.size > MAX_PRODUCT_FILE_SIZE_BYTES) {
         toast.error(`${file.name} is larger than 250MB`);
         continue;

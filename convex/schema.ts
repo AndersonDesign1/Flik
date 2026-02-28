@@ -64,6 +64,7 @@ export default defineSchema({
         mimeType: v.optional(v.string()),
       })
     ),
+    sales: v.optional(v.float64()),
     createdAt: v.float64(),
     updatedAt: v.float64(),
   })

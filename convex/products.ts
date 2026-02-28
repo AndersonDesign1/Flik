@@ -1,3 +1,4 @@
+import { paginationOptsValidator } from "convex/server";
 import { v } from "convex/values";
 import type { MutationCtx } from "./_generated/server";
 import { mutation, query } from "./_generated/server";
@@ -214,6 +215,7 @@ export const createProduct = mutation({
       status: args.status,
       coverStorageId: args.coverStorageId,
       files: args.files,
+      sales: 0,
       createdAt: now,
       updatedAt: now,
     });
@@ -229,46 +231,44 @@ export const createProduct = mutation({
 });
 
 export const listMyProducts = query({
-  args: {},
-  returns: v.array(
-    v.object({
-      _id: v.id("products"),
-      name: v.string(),
-      status: v.union(
-        v.literal("active"),
-        v.literal("draft"),
-        v.literal("archived")
-      ),
-      price: v.number(),
-      inventory: v.number(),
-      sales: v.number(),
-      coverUrl: v.optional(v.string()),
-    })
-  ),
-  handler: async (ctx) => {
+  args: {
+    paginationOpts: paginationOptsValidator,
+  },
+  handler: async (ctx, args) => {
     const user = await authComponent.getAuthUser(ctx);
     if (!user) {
-      return [];
+      return {
+        page: [],
+        isDone: true,
+        continueCursor: args.paginationOpts.cursor,
+        splitCursor: null,
+        pageStatus: null,
+      };
     }
 
-    const products = await ctx.db
+    const paginatedProducts = await ctx.db
       .query("products")
       .withIndex("by_user_id", (q) => q.eq("userId", user._id))
       .order("desc")
-      .collect();
+      .paginate(args.paginationOpts);
 
-    return await Promise.all(
-      products.map(async (product) => ({
+    const page = await Promise.all(
+      paginatedProducts.page.map(async (product) => ({
         _id: product._id,
         name: product.name,
         status: product.status,
         price: product.price,
         inventory: product.files.length,
-        sales: 0,
+        sales: product.sales ?? 0,
         coverUrl: product.coverStorageId
           ? ((await ctx.storage.getUrl(product.coverStorageId)) ?? undefined)
           : undefined,
       }))
     );
+
+    return {
+      ...paginatedProducts,
+      page,
+    };
   },
 });

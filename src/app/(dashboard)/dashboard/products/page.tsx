@@ -4,12 +4,19 @@ import { api } from "../../../../../convex/_generated/api";
 
 export const revalidate = 0;
 
+const PRODUCTS_PAGE_SIZE = 50;
+
 export default async function ProductsPage() {
-  const products = await fetchAuthQuery(api.products.listMyProducts);
+  const productsResult = await fetchAuthQuery(api.products.listMyProducts, {
+    paginationOpts: {
+      cursor: null,
+      numItems: PRODUCTS_PAGE_SIZE,
+    },
+  });
 
   return (
     <ProductsContent
-      products={products.map((product) => ({
+      products={productsResult.page.map((product) => ({
         id: product._id,
         name: product.name,
         status: product.status,
