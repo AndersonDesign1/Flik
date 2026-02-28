@@ -37,89 +37,9 @@ const NotificationsContext = createContext<NotificationsContextType | null>(
   null
 );
 
-// Mock notifications data
-const INITIAL_NOTIFICATIONS: Notification[] = [
-  {
-    id: "1",
-    type: "order",
-    title: "New order received",
-    description: "Order #1234 from John Doe - $156.00",
-    time: "2 min ago",
-    read: false,
-    details:
-      "A new order has been placed by John Doe. The order includes 3 items totaling $156.00. The customer has opted for standard shipping to their address in San Francisco, CA.",
-  },
-  {
-    id: "2",
-    type: "customer",
-    title: "New customer signed up",
-    description: "Sarah Johnson created an account",
-    time: "15 min ago",
-    read: false,
-    details:
-      "Sarah Johnson has created a new customer account. They signed up using their email address sarah.johnson@email.com.",
-  },
-  {
-    id: "3",
-    type: "success",
-    title: "Revenue milestone reached",
-    description: "You've hit $50,000 in monthly sales",
-    time: "1 hour ago",
-    read: false,
-    details:
-      "Congratulations! Your store has achieved $50,000 in sales this month. This represents a 25% increase compared to last month.",
-  },
-  {
-    id: "4",
-    type: "alert",
-    title: "Low stock alert",
-    description: "Premium Headphones is running low (3 remaining)",
-    time: "3 hours ago",
-    read: true,
-    details:
-      "The inventory for Premium Headphones has dropped to 3 units. Consider restocking soon to avoid stockouts.",
-  },
-  {
-    id: "5",
-    type: "order",
-    title: "Order shipped",
-    description: "Order #1230 shipped via FedEx",
-    time: "5 hours ago",
-    read: true,
-    details:
-      "Order #1230 has been shipped to the customer via FedEx. Tracking number: 1234567890.",
-  },
-  {
-    id: "6",
-    type: "info",
-    title: "System maintenance",
-    description: "Scheduled maintenance on Dec 30, 2024",
-    time: "1 day ago",
-    read: true,
-    details:
-      "A scheduled system maintenance is planned for December 30, 2024 from 2:00 AM to 4:00 AM UTC.",
-  },
-  {
-    id: "7",
-    type: "customer",
-    title: "Customer feedback received",
-    description: "5-star review from Emily Chen",
-    time: "2 days ago",
-    read: true,
-    details:
-      "Emily Chen left a 5-star review for Premium Headphones: 'Amazing sound quality and super comfortable!'",
-  },
-  {
-    id: "8",
-    type: "alert",
-    title: "Payment failed",
-    description: "Subscription payment for Pro plan failed",
-    time: "3 days ago",
-    read: true,
-    details:
-      "The automatic payment for your Pro plan subscription failed. Please update your payment method.",
-  },
-];
+// Notifications are loaded from user activity.
+// Start empty in live mode until backend data is wired.
+const INITIAL_NOTIFICATIONS: Notification[] = [];
 
 // Type config for icons
 export const notificationTypeConfig: Record<

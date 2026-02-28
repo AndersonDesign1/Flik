@@ -4,17 +4,19 @@ import { Globe, TrendingDown, Users } from "lucide-react";
 import { Card } from "@/components/ui/card";
 
 interface WebVisitsCardProps {
-  totalVisits?: string;
+  totalVisits: string;
   trend?: string;
-  uniqueVisitors?: string;
-  pageViews?: string;
+  trendLabel?: string;
+  uniqueVisitors: string;
+  pageViews: string;
 }
 
 export function WebVisitsCard({
-  totalVisits = "701.34m",
-  trend = "-12.5%",
-  uniqueVisitors = "485K",
-  pageViews = "1.2M",
+  totalVisits,
+  trend,
+  trendLabel,
+  uniqueVisitors,
+  pageViews,
 }: WebVisitsCardProps) {
   return (
     <Card>
@@ -22,13 +24,17 @@ export function WebVisitsCard({
       <div className="mt-2 font-bold text-3xl text-foreground tabular-nums tracking-tight">
         {totalVisits}
       </div>
-      <div className="mt-1 flex items-center gap-1.5">
-        <span className="flex items-center gap-0.5 font-medium text-red-500 text-xs">
-          <TrendingDown className="h-3 w-3" />
-          {trend}
-        </span>
-        <span className="text-muted-foreground text-xs">vs last month</span>
-      </div>
+      {trend ? (
+        <div className="mt-1 flex items-center gap-1.5">
+          <span className="flex items-center gap-0.5 font-medium text-red-500 text-xs">
+            <TrendingDown className="h-3 w-3" />
+            {trend}
+          </span>
+          {trendLabel ? (
+            <span className="text-muted-foreground text-xs">{trendLabel}</span>
+          ) : null}
+        </div>
+      ) : null}
 
       <div className="mt-6 space-y-3">
         <div className="flex items-center justify-between">

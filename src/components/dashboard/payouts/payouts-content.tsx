@@ -87,8 +87,17 @@ export function PayoutsContent({ data }: PayoutsContentProps) {
 
       {/* Earnings Stats + Payment Methods */}
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-        <MonthlyEarningsCard />
-        <PaymentMethodsCard methods={data.paymentMethods} />
+        <MonthlyEarningsCard
+          totalEarnings={data.monthlyEarnings?.totalEarnings ?? "$0"}
+          trend={data.monthlyEarnings?.trend}
+          trendLabel={data.monthlyEarnings?.trendLabel}
+          weeks={data.monthlyEarnings?.weeks ?? []}
+        />
+        <PaymentMethodsCard
+          methods={data.paymentMethods}
+          totalValue={data.paymentMethodsTotalValue}
+          trend={data.paymentMethodsTrend}
+        />
       </div>
 
       {/* Transactions Table */}
@@ -188,7 +197,21 @@ export function PayoutsContent({ data }: PayoutsContentProps) {
         open={!!selectedId}
       >
         <SheetContent className="w-full overflow-y-auto sm:max-w-lg">
-          {selectedId && <TransactionDetail id={selectedId} />}
+          {selectedId ? (
+            <TransactionDetail
+              transaction={
+                data.transactions.find((tx) => tx.id === selectedId) ?? {
+                  id: selectedId,
+                  amount: "$0",
+                  date: "-",
+                  time: "-",
+                  method: "-",
+                  account: "-",
+                  status: "Pending",
+                }
+              }
+            />
+          ) : null}
         </SheetContent>
       </Sheet>
     </div>

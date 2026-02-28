@@ -4,65 +4,80 @@
       "id": "CUST-001",
       "name": "Alice Johnson",
       "email": "alice@example.com",
-      "spent": 1250.0,
+      "spent": 1250,
       "lastOrder": "2024-03-10",
-      "status": "active"
+      "status": "active",
+      "customerSince": "2024-01-01",
+      "totalOrders": 20
     },
     {
       "id": "CUST-002",
       "name": "Bob Smith",
       "email": "bob@example.com",
-      "spent": 450.0,
+      "spent": 450,
       "lastOrder": "2024-03-08",
-      "status": "inactive"
+      "status": "inactive",
+      "customerSince": "2024-01-01",
+      "totalOrders": 7
     },
     {
       "id": "CUST-003",
       "name": "Charlie Davis",
       "email": "charlie@example.com",
-      "spent": 3200.0,
+      "spent": 3200,
       "lastOrder": "2024-03-12",
-      "status": "active"
+      "status": "active",
+      "customerSince": "2024-01-01",
+      "totalOrders": 53
     },
     {
       "id": "CUST-004",
       "name": "Diana Evans",
       "email": "diana@example.com",
-      "spent": 89.0,
+      "spent": 89,
       "lastOrder": "2024-02-28",
-      "status": "active"
+      "status": "active",
+      "customerSince": "2024-01-01",
+      "totalOrders": 1
     },
     {
       "id": "CUST-005",
       "name": "Evan Wright",
       "email": "evan@example.com",
-      "spent": 0.0,
+      "spent": 0,
       "lastOrder": "-",
-      "status": "inactive"
+      "status": "inactive",
+      "totalOrders": 0
     },
     {
       "id": "CUST-006",
       "name": "Fiona Green",
       "email": "fiona@example.com",
-      "spent": 560.0,
+      "spent": 560,
       "lastOrder": "2024-03-01",
-      "status": "active"
+      "status": "active",
+      "customerSince": "2024-01-01",
+      "totalOrders": 9
     },
     {
       "id": "CUST-007",
       "name": "George Hall",
       "email": "george@example.com",
-      "spent": 120.0,
+      "spent": 120,
       "lastOrder": "2024-03-05",
-      "status": "active"
+      "status": "active",
+      "customerSince": "2024-01-01",
+      "totalOrders": 2
     },
     {
       "id": "CUST-008",
       "name": "Hannah Lee",
       "email": "hannah@example.com",
-      "spent": 2300.0,
+      "spent": 2300,
       "lastOrder": "2024-03-11",
-      "status": "active"
+      "status": "active",
+      "customerSince": "2024-01-01",
+      "totalOrders": 38
     }
   ],
   "metrics": [
@@ -124,5 +139,9 @@
       "percent": 25,
       "color": "bg-gray-400"
     }
-  ]
+  ],
+  "segmentsTotalValue": "4,972",
+  "segmentsTrend": "+19.08%",
+  "totalLTV": "$847,520",
+  "ltvTrend": "+24.8%"
 }

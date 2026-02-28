@@ -10,23 +10,17 @@ import {
   YAxis,
 } from "recharts";
 import { ClientOnly } from "@/components/shared/client-only";
+import type { ChartPoint } from "@/lib/data";
 
-const data = [
-  { name: "Jan", total: 12_000 },
-  { name: "Feb", total: 15_000 },
-  { name: "Mar", total: 18_000 },
-  { name: "Apr", total: 22_000 },
-  { name: "May", total: 28_000 },
-  { name: "Jun", total: 32_000 },
-  { name: "Jul", total: 39_952 },
-  { name: "Aug", total: 42_000 },
-  { name: "Sep", total: 48_000 },
-  { name: "Oct", total: 55_000 },
-  { name: "Nov", total: 62_000 },
-  { name: "Dec", total: 72_000 },
-];
+interface OverviewChartProps {
+  data: ChartPoint[];
+}
 
-export function OverviewChart() {
+export function OverviewChart({ data }: OverviewChartProps) {
+  if (data.length === 0) {
+    return <div className="h-[220px] rounded-lg bg-muted/20" />;
+  }
+
   return (
     <ClientOnly
       fallback={<div className="h-[220px] w-full animate-pulse bg-muted/20" />}

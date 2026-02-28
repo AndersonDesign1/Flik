@@ -66,7 +66,8 @@
       "amount": "+$2,450.00",
       "method": "Bank Transfer",
       "account": "****4242",
-      "status": "Completed"
+      "status": "Completed",
+      "referenceId": "PAY-883920"
     },
     {
       "id": "TRX-1002",
@@ -75,7 +76,8 @@
       "amount": "+$1,890.00",
       "method": "PayPal",
       "account": "user@email.com",
-      "status": "Completed"
+      "status": "Completed",
+      "referenceId": "PAY-883921"
     },
     {
       "id": "TRX-1003",
@@ -84,7 +86,8 @@
       "amount": "+$3,200.00",
       "method": "Stripe",
       "account": "acct_xxx",
-      "status": "Pending"
+      "status": "Pending",
+      "referenceId": "PAY-883922"
     },
     {
       "id": "TRX-1004",
@@ -93,7 +96,8 @@
       "amount": "+$950.00",
       "method": "Bank Transfer",
       "account": "****4242",
-      "status": "Completed"
+      "status": "Completed",
+      "referenceId": "PAY-883923"
     },
     {
       "id": "TRX-1005",
@@ -102,7 +106,37 @@
       "amount": "+$1,650.00",
       "method": "Wise",
       "account": "****8821",
-      "status": "Failed"
+      "status": "Failed",
+      "referenceId": "PAY-883924"
     }
-  ]
+  ],
+  "paymentMethodsTotalValue": "$847,520",
+  "paymentMethodsTrend": "+24.8%",
+  "monthlyEarnings": {
+    "totalEarnings": "$24,890.00",
+    "trend": "+32.5%",
+    "trendLabel": "vs last month",
+    "weeks": [
+      {
+        "week": "Week 1",
+        "amount": 5420,
+        "percent": 65
+      },
+      {
+        "week": "Week 2",
+        "amount": 7230,
+        "percent": 85
+      },
+      {
+        "week": "Week 3",
+        "amount": 6180,
+        "percent": 75
+      },
+      {
+        "week": "Week 4",
+        "amount": 6060,
+        "percent": 72
+      }
+    ]
+  }
 }
