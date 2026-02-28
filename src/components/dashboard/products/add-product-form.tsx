@@ -45,6 +45,7 @@ export function AddProductForm() {
     api.products.generateProductUploadUrl
   );
   const deleteUploadedFile = useMutation(api.products.deleteUploadedFile);
+  const registerUploadedFile = useMutation(api.products.registerUploadedFile);
   const createProduct = useMutation(api.products.createProduct);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -66,6 +67,8 @@ export function AddProductForm() {
 
   const coverInputRef = useRef<HTMLInputElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const uploadedStorageIdsRef = useRef<Set<Id<"_storage">>>(new Set());
+  const isSubmittedRef = useRef(false);
 
   useEffect(() => {
     return () => {
@@ -74,6 +77,18 @@ export function AddProductForm() {
       }
     };
   }, [coverPreviewUrl]);
+
+  useEffect(() => {
+    return () => {
+      if (isSubmittedRef.current) {
+        return;
+      }
+
+      for (const storageId of uploadedStorageIdsRef.current) {
+        deleteUploadedFile({ storageId }).catch(() => undefined);
+      }
+    };
+  }, [deleteUploadedFile]);
 
   const uploadFileToConvex = async (file: File): Promise<Id<"_storage">> => {
     const uploadUrl = await generateProductUploadUrl();
@@ -95,6 +110,19 @@ export function AddProductForm() {
 
     if (!storageId) {
       throw new Error("Upload did not return a storageId");
+    }
+
+    try {
+      await registerUploadedFile({
+        storageId,
+        fileName: file.name,
+        fileSize: file.size,
+        mimeType: file.type || undefined,
+      });
+      uploadedStorageIdsRef.current.add(storageId);
+    } catch {
+      await deleteUploadedFile({ storageId }).catch(() => undefined);
+      throw new Error("Failed to register uploaded file");
     }
 
     return storageId;
@@ -128,6 +156,7 @@ export function AddProductForm() {
 
       if (coverStorageId) {
         await deleteUploadedFile({ storageId: coverStorageId });
+        uploadedStorageIdsRef.current.delete(coverStorageId);
       }
       if (coverPreviewUrl) {
         URL.revokeObjectURL(coverPreviewUrl);
@@ -173,6 +202,7 @@ export function AddProductForm() {
 
     try {
       await deleteUploadedFile({ storageId: fileToRemove.storageId });
+      uploadedStorageIdsRef.current.delete(fileToRemove.storageId);
       setFiles((prev) => prev.filter((_, i) => i !== index));
       toast.success("File removed");
     } catch {
@@ -188,6 +218,7 @@ export function AddProductForm() {
 
     try {
       await deleteUploadedFile({ storageId: coverStorageId });
+      uploadedStorageIdsRef.current.delete(coverStorageId);
       if (coverPreviewUrl) {
         URL.revokeObjectURL(coverPreviewUrl);
       }
@@ -255,6 +286,8 @@ export function AddProductForm() {
         return;
       }
 
+      isSubmittedRef.current = true;
+      uploadedStorageIdsRef.current.clear();
       toast.success("Product published successfully");
       router.push("/dashboard/products");
       router.refresh();
@@ -275,6 +308,8 @@ export function AddProductForm() {
         return;
       }
 
+      isSubmittedRef.current = true;
+      uploadedStorageIdsRef.current.clear();
       toast.success("Draft saved");
       router.push("/dashboard/products");
       router.refresh();

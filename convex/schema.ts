@@ -29,6 +29,18 @@ export default defineSchema({
     createdAt: v.float64(),
   }).index("by_email", ["email"]),
 
+  product_uploads: defineTable({
+    userId: v.string(),
+    storageId: v.id("_storage"),
+    fileName: v.string(),
+    fileSize: v.float64(),
+    mimeType: v.optional(v.string()),
+    createdAt: v.float64(),
+    updatedAt: v.float64(),
+  })
+    .index("by_user_id", ["userId"])
+    .index("by_storage_id", ["storageId"])
+    .index("by_user_id_storage_id", ["userId", "storageId"]),
   products: defineTable({
     userId: v.string(),
     name: v.string(),

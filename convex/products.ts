@@ -1,4 +1,5 @@
 import { v } from "convex/values";
+import type { MutationCtx } from "./_generated/server";
 import { mutation, query } from "./_generated/server";
 import { authComponent } from "./auth";
 
@@ -10,6 +11,31 @@ const productFileValidator = v.object({
   fileSize: v.number(),
   mimeType: v.optional(v.string()),
 });
+
+function getStorageIdsFromProduct(product: {
+  coverStorageId?: string;
+  files: Array<{ storageId: string }>;
+}) {
+  const fileStorageIds = product.files.map((file) => file.storageId);
+  return product.coverStorageId
+    ? [product.coverStorageId, ...fileStorageIds]
+    : fileStorageIds;
+}
+
+async function isStorageOwnedByUserProducts(
+  ctx: MutationCtx,
+  userId: string,
+  storageId: string
+) {
+  const ownedProducts = await ctx.db
+    .query("products")
+    .withIndex("by_user_id", (q) => q.eq("userId", userId))
+    .collect();
+
+  return ownedProducts.some((product) =>
+    getStorageIdsFromProduct(product).some((id) => id === storageId)
+  );
+}
 
 export const generateProductUploadUrl = mutation({
   args: {},
@@ -24,6 +50,49 @@ export const generateProductUploadUrl = mutation({
   },
 });
 
+export const registerUploadedFile = mutation({
+  args: {
+    storageId: v.id("_storage"),
+    fileName: v.string(),
+    fileSize: v.number(),
+    mimeType: v.optional(v.string()),
+  },
+  returns: v.id("product_uploads"),
+  handler: async (ctx, args) => {
+    const user = await authComponent.getAuthUser(ctx);
+    if (!user) {
+      throw new Error("Not authenticated");
+    }
+
+    const existingRegistration = await ctx.db
+      .query("product_uploads")
+      .withIndex("by_user_id_storage_id", (q) =>
+        q.eq("userId", user._id).eq("storageId", args.storageId)
+      )
+      .first();
+
+    if (existingRegistration) {
+      await ctx.db.patch(existingRegistration._id, {
+        fileName: args.fileName,
+        fileSize: args.fileSize,
+        mimeType: args.mimeType,
+        updatedAt: Date.now(),
+      });
+      return existingRegistration._id;
+    }
+
+    return await ctx.db.insert("product_uploads", {
+      userId: user._id,
+      storageId: args.storageId,
+      fileName: args.fileName,
+      fileSize: args.fileSize,
+      mimeType: args.mimeType,
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+    });
+  },
+});
+
 export const deleteUploadedFile = mutation({
   args: {
     storageId: v.id("_storage"),
@@ -33,6 +102,27 @@ export const deleteUploadedFile = mutation({
     const user = await authComponent.getAuthUser(ctx);
     if (!user) {
       throw new Error("Not authenticated");
+    }
+
+    const uploadRegistration = await ctx.db
+      .query("product_uploads")
+      .withIndex("by_user_id_storage_id", (q) =>
+        q.eq("userId", user._id).eq("storageId", args.storageId)
+      )
+      .first();
+
+    const isOwnedByProduct = await isStorageOwnedByUserProducts(
+      ctx,
+      user._id,
+      args.storageId
+    );
+
+    if (!(uploadRegistration || isOwnedByProduct)) {
+      throw new Error("Not authorized to delete this file");
+    }
+
+    if (uploadRegistration) {
+      await ctx.db.delete(uploadRegistration._id);
     }
 
     await ctx.storage.delete(args.storageId);
@@ -88,9 +178,31 @@ export const createProduct = mutation({
       throw new Error(`Maximum ${MAX_FILE_COUNT} product files allowed`);
     }
 
+    const requiredStorageIds = [
+      ...(args.coverStorageId ? [args.coverStorageId] : []),
+      ...args.files.map((file) => file.storageId),
+    ];
+
+    const uploadRegistrations = requiredStorageIds.length
+      ? await Promise.all(
+          requiredStorageIds.map((storageId) =>
+            ctx.db
+              .query("product_uploads")
+              .withIndex("by_user_id_storage_id", (q) =>
+                q.eq("userId", user._id).eq("storageId", storageId)
+              )
+              .first()
+          )
+        )
+      : [];
+
+    if (uploadRegistrations.some((registration) => !registration)) {
+      throw new Error("One or more files are not owned by the current user");
+    }
+
     const now = Date.now();
 
-    return await ctx.db.insert("products", {
+    const productId = await ctx.db.insert("products", {
       userId: user._id,
       name,
       description,
@@ -105,6 +217,14 @@ export const createProduct = mutation({
       createdAt: now,
       updatedAt: now,
     });
+
+    await Promise.all(
+      uploadRegistrations
+        .filter((registration) => registration !== null)
+        .map((registration) => ctx.db.delete(registration._id))
+    );
+
+    return productId;
   },
 });
 
