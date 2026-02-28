@@ -33,25 +33,29 @@ export function LeadsByStatusCard({
       </div>
 
       <div className="space-y-4">
-        {leads.map((lead) => (
-          <div className="space-y-2" key={lead.name}>
-            <div className="flex items-center justify-between text-sm">
-              <span className="font-medium text-foreground">{lead.name}</span>
-              <div className="flex items-center gap-1.5 tabular-nums">
-                <span className="text-muted-foreground">{lead.value}</span>
-                <span className="text-muted-foreground/60 text-xs">
-                  ({lead.percent}%)
-                </span>
+        {leads.length === 0 ? (
+          <p className="text-muted-foreground text-sm">No leads data yet.</p>
+        ) : (
+          leads.map((lead) => (
+            <div className="space-y-2" key={lead.name}>
+              <div className="flex items-center justify-between text-sm">
+                <span className="font-medium text-foreground">{lead.name}</span>
+                <div className="flex items-center gap-1.5 tabular-nums">
+                  <span className="text-muted-foreground">{lead.value}</span>
+                  <span className="text-muted-foreground/60 text-xs">
+                    ({lead.percent}%)
+                  </span>
+                </div>
+              </div>
+              <div className="h-2 w-full overflow-hidden rounded-full bg-gray-100 dark:bg-gray-800">
+                <div
+                  className={`${lead.color} h-full rounded-full transition-all`}
+                  style={{ width: `${lead.percent}%` }}
+                />
               </div>
             </div>
-            <div className="h-2 w-full overflow-hidden rounded-full bg-gray-100 dark:bg-gray-800">
-              <div
-                className={`${lead.color} h-full rounded-full transition-all`}
-                style={{ width: `${lead.percent}%` }}
-              />
-            </div>
-          </div>
-        ))}
+          ))
+        )}
       </div>
     </Card>
   );

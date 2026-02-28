@@ -15,6 +15,7 @@ import {
   useMemo,
   useState,
 } from "react";
+import { useDashboardMode } from "@/components/dashboard/dashboard-mode-context";
 
 export interface Notification {
   id: string;
@@ -37,11 +38,48 @@ const NotificationsContext = createContext<NotificationsContextType | null>(
   null
 );
 
-// Notifications are loaded from user activity.
-// Start empty in live mode until backend data is wired.
-const INITIAL_NOTIFICATIONS: Notification[] = [];
+const DEMO_NOTIFICATIONS: Notification[] = [
+  {
+    id: "1",
+    type: "order",
+    title: "New order received",
+    description: "Order #1234 from John Doe - $156.00",
+    time: "2 min ago",
+    read: false,
+    details:
+      "A new order has been placed by John Doe. The order includes 3 items totaling $156.00.",
+  },
+  {
+    id: "2",
+    type: "customer",
+    title: "New customer signed up",
+    description: "Sarah Johnson created an account",
+    time: "15 min ago",
+    read: false,
+    details:
+      "Sarah Johnson created a new customer account using sarah.johnson@email.com.",
+  },
+  {
+    id: "3",
+    type: "success",
+    title: "Revenue milestone reached",
+    description: "You've hit $50,000 in monthly sales",
+    time: "1 hour ago",
+    read: false,
+    details:
+      "Your store achieved $50,000 in monthly sales, up 25% versus the previous month.",
+  },
+  {
+    id: "4",
+    type: "alert",
+    title: "Low stock alert",
+    description: "Premium Headphones is running low (3 remaining)",
+    time: "3 hours ago",
+    read: true,
+    details: "The inventory for Premium Headphones is down to 3 units.",
+  },
+];
 
-// Type config for icons
 export const notificationTypeConfig: Record<
   Notification["type"],
   { icon: LucideIcon; bgColor: string; iconColor: string }
@@ -78,7 +116,10 @@ export function NotificationsProvider({
 }: {
   children: React.ReactNode;
 }) {
-  const [notifications, setNotifications] = useState(INITIAL_NOTIFICATIONS);
+  const dashboardMode = useDashboardMode();
+  const [notifications, setNotifications] = useState<Notification[]>(() =>
+    dashboardMode === "demo" ? DEMO_NOTIFICATIONS : []
+  );
 
   const unreadCount = useMemo(
     () => notifications.filter((n) => !n.read).length,

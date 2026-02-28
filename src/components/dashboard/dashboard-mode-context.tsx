@@ -3,7 +3,7 @@
 import { createContext, useContext } from "react";
 import type { DashboardDataMode } from "@/lib/dashboard-mode";
 
-const DashboardModeContext = createContext<DashboardDataMode>("empty");
+const DashboardModeContext = createContext<DashboardDataMode>("demo");
 
 export function DashboardModeProvider({
   mode,

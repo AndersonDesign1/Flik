@@ -22,6 +22,7 @@ interface ProgressBarListProps {
   viewAllLabel?: string;
   onViewAll?: () => void;
   formatValue?: (value: number) => string;
+  emptyMessage?: string;
 }
 
 export function ProgressBarList({
@@ -33,6 +34,7 @@ export function ProgressBarList({
   viewAllLabel = "View All",
   onViewAll,
   formatValue = (v) => v.toLocaleString(),
+  emptyMessage = "No data yet.",
 }: ProgressBarListProps) {
   return (
     <Card>
@@ -69,46 +71,50 @@ export function ProgressBarList({
       )}
 
       <div className={cn("space-y-4", (totalValue || trend) && "mt-5")}>
-        {items.map((item) => {
-          const renderIcon = () => {
-            if (typeof item.icon === "string") {
-              return <span className="text-base">{item.icon}</span>;
-            }
-            if (item.icon) {
-              return <item.icon className="h-4 w-4 text-muted-foreground" />;
-            }
-            return null;
-          };
-          return (
-            <div className="space-y-2" key={item.name}>
-              <div className="flex items-center justify-between text-sm">
-                <div className="flex items-center gap-2">
-                  {renderIcon()}
-                  <span className="font-medium text-foreground">
-                    {item.name}
-                  </span>
+        {items.length === 0 ? (
+          <p className="text-muted-foreground text-sm">{emptyMessage}</p>
+        ) : (
+          items.map((item) => {
+            const renderIcon = () => {
+              if (typeof item.icon === "string") {
+                return <span className="text-base">{item.icon}</span>;
+              }
+              if (item.icon) {
+                return <item.icon className="h-4 w-4 text-muted-foreground" />;
+              }
+              return null;
+            };
+            return (
+              <div className="space-y-2" key={item.name}>
+                <div className="flex items-center justify-between text-sm">
+                  <div className="flex items-center gap-2">
+                    {renderIcon()}
+                    <span className="font-medium text-foreground">
+                      {item.name}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1.5 tabular-nums">
+                    <span className="text-muted-foreground">
+                      {formatValue(item.value)}
+                    </span>
+                    <span className="text-muted-foreground/60 text-xs">
+                      ({item.percent}%)
+                    </span>
+                  </div>
                 </div>
-                <div className="flex items-center gap-1.5 tabular-nums">
-                  <span className="text-muted-foreground">
-                    {formatValue(item.value)}
-                  </span>
-                  <span className="text-muted-foreground/60 text-xs">
-                    ({item.percent}%)
-                  </span>
+                <div className="h-2 w-full overflow-hidden rounded-full bg-gray-100 dark:bg-gray-800">
+                  <div
+                    className={cn(
+                      "h-full rounded-full transition-all",
+                      item.color
+                    )}
+                    style={{ width: `${item.percent}%` }}
+                  />
                 </div>
               </div>
-              <div className="h-2 w-full overflow-hidden rounded-full bg-gray-100 dark:bg-gray-800">
-                <div
-                  className={cn(
-                    "h-full rounded-full transition-all",
-                    item.color
-                  )}
-                  style={{ width: `${item.percent}%` }}
-                />
-              </div>
-            </div>
-          );
-        })}
+            );
+          })
+        )}
       </div>
     </Card>
   );
