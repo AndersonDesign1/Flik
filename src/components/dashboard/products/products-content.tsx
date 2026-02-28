@@ -10,13 +10,30 @@ import {
 import { DataTable } from "@/components/dashboard/products/data-table";
 import { ProductDetail } from "@/components/dashboard/products/product-detail";
 import { Button } from "@/components/ui/button";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 
 interface ProductsContentProps {
   products: DashboardProduct[];
+  pagination?: {
+    hasPrevious: boolean;
+    hasNext: boolean;
+    onPrevious: () => void;
+    onNext: () => void;
+    isLoading?: boolean;
+  };
 }
 
-export function ProductsContent({ products }: ProductsContentProps) {
+export function ProductsContent({
+  products,
+  pagination,
+}: ProductsContentProps) {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const selectedProduct = products.find((p) => p.id === selectedId);
 
@@ -51,6 +68,49 @@ export function ProductsContent({ products }: ProductsContentProps) {
           selectedId={selectedId || undefined}
         />
       </div>
+
+      {pagination && (
+        <Pagination className="justify-end">
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationPrevious
+                aria-disabled={!pagination.hasPrevious || pagination.isLoading}
+                className={
+                  pagination.hasPrevious
+                    ? undefined
+                    : "pointer-events-none opacity-50"
+                }
+                href="#"
+                onClick={(event) => {
+                  event.preventDefault();
+                  if (!pagination.hasPrevious || pagination.isLoading) {
+                    return;
+                  }
+                  pagination.onPrevious();
+                }}
+              />
+            </PaginationItem>
+            <PaginationItem>
+              <PaginationNext
+                aria-disabled={!pagination.hasNext || pagination.isLoading}
+                className={
+                  pagination.hasNext
+                    ? undefined
+                    : "pointer-events-none opacity-50"
+                }
+                href="#"
+                onClick={(event) => {
+                  event.preventDefault();
+                  if (!pagination.hasNext || pagination.isLoading) {
+                    return;
+                  }
+                  pagination.onNext();
+                }}
+              />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
+      )}
 
       <Sheet
         onOpenChange={(open) => !open && setSelectedId(null)}
