@@ -10,22 +10,17 @@ interface WeekData {
 }
 
 interface MonthlyEarningsCardProps {
-  totalEarnings?: string;
+  totalEarnings: string;
   trend?: string;
-  weeks?: WeekData[];
+  trendLabel?: string;
+  weeks: WeekData[];
 }
 
-const DEFAULT_WEEKS: WeekData[] = [
-  { week: "Week 1", amount: 5420, percent: 65 },
-  { week: "Week 2", amount: 7230, percent: 85 },
-  { week: "Week 3", amount: 6180, percent: 75 },
-  { week: "Week 4", amount: 6060, percent: 72 },
-];
-
 export function MonthlyEarningsCard({
-  totalEarnings = "$24,890.00",
-  trend = "+32.5%",
-  weeks = DEFAULT_WEEKS,
+  totalEarnings,
+  trend,
+  trendLabel,
+  weeks,
 }: MonthlyEarningsCardProps) {
   return (
     <Card className="lg:col-span-2">
@@ -37,13 +32,19 @@ export function MonthlyEarningsCard({
           <div className="mt-1 font-bold text-2xl text-foreground tabular-nums tracking-tight">
             {totalEarnings}
           </div>
-          <div className="mt-0.5 flex items-center gap-1.5">
-            <span className="flex items-center gap-0.5 font-medium text-emerald-600 text-xs dark:text-emerald-400">
-              <TrendingUp className="h-3 w-3" />
-              {trend}
-            </span>
-            <span className="text-muted-foreground text-xs">vs last month</span>
-          </div>
+          {trend ? (
+            <div className="mt-0.5 flex items-center gap-1.5">
+              <span className="flex items-center gap-0.5 font-medium text-emerald-600 text-xs dark:text-emerald-400">
+                <TrendingUp className="h-3 w-3" />
+                {trend}
+              </span>
+              {trendLabel ? (
+                <span className="text-muted-foreground text-xs">
+                  {trendLabel}
+                </span>
+              ) : null}
+            </div>
+          ) : null}
         </div>
       </div>
 
@@ -51,24 +52,28 @@ export function MonthlyEarningsCard({
         <h4 className="font-medium text-muted-foreground text-xs uppercase tracking-wider">
           Weekly Breakdown
         </h4>
-        {weeks.map((week) => (
-          <div className="flex items-center gap-4" key={week.week}>
-            <span className="w-16 text-muted-foreground text-sm">
-              {week.week}
-            </span>
-            <div className="flex-1">
-              <div className="h-2.5 w-full overflow-hidden rounded-full bg-gray-100 dark:bg-gray-800">
-                <div
-                  className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-emerald-400 transition-all"
-                  style={{ width: `${week.percent}%` }}
-                />
+        {weeks.length === 0 ? (
+          <p className="text-muted-foreground text-sm">No earnings data yet.</p>
+        ) : (
+          weeks.map((week) => (
+            <div className="flex items-center gap-4" key={week.week}>
+              <span className="w-16 text-muted-foreground text-sm">
+                {week.week}
+              </span>
+              <div className="flex-1">
+                <div className="h-2.5 w-full overflow-hidden rounded-full bg-gray-100 dark:bg-gray-800">
+                  <div
+                    className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-emerald-400 transition-all"
+                    style={{ width: `${week.percent}%` }}
+                  />
+                </div>
               </div>
+              <span className="w-20 text-right font-semibold text-foreground text-sm tabular-nums">
+                ${week.amount.toLocaleString()}
+              </span>
             </div>
-            <span className="w-20 text-right font-semibold text-foreground text-sm tabular-nums">
-              ${week.amount.toLocaleString()}
-            </span>
-          </div>
-        ))}
+          ))
+        )}
       </div>
     </Card>
   );

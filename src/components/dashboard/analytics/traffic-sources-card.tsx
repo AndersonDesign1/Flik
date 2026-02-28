@@ -21,8 +21,8 @@ interface TrafficSourcesCardProps {
 
 export function TrafficSourcesCard({
   sources,
-  totalValue = "328,110",
-  trend = "+18.2%",
+  totalValue,
+  trend,
 }: TrafficSourcesCardProps) {
   const items: ProgressBarItem[] = sources.map((source) => ({
     name: source.name,

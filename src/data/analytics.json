@@ -89,5 +89,95 @@
       "trend": "-3%"
     }
   ],
-  "salesRevenue": "$1,631,241"
+  "salesRevenue": "$1,631,241",
+  "salesRevenueTrend": "-12.5%",
+  "salesRevenueTrendLabel": "vs yesterday",
+  "growth3m": "+25%",
+  "growth6m": "+25%",
+  "trafficTotalValue": "328,110",
+  "trafficTrend": "+18.2%",
+  "salesSeries": [
+    {
+      "name": "Jan",
+      "total": 85000
+    },
+    {
+      "name": "Feb",
+      "total": 92000
+    },
+    {
+      "name": "Mar",
+      "total": 78000
+    },
+    {
+      "name": "Apr",
+      "total": 95000
+    },
+    {
+      "name": "May",
+      "total": 180000
+    },
+    {
+      "name": "Jun",
+      "total": 145000
+    },
+    {
+      "name": "Jul",
+      "total": 125000
+    },
+    {
+      "name": "Aug",
+      "total": 135000
+    },
+    {
+      "name": "Sep",
+      "total": 155000
+    },
+    {
+      "name": "Oct",
+      "total": 142000
+    },
+    {
+      "name": "Nov",
+      "total": 165000
+    },
+    {
+      "name": "Dec",
+      "total": 195000
+    }
+  ],
+  "leads": [
+    {
+      "name": "New Leads",
+      "value": 134,
+      "percent": 63,
+      "color": "bg-blue-500"
+    },
+    {
+      "name": "Contacted",
+      "value": 121,
+      "percent": 57,
+      "color": "bg-amber-500"
+    },
+    {
+      "name": "Qualified",
+      "value": 81,
+      "percent": 38,
+      "color": "bg-emerald-500"
+    },
+    {
+      "name": "Converted",
+      "value": 47,
+      "percent": 22,
+      "color": "bg-indigo-500"
+    }
+  ],
+  "totalLeadsInPipeline": 213,
+  "webVisits": {
+    "totalVisits": "701.34m",
+    "trend": "-12.5%",
+    "trendLabel": "vs last month",
+    "uniqueVisitors": "485K",
+    "pageViews": "1.2M"
+  }
 }

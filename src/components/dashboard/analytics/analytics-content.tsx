@@ -25,16 +25,13 @@ export function AnalyticsContent({ data }: AnalyticsContentProps) {
 
   return (
     <div className="space-y-6">
-      {/* Metrics Row */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {data.metrics.map((item) => (
           <MetricCard key={item.title} {...item} />
         ))}
       </div>
 
-      {/* Chart + Traffic Sources Section */}
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-        {/* Revenue Chart - Takes 2 cols */}
         <Card className="lg:col-span-2">
           <div className="mb-4 flex items-center justify-between">
             <div>
@@ -44,50 +41,72 @@ export function AnalyticsContent({ data }: AnalyticsContentProps) {
               <div className="mt-1 font-bold text-2xl text-foreground tabular-nums tracking-tight">
                 {data.salesRevenue}
               </div>
-              <div className="mt-0.5 flex items-center gap-1.5">
-                <span className="flex items-center gap-0.5 font-medium text-red-500 text-xs">
-                  <TrendingDown className="h-3 w-3" />
-                  -12.5%
-                </span>
-                <span className="text-muted-foreground text-xs">
-                  vs yesterday
-                </span>
-              </div>
+              {data.salesRevenueTrend ? (
+                <div className="mt-0.5 flex items-center gap-1.5">
+                  <span className="flex items-center gap-0.5 font-medium text-red-500 text-xs">
+                    <TrendingDown className="h-3 w-3" />
+                    {data.salesRevenueTrend}
+                  </span>
+                  {data.salesRevenueTrendLabel ? (
+                    <span className="text-muted-foreground text-xs">
+                      {data.salesRevenueTrendLabel}
+                    </span>
+                  ) : null}
+                </div>
+              ) : null}
             </div>
             <div className="flex items-center gap-2">
-              <div className="rounded-lg border border-border/40 bg-surface-2 px-3 py-1.5">
-                <span className="text-muted-foreground text-xs">3m growth</span>
-                <div className="font-semibold text-emerald-600 text-sm dark:text-emerald-400">
-                  +25% ↑
+              {data.growth3m ? (
+                <div className="rounded-lg border border-border/40 bg-surface-2 px-3 py-1.5">
+                  <span className="text-muted-foreground text-xs">
+                    3m growth
+                  </span>
+                  <div className="font-semibold text-emerald-600 text-sm dark:text-emerald-400">
+                    {data.growth3m}
+                  </div>
                 </div>
-              </div>
-              <div className="rounded-lg border border-border/40 bg-surface-2 px-3 py-1.5">
-                <span className="text-muted-foreground text-xs">6m growth</span>
-                <div className="font-semibold text-emerald-600 text-sm dark:text-emerald-400">
-                  +25% ↑
+              ) : null}
+              {data.growth6m ? (
+                <div className="rounded-lg border border-border/40 bg-surface-2 px-3 py-1.5">
+                  <span className="text-muted-foreground text-xs">
+                    6m growth
+                  </span>
+                  <div className="font-semibold text-emerald-600 text-sm dark:text-emerald-400">
+                    {data.growth6m}
+                  </div>
                 </div>
-              </div>
+              ) : null}
             </div>
           </div>
-          <AnalyticsChart />
+          <AnalyticsChart data={data.salesSeries} />
         </Card>
 
-        <TrafficSourcesCard sources={data.trafficSources} />
+        <TrafficSourcesCard
+          sources={data.trafficSources}
+          totalValue={data.trafficTotalValue}
+          trend={data.trafficTrend}
+        />
       </div>
 
-      {/* Leads by Status + Web Visits */}
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-        <LeadsByStatusCard />
-        <WebVisitsCard />
+        <LeadsByStatusCard
+          leads={data.leads}
+          totalInPipeline={data.totalLeadsInPipeline ?? 0}
+        />
+        <WebVisitsCard
+          pageViews={data.webVisits?.pageViews ?? "0"}
+          totalVisits={data.webVisits?.totalVisits ?? "0"}
+          trend={data.webVisits?.trend}
+          trendLabel={data.webVisits?.trendLabel}
+          uniqueVisitors={data.webVisits?.uniqueVisitors ?? "0"}
+        />
       </div>
 
-      {/* Top Pages Table */}
       <TopPagesTable
         onRowClick={setSelectedPage}
         pages={data.topPages as PageData[]}
       />
 
-      {/* Sheet for Page Detail */}
       <Sheet
         onOpenChange={(open) => !open && setSelectedPage(null)}
         open={!!selectedPage}

@@ -23,6 +23,8 @@ export interface Customer {
   lastOrder: string;
   status: "active" | "inactive";
   image?: string;
+  customerSince?: string;
+  totalOrders?: number;
 }
 
 export const columns: ColumnDef<Customer>[] = [

@@ -66,8 +66,16 @@ export function CustomersContent({ data }: CustomersContentProps) {
 
       {/* Customer Segments Section */}
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-        <CustomerLTVCard topCustomers={data.customers as Customer[]} />
-        <CustomerSegmentsCard segments={data.segments} />
+        <CustomerLTVCard
+          topCustomers={data.customers as Customer[]}
+          totalLTV={data.totalLTV}
+          trend={data.ltvTrend}
+        />
+        <CustomerSegmentsCard
+          segments={data.segments}
+          totalValue={data.segmentsTotalValue}
+          trend={data.segmentsTrend}
+        />
       </div>
 
       {/* Content - Table with Search/Filter */}

@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 
 interface CustomerDetailProps {
-  customer: Customer;
+  customer: Customer & { customerSince?: string; totalOrders?: number };
 }
 
 const statusConfig = {
@@ -36,7 +36,6 @@ export function CustomerDetail({ customer }: CustomerDetailProps) {
 
   return (
     <div className="flex h-full min-h-0 flex-col">
-      {/* Header */}
       <div className="flex-shrink-0 border-border/40 border-b pb-6">
         <div className="flex min-w-0 items-center gap-3">
           <Avatar className="h-12 w-12">
@@ -66,9 +65,7 @@ export function CustomerDetail({ customer }: CustomerDetailProps) {
         </div>
       </div>
 
-      {/* Scrollable Content */}
       <div className="flex-1 space-y-6 overflow-y-auto py-6">
-        {/* Stats Cards */}
         <div className="grid grid-cols-2 gap-3">
           <div className="rounded-xl border border-border/40 bg-card p-4">
             <div className="mb-2 flex items-center gap-2 text-muted-foreground">
@@ -90,7 +87,6 @@ export function CustomerDetail({ customer }: CustomerDetailProps) {
           </div>
         </div>
 
-        {/* Customer Info Card */}
         <div className="space-y-3">
           <h3 className="font-medium text-muted-foreground text-xs uppercase tracking-wider">
             Customer Details
@@ -111,7 +107,7 @@ export function CustomerDetail({ customer }: CustomerDetailProps) {
                 <span className="text-sm">Customer Since</span>
               </div>
               <span className="font-medium text-foreground text-sm">
-                Jan 2024
+                {customer.customerSince ?? "Not available"}
               </span>
             </div>
             <div className="flex items-center justify-between p-4">
@@ -120,13 +116,12 @@ export function CustomerDetail({ customer }: CustomerDetailProps) {
                 <span className="text-sm">Total Orders</span>
               </div>
               <span className="font-medium text-foreground text-sm">
-                {Math.floor(customer.spent / 50) || 1}
+                {customer.totalOrders ?? "Not available"}
               </span>
             </div>
           </div>
         </div>
 
-        {/* Notes Section */}
         <div className="space-y-3">
           <h3 className="font-medium text-muted-foreground text-xs uppercase tracking-wider">
             Private Notes
@@ -146,7 +141,6 @@ export function CustomerDetail({ customer }: CustomerDetailProps) {
         </div>
       </div>
 
-      {/* Footer Actions */}
       <div className="flex flex-shrink-0 gap-3 border-border/40 border-t pt-6">
         <Button className="flex-1 gap-2" size="lg" variant="outline">
           Archive

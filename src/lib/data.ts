@@ -2,6 +2,11 @@ import { promises as fs } from "node:fs";
 import path from "node:path";
 import type { DashboardDataMode } from "@/lib/dashboard-mode";
 
+export interface ChartPoint {
+  name: string;
+  total: number;
+}
+
 // Dashboard data types
 export interface DashboardData {
   metrics: Array<{
@@ -29,6 +34,9 @@ export interface DashboardData {
     time: string;
   }>;
   totalRevenue: string;
+  revenueSeries: ChartPoint[];
+  countriesTotalValue?: string;
+  countriesTrend?: string;
 }
 
 export interface ProductsData {
@@ -51,6 +59,8 @@ export interface CustomersData {
     spent: number;
     lastOrder: string;
     status: string;
+    customerSince?: string;
+    totalOrders?: number;
   }>;
   metrics: Array<{
     title: string;
@@ -66,6 +76,10 @@ export interface CustomersData {
     percent: number;
     color: string;
   }>;
+  segmentsTotalValue?: string;
+  segmentsTrend?: string;
+  totalLTV?: string;
+  ltvTrend?: string;
 }
 
 export interface AnalyticsData {
@@ -91,6 +105,27 @@ export interface AnalyticsData {
     trend: string;
   }>;
   salesRevenue: string;
+  salesRevenueTrend?: string;
+  salesRevenueTrendLabel?: string;
+  growth3m?: string;
+  growth6m?: string;
+  trafficTotalValue?: string;
+  trafficTrend?: string;
+  salesSeries: ChartPoint[];
+  leads: Array<{
+    name: string;
+    value: number;
+    percent: number;
+    color: string;
+  }>;
+  totalLeadsInPipeline?: number;
+  webVisits?: {
+    totalVisits: string;
+    trend?: string;
+    trendLabel?: string;
+    uniqueVisitors: string;
+    pageViews: string;
+  };
 }
 
 export interface PayoutsData {
@@ -109,6 +144,18 @@ export interface PayoutsData {
     percent: number;
     color: string;
   }>;
+  paymentMethodsTotalValue?: string;
+  paymentMethodsTrend?: string;
+  monthlyEarnings?: {
+    totalEarnings: string;
+    trend?: string;
+    trendLabel?: string;
+    weeks: Array<{
+      week: string;
+      amount: number;
+      percent: number;
+    }>;
+  };
   transactions: Array<{
     id: string;
     date: string;
@@ -117,6 +164,7 @@ export interface PayoutsData {
     method: string;
     account: string;
     status: string;
+    referenceId?: string;
   }>;
 }
 
@@ -138,6 +186,7 @@ function getEmptyDashboardData(): DashboardData {
     countries: [],
     transactions: [],
     totalRevenue: "$0",
+    revenueSeries: [],
   };
 }
 
@@ -189,6 +238,14 @@ function getEmptyAnalyticsData(): AnalyticsData {
     trafficSources: [],
     topPages: [],
     salesRevenue: "$0",
+    salesSeries: [],
+    leads: [],
+    totalLeadsInPipeline: 0,
+    webVisits: {
+      totalVisits: "0",
+      uniqueVisitors: "0",
+      pageViews: "0",
+    },
   };
 }
 
@@ -221,6 +278,10 @@ function getEmptyPayoutsData(): PayoutsData {
       },
     ],
     paymentMethods: [],
+    monthlyEarnings: {
+      totalEarnings: "$0",
+      weeks: [],
+    },
     transactions: [],
   };
 }

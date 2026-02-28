@@ -21,8 +21,8 @@ interface CountryStatsProps {
 
 export function CountryStats({
   countries,
-  totalValue = "38,512",
-  trend = "+39.22%",
+  totalValue,
+  trend,
 }: CountryStatsProps) {
   const items: ProgressBarItem[] = countries.map((country) => ({
     name: country.name,

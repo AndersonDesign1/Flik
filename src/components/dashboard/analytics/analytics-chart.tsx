@@ -10,23 +10,17 @@ import {
   YAxis,
 } from "recharts";
 import { ClientOnly } from "@/components/shared/client-only";
+import type { ChartPoint } from "@/lib/data";
 
-const data = [
-  { name: "Jan", total: 85_000 },
-  { name: "Feb", total: 92_000 },
-  { name: "Mar", total: 78_000 },
-  { name: "Apr", total: 95_000 },
-  { name: "May", total: 180_000 },
-  { name: "Jun", total: 145_000 },
-  { name: "Jul", total: 125_000 },
-  { name: "Aug", total: 135_000 },
-  { name: "Sep", total: 155_000 },
-  { name: "Oct", total: 142_000 },
-  { name: "Nov", total: 165_000 },
-  { name: "Dec", total: 195_000 },
-];
+interface AnalyticsChartProps {
+  data: ChartPoint[];
+}
 
-export function AnalyticsChart() {
+export function AnalyticsChart({ data }: AnalyticsChartProps) {
+  if (data.length === 0) {
+    return <div className="h-[280px] rounded-lg bg-muted/20" />;
+  }
+
   return (
     <ClientOnly
       fallback={<div className="h-[280px] w-full animate-pulse bg-muted/20" />}

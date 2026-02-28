@@ -4,13 +4,16 @@ import { ChevronDown } from "lucide-react";
 import { OverviewChart } from "@/components/dashboard/overview-chart";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import type { ChartPoint } from "@/lib/data";
 
 interface RevenueChartCardProps {
-  totalRevenue?: string;
+  totalRevenue: string;
+  series: ChartPoint[];
 }
 
 export function RevenueChartCard({
-  totalRevenue = "$72,592",
+  totalRevenue,
+  series,
 }: RevenueChartCardProps) {
   return (
     <Card className="lg:col-span-2">
@@ -28,7 +31,7 @@ export function RevenueChartCard({
           <ChevronDown className="h-3 w-3" />
         </Button>
       </div>
-      <OverviewChart />
+      <OverviewChart data={series} />
     </Card>
   );
 }

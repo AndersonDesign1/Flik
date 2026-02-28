@@ -31,8 +31,15 @@ export function DashboardContent({ data }: DashboardContentProps) {
 
       {/* Chart + Country Section */}
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-        <RevenueChartCard totalRevenue={data.totalRevenue} />
-        <CountryStats countries={data.countries} />
+        <RevenueChartCard
+          series={data.revenueSeries}
+          totalRevenue={data.totalRevenue}
+        />
+        <CountryStats
+          countries={data.countries}
+          totalValue={data.countriesTotalValue}
+          trend={data.countriesTrend}
+        />
       </div>
 
       {/* Transactions Table */}

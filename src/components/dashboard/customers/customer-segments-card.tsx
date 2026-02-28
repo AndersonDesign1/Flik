@@ -20,8 +20,8 @@ interface CustomerSegmentsCardProps {
 
 export function CustomerSegmentsCard({
   segments,
-  totalValue = "4,972",
-  trend = "+19.08%",
+  totalValue,
+  trend,
 }: CustomerSegmentsCardProps) {
   const items: ProgressBarItem[] = segments.map((segment) => ({
     name: segment.name,

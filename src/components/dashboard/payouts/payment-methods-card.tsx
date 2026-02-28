@@ -20,8 +20,8 @@ interface PaymentMethodsCardProps {
 
 export function PaymentMethodsCard({
   methods,
-  totalValue = "$847,520",
-  trend = "+24.8%",
+  totalValue,
+  trend,
 }: PaymentMethodsCardProps) {
   const items: ProgressBarItem[] = methods.map((method) => ({
     name: method.name,

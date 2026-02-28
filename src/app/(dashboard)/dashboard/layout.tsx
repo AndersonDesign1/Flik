@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { DashboardModeProvider } from "@/components/dashboard/dashboard-mode-context";
 import { DemoModeBanner } from "@/components/dashboard/demo-mode-banner";
 import { DashboardSidebar } from "@/components/dashboard/sidebar";
 import { DashboardShell } from "@/components/shared/dashboard-shell";
@@ -39,7 +40,9 @@ export default async function DashboardLayout({
     >
       <div className="space-y-4">
         <DemoModeBanner mode={dashboardMode} />
-        {children}
+        <DashboardModeProvider mode={dashboardMode}>
+          {children}
+        </DashboardModeProvider>
       </div>
     </DashboardShell>
   );

@@ -101,5 +101,57 @@
       "time": "5:54 PM"
     }
   ],
-  "totalRevenue": "$72,592"
+  "totalRevenue": "$72,592",
+  "revenueSeries": [
+    {
+      "name": "Jan",
+      "total": 12000
+    },
+    {
+      "name": "Feb",
+      "total": 15000
+    },
+    {
+      "name": "Mar",
+      "total": 18000
+    },
+    {
+      "name": "Apr",
+      "total": 22000
+    },
+    {
+      "name": "May",
+      "total": 28000
+    },
+    {
+      "name": "Jun",
+      "total": 32000
+    },
+    {
+      "name": "Jul",
+      "total": 39952
+    },
+    {
+      "name": "Aug",
+      "total": 42000
+    },
+    {
+      "name": "Sep",
+      "total": 48000
+    },
+    {
+      "name": "Oct",
+      "total": 55000
+    },
+    {
+      "name": "Nov",
+      "total": 62000
+    },
+    {
+      "name": "Dec",
+      "total": 72000
+    }
+  ],
+  "countriesTotalValue": "38,512",
+  "countriesTrend": "+39.22%"
 }
