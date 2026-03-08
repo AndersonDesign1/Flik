@@ -3,6 +3,7 @@
 import type { LucideIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { Badge } from "@/components/ui/badge";
 import {
   Sidebar,
   SidebarContent,
@@ -15,6 +16,8 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import { useCurrentRole } from "@/hooks/use-auth";
+import { getRolePresentation } from "@/lib/roles";
 
 export interface NavItem {
   href: string;
@@ -29,13 +32,17 @@ export interface RoleSidebarProps {
   footerItems?: NavItem[];
 }
 
+const EMPTY_NAV_ITEMS: NavItem[] = [];
+
 export function RoleSidebar({
   title,
   titleShort,
   navItems,
-  footerItems = [],
+  footerItems = EMPTY_NAV_ITEMS,
 }: RoleSidebarProps) {
   const pathname = usePathname();
+  const { role, isLoading } = useCurrentRole();
+  const rolePresentation = getRolePresentation(role);
 
   return (
     <Sidebar>
@@ -47,9 +54,19 @@ export function RoleSidebar({
           <div className="flex size-7 items-center justify-center rounded-lg bg-primary-violet text-white">
             <span className="font-bold text-xs">{titleShort}</span>
           </div>
-          <span className="font-semibold text-sm group-data-[collapsible=icon]:hidden">
-            {title}
-          </span>
+          <div className="flex min-w-0 flex-col gap-1 group-data-[collapsible=icon]:hidden">
+            <span className="font-semibold text-sm">{title}</span>
+            {isLoading ? (
+              <div className="h-5 w-16 animate-pulse rounded-full bg-muted" />
+            ) : (
+              <Badge
+                className="w-fit rounded-full px-2 py-0 text-[10px] uppercase tracking-[0.14em]"
+                variant={rolePresentation.badgeVariant}
+              >
+                {rolePresentation.label}
+              </Badge>
+            )}
+          </div>
         </Link>
       </SidebarHeader>
 

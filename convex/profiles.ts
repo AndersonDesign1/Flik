@@ -4,6 +4,22 @@ import { authComponent } from "./auth";
 import { inviteToRoleSchema, updateProfileSchema } from "./validation";
 
 const WHITESPACE_REGEX = /\s+/;
+const roleHierarchy = {
+  user: 0,
+  staff: 1,
+  admin: 2,
+  super_admin: 3,
+} as const;
+
+type PlatformRole = keyof typeof roleHierarchy;
+
+function getRoleLevel(role?: string): number {
+  return roleHierarchy[(role ?? "user") as PlatformRole] ?? 0;
+}
+
+function canManageUsers(role?: string): boolean {
+  return role === "admin" || role === "super_admin";
+}
 
 function splitName(fullName?: string | null) {
   const trimmed = fullName?.trim();
@@ -89,7 +105,7 @@ export const getAllUsers = query({
       .withIndex("by_user_id", (q) => q.eq("userId", user._id))
       .first();
 
-    if (profile?.role !== "admin") {
+    if (!canManageUsers(profile?.role)) {
       return [];
     }
 
@@ -351,12 +367,8 @@ export const claimRoleInvite = mutation({
     const nameParts = splitName(user.name);
 
     if (existingProfile) {
-      const currentRole = existingProfile.role ?? "user";
-      const roleHierarchy = { user: 0, staff: 1, admin: 2 };
-      const currentLevel =
-        roleHierarchy[currentRole as keyof typeof roleHierarchy] ?? 0;
-      const inviteLevel =
-        roleHierarchy[invitedRole as keyof typeof roleHierarchy] ?? 0;
+      const currentLevel = getRoleLevel(existingProfile.role);
+      const inviteLevel = getRoleLevel(invitedRole);
 
       if (inviteLevel > currentLevel) {
         await ctx.db.patch(existingProfile._id, {
@@ -387,7 +399,11 @@ export const claimRoleInvite = mutation({
 export const inviteToRole = mutation({
   args: {
     email: v.string(),
-    role: v.union(v.literal("admin"), v.literal("staff")),
+    role: v.union(
+      v.literal("admin"),
+      v.literal("staff"),
+      v.literal("super_admin")
+    ),
   },
   returns: v.id("role_invites"),
   handler: async (ctx, args) => {
@@ -405,8 +421,12 @@ export const inviteToRole = mutation({
       .withIndex("by_user_id", (q) => q.eq("userId", user._id))
       .first();
 
-    if (profile?.role !== "admin") {
+    if (!canManageUsers(profile?.role)) {
       throw new Error("Only admins can invite users to roles");
+    }
+
+    if (validated.role === "super_admin" && profile?.role !== "super_admin") {
+      throw new Error("Only super admins can invite another super admin");
     }
 
     // Check if invite already exists (email already normalized by Zod)
@@ -452,7 +472,7 @@ export const revokeInvite = mutation({
       .withIndex("by_user_id", (q) => q.eq("userId", user._id))
       .first();
 
-    if (profile?.role !== "admin") {
+    if (!canManageUsers(profile?.role)) {
       throw new Error("Only admins can revoke invites");
     }
 
@@ -493,7 +513,7 @@ export const getPendingInvites = query({
       .withIndex("by_user_id", (q) => q.eq("userId", user._id))
       .first();
 
-    if (profile?.role !== "admin") {
+    if (!canManageUsers(profile?.role)) {
       return [];
     }
 
@@ -504,5 +524,102 @@ export const getPendingInvites = query({
       role: invite.role,
       createdAt: invite.createdAt,
     }));
+  },
+});
+
+export const updateUserRole = mutation({
+  args: {
+    userId: v.string(),
+    role: v.union(
+      v.literal("user"),
+      v.literal("staff"),
+      v.literal("admin"),
+      v.literal("super_admin")
+    ),
+  },
+  returns: v.boolean(),
+  handler: async (ctx, args) => {
+    const actor = await authComponent.getAuthUser(ctx);
+    if (!actor) {
+      throw new Error("Not authenticated");
+    }
+
+    const actorProfile = await ctx.db
+      .query("profiles")
+      .withIndex("by_user_id", (q) => q.eq("userId", actor._id))
+      .first();
+
+    if (!canManageUsers(actorProfile?.role)) {
+      throw new Error("Only admins can update user roles");
+    }
+
+    if (args.role === "super_admin" && actorProfile?.role !== "super_admin") {
+      throw new Error("Only super admins can assign super admin role");
+    }
+
+    const targetProfile = await ctx.db
+      .query("profiles")
+      .withIndex("by_user_id", (q) => q.eq("userId", args.userId))
+      .first();
+
+    if (!targetProfile) {
+      throw new Error("Target user profile not found");
+    }
+
+    if (
+      actorProfile?.role !== "super_admin" &&
+      getRoleLevel(targetProfile.role) >= getRoleLevel("admin")
+    ) {
+      throw new Error("Only super admins can modify admin accounts");
+    }
+
+    await ctx.db.patch(targetProfile._id, {
+      role: args.role,
+      updatedAt: Date.now(),
+    });
+
+    return true;
+  },
+});
+
+export const promoteSelfToSuperAdmin = mutation({
+  args: {},
+  returns: v.boolean(),
+  handler: async (ctx) => {
+    const user = await authComponent.getAuthUser(ctx);
+    if (!user) {
+      throw new Error("Not authenticated");
+    }
+
+    if (!user.emailVerified) {
+      throw new Error("Email must be verified before role elevation");
+    }
+
+    const existingSuperAdmin = await ctx.db
+      .query("profiles")
+      .filter((q) => q.eq(q.field("role"), "super_admin"))
+      .first();
+
+    if (existingSuperAdmin) {
+      throw new Error("A super admin already exists. Ask them for access.");
+    }
+
+    const profile = await ctx.db
+      .query("profiles")
+      .withIndex("by_user_id", (q) => q.eq("userId", user._id))
+      .first();
+
+    if (!profile) {
+      throw new Error(
+        "Complete onboarding before requesting super admin access"
+      );
+    }
+
+    await ctx.db.patch(profile._id, {
+      role: "super_admin",
+      updatedAt: Date.now(),
+    });
+
+    return true;
   },
 });

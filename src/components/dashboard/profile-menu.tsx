@@ -4,6 +4,7 @@ import { CreditCard, HelpCircle, LogOut, Settings, User } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,8 +13,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useSession } from "@/hooks/use-auth";
+import { useCurrentRole, useSession } from "@/hooks/use-auth";
 import { authClient } from "@/lib/auth-client";
+import { getRolePresentation } from "@/lib/roles";
 
 function getInitials(name?: string | null): string {
   if (!name) {
@@ -32,6 +34,7 @@ function getInitials(name?: string | null): string {
 export function ProfileMenu() {
   const router = useRouter();
   const { user, isLoading } = useSession();
+  const { role, isLoading: isRoleLoading } = useCurrentRole();
 
   const handleLogout = async () => {
     await authClient.signOut();
@@ -48,6 +51,7 @@ export function ProfileMenu() {
   }
 
   const initials = getInitials(user.name);
+  const rolePresentation = getRolePresentation(role);
 
   return (
     <DropdownMenu modal={false}>
@@ -70,10 +74,20 @@ export function ProfileMenu() {
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56">
         <DropdownMenuLabel className="font-normal">
-          <div className="flex flex-col gap-1">
-            <p className="font-medium text-sm leading-none">
-              {user.name ?? "Unnamed User"}
-            </p>
+          <div className="flex flex-col gap-2">
+            <div className="flex items-center justify-between gap-2">
+              <p className="font-medium text-sm leading-none">
+                {user.name ?? "Unnamed User"}
+              </p>
+              {!isRoleLoading && (
+                <Badge
+                  className="rounded-full px-2 py-0 text-[10px] uppercase tracking-[0.14em]"
+                  variant={rolePresentation.badgeVariant}
+                >
+                  {rolePresentation.shortLabel}
+                </Badge>
+              )}
+            </div>
             <p className="text-muted-foreground text-xs leading-none">
               {user.email}
             </p>

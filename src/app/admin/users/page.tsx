@@ -1,14 +1,16 @@
 "use client";
 
-import { useQuery } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import {
   MoreHorizontal,
   Shield,
   ShoppingBag,
+  Sparkles,
   UserCog,
   Users,
 } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
 import { InviteRoleDialog } from "@/components/admin/invite-role-dialog";
 import { StatsGrid } from "@/components/shared/stats-grid";
 import { TableToolbar } from "@/components/shared/table-toolbar";
@@ -31,6 +33,8 @@ import {
 import { cn } from "@/lib/utils";
 import { api } from "../../../../convex/_generated/api";
 
+type Role = "user" | "staff" | "admin" | "super_admin";
+
 const roleConfig = {
   user: {
     bg: "bg-gray-50 dark:bg-gray-500/10",
@@ -41,6 +45,11 @@ const roleConfig = {
     bg: "bg-primary-violet-50 dark:bg-primary-violet/10",
     text: "text-primary-violet dark:text-primary-violet",
     border: "border-primary-violet-200 dark:border-primary-violet/20",
+  },
+  super_admin: {
+    bg: "bg-amber-50 dark:bg-amber-500/10",
+    text: "text-amber-700 dark:text-amber-400",
+    border: "border-amber-200 dark:border-amber-500/20",
   },
   staff: {
     bg: "bg-accent-teal-50 dark:bg-accent-teal/10",
@@ -60,12 +69,39 @@ function formatDate(timestamp: number): string {
 export default function AdminUsersPage() {
   const [searchValue, setSearchValue] = useState("");
   const users = useQuery(api.profiles.getAllUsers) ?? [];
+  const myRole = useQuery(api.profiles.getRole);
+  const updateUserRole = useMutation(api.profiles.updateUserRole);
+  const promoteSelfToSuperAdmin = useMutation(
+    api.profiles.promoteSelfToSuperAdmin
+  );
 
   const filteredUsers = users.filter(
     (user) =>
       (user.name?.toLowerCase() ?? "").includes(searchValue.toLowerCase()) ||
       user.email.toLowerCase().includes(searchValue.toLowerCase())
   );
+
+  const handleRoleChange = async (userId: string, role: Role) => {
+    try {
+      await updateUserRole({ userId, role });
+      toast.success(`Role updated to ${role.replace("_", " ")}`);
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : "Failed to update role"
+      );
+    }
+  };
+
+  const handleBootstrapSuperAdmin = async () => {
+    try {
+      await promoteSelfToSuperAdmin({});
+      toast.success("You are now a super admin");
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : "Failed to elevate role"
+      );
+    }
+  };
 
   const userMetrics = [
     {
@@ -91,7 +127,9 @@ export default function AdminUsersPage() {
     },
     {
       title: "Admins",
-      value: users.filter((u) => u.role === "admin").length.toString(),
+      value: users
+        .filter((u) => u.role === "admin" || u.role === "super_admin")
+        .length.toString(),
       change: "Platform admins",
       changeType: "neutral" as const,
       icon: Shield,
@@ -100,14 +138,22 @@ export default function AdminUsersPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-2">
         <div className="flex flex-col gap-1">
           <h2 className="font-semibold text-2xl text-foreground">Users</h2>
           <p className="text-muted-foreground text-sm">
             Manage all users on the platform.
           </p>
         </div>
-        <InviteRoleDialog />
+        <div className="flex items-center gap-2">
+          {myRole !== "super_admin" && (
+            <Button onClick={handleBootstrapSuperAdmin} variant="outline">
+              <Sparkles className="size-4" />
+              Become Super Admin
+            </Button>
+          )}
+          <InviteRoleDialog />
+        </div>
       </div>
 
       <StatsGrid metrics={userMetrics} />
@@ -173,7 +219,7 @@ export default function AdminUsersPage() {
                           role.border
                         )}
                       >
-                        {user.role}
+                        {user.role.replace("_", " ")}
                       </span>
                     </TableCell>
                     <TableCell className="py-4 text-muted-foreground">
@@ -192,11 +238,31 @@ export default function AdminUsersPage() {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem>View details</DropdownMenuItem>
-                          <DropdownMenuItem>Change role</DropdownMenuItem>
-                          <DropdownMenuItem className="text-error-red">
-                            Suspend user
+                          <DropdownMenuItem
+                            onClick={() => handleRoleChange(user._id, "user")}
+                          >
+                            Set as User
                           </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => handleRoleChange(user._id, "staff")}
+                          >
+                            Set as Staff
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => handleRoleChange(user._id, "admin")}
+                          >
+                            Set as Admin
+                          </DropdownMenuItem>
+                          {myRole === "super_admin" && (
+                            <DropdownMenuItem
+                              onClick={() =>
+                                handleRoleChange(user._id, "super_admin")
+                              }
+                            >
+                              <Sparkles className="size-4" />
+                              Set as Super Admin
+                            </DropdownMenuItem>
+                          )}
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </TableCell>

@@ -37,13 +37,13 @@ export const updateProfileSchema = z.object({
 });
 
 /**
- * Schema for inviting users to admin/staff roles.
+ * Schema for inviting users to privileged roles.
  */
 export const inviteToRoleSchema = z.object({
   email: z
     .email("Invalid email format")
     .transform((val) => val.toLowerCase().trim()),
-  role: z.enum(["admin", "staff"]),
+  role: z.enum(["admin", "staff", "super_admin"]),
 });
 
 export type UpdateProfileInput = z.infer<typeof updateProfileSchema>;

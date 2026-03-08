@@ -4,9 +4,8 @@ import { useQuery } from "convex/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef } from "react";
 import { authClient } from "@/lib/auth-client";
+import type { Role } from "@/lib/roles";
 import { api } from "../../convex/_generated/api";
-
-type Role = "user" | "staff" | "admin";
 
 /**
  * Session hook using Better Auth's built-in nanostore caching.
@@ -42,11 +41,18 @@ export function useRequireAuth(redirectTo = "/login") {
   return { user, isLoading, isAuthenticated: !!user };
 }
 
+export function useCurrentRole() {
+  const roleData = useQuery(api.profiles.getRole);
+
+  return {
+    role: (roleData ?? "user") as Role,
+    isLoading: roleData === undefined,
+  };
+}
+
 export function useRequireRole(requiredRole: Role | Role[]) {
   const { user, isLoading: sessionLoading } = useSession();
-  const roleData = useQuery(api.profiles.getRole);
-  const isLoadingRole = roleData === undefined;
-  const currentRole = (roleData ?? "user") as Role;
+  const { role: currentRole, isLoading: isLoadingRole } = useCurrentRole();
 
   const allowedRoles = Array.isArray(requiredRole)
     ? requiredRole
@@ -54,7 +60,9 @@ export function useRequireRole(requiredRole: Role | Role[]) {
 
   const hasAccess =
     allowedRoles.includes(currentRole) ||
-    (allowedRoles.includes("staff") && currentRole === "admin");
+    (allowedRoles.includes("staff") &&
+      (currentRole === "admin" || currentRole === "super_admin")) ||
+    (allowedRoles.includes("admin") && currentRole === "super_admin");
 
   return {
     user,
