@@ -103,9 +103,9 @@ export default async function SuperAdminPage() {
             <h3 className="font-semibold text-foreground">Seller Snapshot</h3>
             <Link
               className="font-medium text-primary-violet text-sm hover:underline"
-              href="/super-admin/admins"
+              href="/super-admin/sellers"
             >
-              View team
+              View sellers
             </Link>
           </div>
           <div className="space-y-3">
