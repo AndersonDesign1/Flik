@@ -46,5 +46,28 @@ export const inviteToRoleSchema = z.object({
   role: z.enum(["admin", "staff", "super_admin"]),
 });
 
+/**
+ * Schema for buyer-to-seller store activation.
+ */
+export const createStoreSchema = z.object({
+  description: z
+    .string()
+    .trim()
+    .max(280, "Description must be 280 characters or less")
+    .optional(),
+  name: z
+    .string()
+    .trim()
+    .min(2, "Store name must be at least 2 characters")
+    .max(100, "Store name must be 100 characters or less"),
+  slug: z
+    .string()
+    .trim()
+    .min(3, "Store URL must be at least 3 characters")
+    .max(60, "Store URL must be 60 characters or less")
+    .optional(),
+});
+
 export type UpdateProfileInput = z.infer<typeof updateProfileSchema>;
 export type InviteToRoleInput = z.infer<typeof inviteToRoleSchema>;
+export type CreateStoreInput = z.infer<typeof createStoreSchema>;

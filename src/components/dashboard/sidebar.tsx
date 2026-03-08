@@ -3,6 +3,7 @@
 import {
   BarChart3,
   Box,
+  BriefcaseBusiness,
   CreditCard,
   HelpCircle,
   LayoutGrid,
@@ -39,6 +40,7 @@ const NAV_ITEMS = [
 ];
 
 const FOOTER_ITEMS = [
+  { href: "/account", label: "Buyer Workspace", icon: BriefcaseBusiness },
   { href: "/dashboard/help", label: "Help Center", icon: HelpCircle },
   { href: "/dashboard/feedback", label: "Feedback", icon: MessageSquare },
   { href: "/dashboard/settings", label: "Settings", icon: Settings },
