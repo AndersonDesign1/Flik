@@ -13,18 +13,29 @@ export default defineSchema({
       v.union(v.literal("buyer"), v.literal("seller"), v.literal("both"))
     ),
     role: v.optional(
-      v.union(v.literal("user"), v.literal("staff"), v.literal("admin"))
+      v.union(
+        v.literal("user"),
+        v.literal("staff"),
+        v.literal("admin"),
+        v.literal("super_admin")
+      )
     ),
     storeName: v.optional(v.string()),
     offerTypes: v.optional(v.array(v.string())),
     onboardingCompleted: v.optional(v.boolean()),
     createdAt: v.float64(),
     updatedAt: v.float64(),
-  }).index("by_user_id", ["userId"]),
+  })
+    .index("by_user_id", ["userId"])
+    .index("by_role", ["role"]),
 
   role_invites: defineTable({
     email: v.string(),
-    role: v.union(v.literal("admin"), v.literal("staff")),
+    role: v.union(
+      v.literal("admin"),
+      v.literal("staff"),
+      v.literal("super_admin")
+    ),
     invitedBy: v.string(),
     createdAt: v.float64(),
   }).index("by_email", ["email"]),

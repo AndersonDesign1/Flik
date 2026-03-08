@@ -26,8 +26,8 @@ export default async function AdminLayout({
   // Server-side role check via Convex
   const role = await fetchAuthQuery(api.profiles.getRole);
 
-  // Only admin role can access
-  if (role !== "admin") {
+  // Only admin and super admin roles can access
+  if (role !== "admin" && role !== "super_admin") {
     return <UnauthorizedView isAuthenticated />;
   }
 

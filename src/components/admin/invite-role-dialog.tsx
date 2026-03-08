@@ -25,7 +25,7 @@ import {
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
 
-type Role = "admin" | "staff";
+type Role = "admin" | "staff" | "super_admin";
 
 interface PendingInvite {
   _id: Id<"role_invites">;
@@ -43,27 +43,28 @@ export function InviteRoleDialog() {
   const inviteToRole = useMutation(api.profiles.inviteToRole);
   const revokeInvite = useMutation(api.profiles.revokeInvite);
   const pendingInvites = useQuery(api.profiles.getPendingInvites);
+  const currentRole = useQuery(api.profiles.getRole);
 
   const handleInvite = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!email.trim()) {
+    const trimmedEmail = email.trim();
+    if (!trimmedEmail) {
       toast.error("Please enter an email address");
       return;
     }
 
     setIsLoading(true);
     try {
-      await inviteToRole({ email: email.trim(), role });
-      toast.success(`Invited ${email} as ${role}`);
+      await inviteToRole({ email: trimmedEmail, role });
+      toast.success(`Invited ${trimmedEmail} as ${role}`);
       setEmail("");
     } catch (error) {
-      toast.error(
-        error instanceof Error ? error.message : "Failed to send invite"
-      );
-    } finally {
-      setIsLoading(false);
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to send invite";
+      toast.error(errorMessage);
     }
+    setIsLoading(false);
   };
 
   const handleRevoke = async (inviteEmail: string) => {
@@ -87,8 +88,8 @@ export function InviteRoleDialog() {
         <DialogHeader>
           <DialogTitle>Invite User to Role</DialogTitle>
           <DialogDescription>
-            Invite a user to become an admin or staff member. They will receive
-            the role when they next sign up or log in.
+            Invite a user to a privileged role. They will receive the role when
+            they next sign up or log in.
           </DialogDescription>
         </DialogHeader>
 
@@ -117,6 +118,9 @@ export function InviteRoleDialog() {
               <SelectContent>
                 <SelectItem value="staff">Staff</SelectItem>
                 <SelectItem value="admin">Admin</SelectItem>
+                {currentRole === "super_admin" && (
+                  <SelectItem value="super_admin">Super Admin</SelectItem>
+                )}
               </SelectContent>
             </Select>
           </div>
