@@ -11,7 +11,7 @@ const SUPER_ADMIN_NAV_ITEMS = [
 ];
 
 const SUPER_ADMIN_FOOTER_ITEMS = [
-  { href: "/admin/settings", label: "Settings", icon: Settings },
+  { href: "/account/settings", label: "Settings", icon: Settings },
 ];
 
 export function SuperAdminSidebar() {

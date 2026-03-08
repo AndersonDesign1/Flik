@@ -64,9 +64,9 @@ export function ProfileMenu() {
 
   const initials = getInitials(user.name);
   const rolePresentation = getRolePresentation(role);
-  const settingsHref = pathname.startsWith("/account")
-    ? "/account/settings"
-    : "/dashboard/settings";
+  const settingsHref = pathname.startsWith("/dashboard")
+    ? "/dashboard/settings"
+    : "/account/settings";
 
   return (
     <DropdownMenu modal={false}>
