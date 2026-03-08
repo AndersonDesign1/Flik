@@ -25,7 +25,9 @@ export default defineSchema({
     onboardingCompleted: v.optional(v.boolean()),
     createdAt: v.float64(),
     updatedAt: v.float64(),
-  }).index("by_user_id", ["userId"]),
+  })
+    .index("by_user_id", ["userId"])
+    .index("by_role", ["role"]),
 
   role_invites: defineTable({
     email: v.string(),

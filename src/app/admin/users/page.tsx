@@ -14,6 +14,16 @@ import { toast } from "sonner";
 import { InviteRoleDialog } from "@/components/admin/invite-role-dialog";
 import { StatsGrid } from "@/components/shared/stats-grid";
 import { TableToolbar } from "@/components/shared/table-toolbar";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {
@@ -30,10 +40,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import type { Role } from "@/lib/roles";
 import { cn } from "@/lib/utils";
 import { api } from "../../../../convex/_generated/api";
-
-type Role = "user" | "staff" | "admin" | "super_admin";
 
 const roleConfig = {
   user: {
@@ -58,6 +67,17 @@ const roleConfig = {
   },
 } as const;
 
+type PendingAction =
+  | {
+      type: "bootstrap";
+    }
+  | {
+      type: "role-change";
+      nextRole: Role;
+      userEmail: string;
+      userId: string;
+    };
+
 function formatDate(timestamp: number): string {
   return new Date(timestamp).toLocaleDateString("en-US", {
     month: "short",
@@ -68,12 +88,16 @@ function formatDate(timestamp: number): string {
 
 export default function AdminUsersPage() {
   const [searchValue, setSearchValue] = useState("");
+  const [pendingAction, setPendingAction] = useState<PendingAction | null>(
+    null
+  );
   const users = useQuery(api.profiles.getAllUsers) ?? [];
   const myRole = useQuery(api.profiles.getRole);
   const updateUserRole = useMutation(api.profiles.updateUserRole);
   const promoteSelfToSuperAdmin = useMutation(
     api.profiles.promoteSelfToSuperAdmin
   );
+  const hasSuperAdmin = users.some((user) => user.role === "super_admin");
 
   const filteredUsers = users.filter(
     (user) =>
@@ -135,6 +159,16 @@ export default function AdminUsersPage() {
       icon: Shield,
     },
   ];
+  let confirmationTitle = "Change user role?";
+  let confirmationDescription = "";
+
+  if (pendingAction?.type === "bootstrap") {
+    confirmationTitle = "Become super admin?";
+    confirmationDescription =
+      "This will promote your current account to super admin and unlock full role management.";
+  } else if (pendingAction) {
+    confirmationDescription = `This will change ${pendingAction.userEmail} to ${pendingAction.nextRole.replace("_", " ")}.`;
+  }
 
   return (
     <div className="flex flex-col gap-6">
@@ -146,8 +180,11 @@ export default function AdminUsersPage() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          {myRole !== "super_admin" && (
-            <Button onClick={handleBootstrapSuperAdmin} variant="outline">
+          {myRole !== "super_admin" && !hasSuperAdmin && (
+            <Button
+              onClick={() => setPendingAction({ type: "bootstrap" })}
+              variant="outline"
+            >
               <Sparkles className="size-4" />
               Become Super Admin
             </Button>
@@ -239,24 +276,50 @@ export default function AdminUsersPage() {
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                           <DropdownMenuItem
-                            onClick={() => handleRoleChange(user._id, "user")}
+                            onClick={() =>
+                              setPendingAction({
+                                type: "role-change",
+                                nextRole: "user",
+                                userEmail: user.email,
+                                userId: user._id,
+                              })
+                            }
                           >
                             Set as User
                           </DropdownMenuItem>
                           <DropdownMenuItem
-                            onClick={() => handleRoleChange(user._id, "staff")}
+                            onClick={() =>
+                              setPendingAction({
+                                type: "role-change",
+                                nextRole: "staff",
+                                userEmail: user.email,
+                                userId: user._id,
+                              })
+                            }
                           >
                             Set as Staff
                           </DropdownMenuItem>
                           <DropdownMenuItem
-                            onClick={() => handleRoleChange(user._id, "admin")}
+                            onClick={() =>
+                              setPendingAction({
+                                type: "role-change",
+                                nextRole: "admin",
+                                userEmail: user.email,
+                                userId: user._id,
+                              })
+                            }
                           >
                             Set as Admin
                           </DropdownMenuItem>
                           {myRole === "super_admin" && (
                             <DropdownMenuItem
                               onClick={() =>
-                                handleRoleChange(user._id, "super_admin")
+                                setPendingAction({
+                                  type: "role-change",
+                                  nextRole: "super_admin",
+                                  userEmail: user.email,
+                                  userId: user._id,
+                                })
                               }
                             >
                               <Sparkles className="size-4" />
@@ -273,6 +336,48 @@ export default function AdminUsersPage() {
           </TableBody>
         </Table>
       </Card>
+
+      <AlertDialog
+        onOpenChange={(open) => {
+          if (!open) {
+            setPendingAction(null);
+          }
+        }}
+        open={pendingAction !== null}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{confirmationTitle}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {confirmationDescription}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={async () => {
+                if (!pendingAction) {
+                  return;
+                }
+
+                if (pendingAction.type === "bootstrap") {
+                  await handleBootstrapSuperAdmin();
+                  setPendingAction(null);
+                  return;
+                }
+
+                await handleRoleChange(
+                  pendingAction.userId,
+                  pendingAction.nextRole
+                );
+                setPendingAction(null);
+              }}
+            >
+              Confirm
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

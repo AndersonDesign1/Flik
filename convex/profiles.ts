@@ -566,6 +566,10 @@ export const updateUserRole = mutation({
       throw new Error("Target user profile not found");
     }
 
+    if (actor._id === args.userId && args.role !== targetProfile.role) {
+      throw new Error("You can't change your own role");
+    }
+
     if (
       actorProfile?.role !== "super_admin" &&
       getRoleLevel(targetProfile.role) >= getRoleLevel("admin")
@@ -597,7 +601,7 @@ export const promoteSelfToSuperAdmin = mutation({
 
     const existingSuperAdmin = await ctx.db
       .query("profiles")
-      .filter((q) => q.eq(q.field("role"), "super_admin"))
+      .withIndex("by_role", (q) => q.eq("role", "super_admin"))
       .first();
 
     if (existingSuperAdmin) {
