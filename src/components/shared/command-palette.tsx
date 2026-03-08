@@ -336,7 +336,30 @@ const ADMIN_CATEGORIES: SearchCategory[] = [
   },
 ];
 
-export type SearchRole = "user" | "seller" | "staff" | "admin";
+const SUPER_ADMIN_CATEGORIES: SearchCategory[] = [
+  ...ADMIN_CATEGORIES,
+  {
+    id: "governance",
+    label: "Governance",
+    icon: Users,
+    items: [
+      {
+        id: "sg1",
+        title: "Admins & Staff",
+        subtitle: "Manage internal access",
+        href: "/super-admin/admins",
+      },
+      {
+        id: "sg2",
+        title: "Seller Performance",
+        subtitle: "Cross-platform seller oversight",
+        href: "/super-admin/sellers",
+      },
+    ],
+  },
+];
+
+export type SearchRole = "user" | "seller" | "staff" | "admin" | "super_admin";
 
 interface CommandPaletteProps {
   searchRole: SearchRole;
@@ -347,6 +370,7 @@ const ROLE_CATEGORIES: Record<SearchRole, SearchCategory[]> = {
   seller: SELLER_CATEGORIES,
   staff: STAFF_CATEGORIES,
   admin: ADMIN_CATEGORIES,
+  super_admin: SUPER_ADMIN_CATEGORIES,
 };
 
 export function CommandPalette({ searchRole }: CommandPaletteProps) {

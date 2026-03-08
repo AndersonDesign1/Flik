@@ -1,8 +1,17 @@
 "use client";
 
-import { CreditCard, HelpCircle, LogOut, Settings, User } from "lucide-react";
+import { useQuery } from "convex/react";
+import {
+  BriefcaseBusiness,
+  LogOut,
+  Settings,
+  Shield,
+  ShieldCheck,
+  ShoppingBag,
+  Users,
+} from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -16,6 +25,7 @@ import {
 import { useCurrentRole, useSession } from "@/hooks/use-auth";
 import { authClient } from "@/lib/auth-client";
 import { getRolePresentation } from "@/lib/roles";
+import { api } from "../../../convex/_generated/api";
 
 function getInitials(name?: string | null): string {
   if (!name) {
@@ -32,9 +42,11 @@ function getInitials(name?: string | null): string {
 }
 
 export function ProfileMenu() {
+  const pathname = usePathname();
   const router = useRouter();
   const { user, isLoading } = useSession();
   const { role, isLoading: isRoleLoading } = useCurrentRole();
+  const workspaceAccess = useQuery(api.platform.getWorkspaceAccess);
 
   const handleLogout = async () => {
     await authClient.signOut();
@@ -52,6 +64,9 @@ export function ProfileMenu() {
 
   const initials = getInitials(user.name);
   const rolePresentation = getRolePresentation(role);
+  const settingsHref = pathname.startsWith("/account")
+    ? "/account/settings"
+    : "/dashboard/settings";
 
   return (
     <DropdownMenu modal={false}>
@@ -95,27 +110,48 @@ export function ProfileMenu() {
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild className="cursor-pointer gap-2">
-          <Link href="/dashboard/profile">
-            <User className="size-4" />
-            Profile
+          <Link href="/account">
+            <ShoppingBag className="size-4" />
+            Buyer Workspace
           </Link>
         </DropdownMenuItem>
+        {workspaceAccess?.canAccessSeller && (
+          <DropdownMenuItem asChild className="cursor-pointer gap-2">
+            <Link href="/dashboard">
+              <BriefcaseBusiness className="size-4" />
+              Seller Workspace
+            </Link>
+          </DropdownMenuItem>
+        )}
+        {workspaceAccess?.canAccessStaff && (
+          <DropdownMenuItem asChild className="cursor-pointer gap-2">
+            <Link href="/staff">
+              <Users className="size-4" />
+              Staff Panel
+            </Link>
+          </DropdownMenuItem>
+        )}
+        {workspaceAccess?.canAccessAdmin && (
+          <DropdownMenuItem asChild className="cursor-pointer gap-2">
+            <Link href="/admin">
+              <Shield className="size-4" />
+              Admin Panel
+            </Link>
+          </DropdownMenuItem>
+        )}
+        {workspaceAccess?.canAccessSuperAdmin && (
+          <DropdownMenuItem asChild className="cursor-pointer gap-2">
+            <Link href="/super-admin">
+              <ShieldCheck className="size-4" />
+              Super Admin
+            </Link>
+          </DropdownMenuItem>
+        )}
+        <DropdownMenuSeparator />
         <DropdownMenuItem asChild className="cursor-pointer gap-2">
-          <Link href="/dashboard/billing">
-            <CreditCard className="size-4" />
-            Billing
-          </Link>
-        </DropdownMenuItem>
-        <DropdownMenuItem asChild className="cursor-pointer gap-2">
-          <Link href="/dashboard/settings">
+          <Link href={settingsHref}>
             <Settings className="size-4" />
             Settings
-          </Link>
-        </DropdownMenuItem>
-        <DropdownMenuItem asChild className="cursor-pointer gap-2">
-          <Link href="/dashboard/help">
-            <HelpCircle className="size-4" />
-            Help & Support
           </Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />

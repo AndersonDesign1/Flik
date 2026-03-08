@@ -1,6 +1,8 @@
 "use client";
 
+import { useQuery } from "convex/react";
 import {
+  BriefcaseBusiness,
   Compass,
   Download,
   Heart,
@@ -10,6 +12,7 @@ import {
   ShoppingBag,
 } from "lucide-react";
 import { RoleSidebar } from "@/components/shared/role-sidebar";
+import { api } from "../../../convex/_generated/api";
 
 const ACCOUNT_NAV_ITEMS = [
   { href: "/account", label: "Overview", icon: LayoutGrid },
@@ -25,9 +28,26 @@ const ACCOUNT_FOOTER_ITEMS = [
 ];
 
 export function AccountSidebar() {
+  const workspaceAccess = useQuery(api.platform.getWorkspaceAccess);
+
+  const footerItems = [...ACCOUNT_FOOTER_ITEMS];
+  footerItems.unshift(
+    workspaceAccess?.canAccessSeller
+      ? {
+          href: "/dashboard",
+          label: "Seller Workspace",
+          icon: BriefcaseBusiness,
+        }
+      : {
+          href: "/account/start-selling",
+          label: "Start Selling",
+          icon: BriefcaseBusiness,
+        }
+  );
+
   return (
     <RoleSidebar
-      footerItems={ACCOUNT_FOOTER_ITEMS}
+      footerItems={footerItems}
       navItems={ACCOUNT_NAV_ITEMS}
       title="My Account"
       titleShort="U"

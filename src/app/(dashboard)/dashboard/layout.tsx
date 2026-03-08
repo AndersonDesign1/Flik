@@ -5,6 +5,7 @@ import { DashboardSidebar } from "@/components/dashboard/sidebar";
 import { DashboardShell } from "@/components/shared/dashboard-shell";
 import { fetchAuthQuery, isAuthenticated } from "@/lib/auth-server";
 import { getViewerDashboardMode } from "@/lib/dashboard-mode";
+import { canAccessSellerWorkspace } from "@/lib/workspaces";
 import { api } from "../../../../convex/_generated/api";
 
 export default async function DashboardLayout({
@@ -28,6 +29,10 @@ export default async function DashboardLayout({
 
   if (!profile?.onboardingCompleted) {
     redirect("/onboarding");
+  }
+
+  if (!canAccessSellerWorkspace(profile.userType)) {
+    redirect("/account/start-selling");
   }
 
   const dashboardMode = await getViewerDashboardMode();

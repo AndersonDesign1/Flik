@@ -40,6 +40,19 @@ export default defineSchema({
     createdAt: v.float64(),
   }).index("by_email", ["email"]),
 
+  stores: defineTable({
+    createdAt: v.float64(),
+    description: v.optional(v.string()),
+    name: v.string(),
+    ownerId: v.string(),
+    slug: v.string(),
+    status: v.union(v.literal("draft"), v.literal("active")),
+    updatedAt: v.float64(),
+  })
+    .index("by_owner_id", ["ownerId"])
+    .index("by_slug", ["slug"])
+    .index("by_status", ["status"]),
+
   product_uploads: defineTable({
     userId: v.string(),
     storageId: v.id("_storage"),
