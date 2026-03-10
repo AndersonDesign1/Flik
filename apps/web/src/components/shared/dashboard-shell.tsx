@@ -9,6 +9,7 @@ import {
   CommandPalette,
   type SearchRole,
 } from "@/components/shared/command-palette";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   SidebarInset,
@@ -17,6 +18,8 @@ import {
 } from "@/components/ui/sidebar";
 import { CartProvider, useCart } from "@/contexts/cart-context";
 import { NotificationsProvider } from "@/contexts/notifications-context";
+import { useCurrentRole } from "@/hooks/use-auth";
+import { getRolePresentation } from "@/lib/roles";
 
 function CartButton() {
   const { totalItems } = useCart();
@@ -49,6 +52,9 @@ function DashboardContent({
   searchRole = "seller",
 }: DashboardShellProps) {
   const isUser = searchRole === "user";
+  const { role, isLoading: isRoleLoading } = useCurrentRole();
+  const rolePresentation = getRolePresentation(role);
+  const showRoleBadge = searchRole !== "user";
 
   return (
     <NotificationsProvider>
@@ -58,9 +64,19 @@ function DashboardContent({
           <header className="flex h-14 items-center justify-between border-border/30 border-b bg-surface-1 px-4">
             <div className="flex items-center gap-2">
               <SidebarTrigger className="-ml-1" />
-              <h1 className="font-semibold text-base text-foreground">
-                {title}
-              </h1>
+              <div className="flex items-center gap-2">
+                <h1 className="font-semibold text-base text-foreground">
+                  {title}
+                </h1>
+                {showRoleBadge && !isRoleLoading && (
+                  <Badge
+                    className="rounded-full px-2 py-0 text-[10px] uppercase tracking-[0.14em]"
+                    variant={rolePresentation.badgeVariant}
+                  >
+                    {rolePresentation.label}
+                  </Badge>
+                )}
+              </div>
             </div>
             <div className="flex items-center gap-2">
               <CommandPalette searchRole={searchRole} />

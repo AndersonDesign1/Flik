@@ -42,11 +42,12 @@ export function useRequireAuth(redirectTo = "/login") {
 }
 
 export function useCurrentRole() {
-  const roleData = useQuery(api.profiles.getRole);
+  const { user, isLoading: isSessionLoading } = useSession();
+  const roleData = useQuery(api.profiles.getRole, user ? {} : "skip");
 
   return {
     role: (roleData ?? "user") as Role,
-    isLoading: roleData === undefined,
+    isLoading: isSessionLoading || (!!user && roleData === undefined),
   };
 }
 

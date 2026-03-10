@@ -1,0 +1,47 @@
+{
+  "$schema": "https://turborepo.dev/schema.json",
+  "envMode": "loose",
+  "tasks": {
+    "build": {
+      "dependsOn": [
+        "^build"
+      ],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        ".env*",
+        "!.next/**",
+        "!.turbo/**",
+        "!tsconfig.tsbuildinfo"
+      ],
+      "outputs": [
+        ".next/**",
+        "!.next/cache/**",
+        "dist/**"
+      ]
+    },
+    "dev": {
+      "cache": false,
+      "persistent": true
+    },
+    "lint": {
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "!.next/**",
+        "!.turbo/**",
+        "!tsconfig.tsbuildinfo"
+      ]
+    },
+    "format": {},
+    "typecheck": {
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "!.next/**",
+        "!.turbo/**",
+        "!tsconfig.tsbuildinfo"
+      ],
+      "outputs": [
+        "tsconfig.tsbuildinfo"
+      ]
+    }
+  }
+}

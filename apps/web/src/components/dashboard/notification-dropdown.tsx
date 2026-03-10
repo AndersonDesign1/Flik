@@ -2,6 +2,7 @@
 
 import { Bell } from "lucide-react";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -17,10 +18,19 @@ import {
 } from "@/contexts/notifications-context";
 
 export function NotificationDropdown() {
+  const [isMounted, setIsMounted] = useState(false);
   const { notifications, unreadCount, markAllAsRead } = useNotifications();
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   // Show only first 4 for dropdown
   const displayNotifications = notifications.slice(0, 4);
+
+  if (!isMounted) {
+    return <div className="size-8 rounded-md bg-transparent" />;
+  }
 
   return (
     <DropdownMenu modal={false}>

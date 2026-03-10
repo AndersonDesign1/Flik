@@ -30,9 +30,12 @@ export default function RootLayout({
     <html lang="en">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        suppressHydrationWarning
       >
-        <ConvexClientProvider>{children}</ConvexClientProvider>
-        <DevTools />
+        <ConvexClientProvider>
+          {children}
+          <DevTools />
+        </ConvexClientProvider>
         <Toaster />
       </body>
     </html>
