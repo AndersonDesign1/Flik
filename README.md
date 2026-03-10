@@ -11,6 +11,22 @@ bun install
 bun run dev
 ```
 
+## Monorepo
+
+This repository now uses Bun workspaces and Turborepo.
+
+- `apps/web`: the Next.js + Convex application
+- `packages/*`: reserved for future shared internal packages
+
+Run commands from the repository root:
+
+```bash
+bun run dev
+bun run build
+bun run lint
+bun run typecheck
+```
+
 ## License
 
 MIT

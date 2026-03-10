@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -44,9 +45,17 @@ function getInitials(name?: string | null): string {
 export function ProfileMenu() {
   const pathname = usePathname();
   const router = useRouter();
+  const [isMounted, setIsMounted] = useState(false);
   const { user, isLoading } = useSession();
   const { role, isLoading: isRoleLoading } = useCurrentRole();
-  const workspaceAccess = useQuery(api.platform.getWorkspaceAccess);
+  const workspaceAccess = useQuery(
+    api.platform.getWorkspaceAccess,
+    user ? {} : "skip"
+  );
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const handleLogout = async () => {
     await authClient.signOut();
@@ -54,7 +63,7 @@ export function ProfileMenu() {
     router.refresh();
   };
 
-  if (isLoading) {
+  if (isLoading || !isMounted) {
     return <div className="size-8 animate-pulse rounded-full bg-muted" />;
   }
 
