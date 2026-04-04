@@ -52,6 +52,17 @@ async function getOwnedProductOrThrow(
   return product;
 }
 
+async function assertSellerWorkspaceAccess(ctx: MutationCtx, userId: string) {
+  const profile = await ctx.db
+    .query("profiles")
+    .withIndex("by_user_id", (q) => q.eq("userId", userId))
+    .first();
+
+  if (!(profile?.userType === "seller" || profile?.userType === "both")) {
+    throw new Error("Seller workspace required");
+  }
+}
+
 export const generateProductUploadUrl = mutation({
   args: {},
   returns: v.string(),
@@ -60,6 +71,7 @@ export const generateProductUploadUrl = mutation({
     if (!user) {
       throw new Error("Not authenticated");
     }
+    await assertSellerWorkspaceAccess(ctx, user._id);
 
     return await ctx.storage.generateUploadUrl();
   },
@@ -78,6 +90,7 @@ export const registerUploadedFile = mutation({
     if (!user) {
       throw new Error("Not authenticated");
     }
+    await assertSellerWorkspaceAccess(ctx, user._id);
 
     const existingRegistration = await ctx.db
       .query("product_uploads")
@@ -118,6 +131,7 @@ export const deleteUploadedFile = mutation({
     if (!user) {
       throw new Error("Not authenticated");
     }
+    await assertSellerWorkspaceAccess(ctx, user._id);
 
     const uploadRegistration = await ctx.db
       .query("product_uploads")
@@ -164,6 +178,7 @@ export const createProduct = mutation({
     if (!user) {
       throw new Error("Not authenticated");
     }
+    await assertSellerWorkspaceAccess(ctx, user._id);
 
     const name = args.name.trim();
     if (!name) {
@@ -364,6 +379,7 @@ export const updateProduct = mutation({
     if (!user) {
       throw new Error("Not authenticated");
     }
+    await assertSellerWorkspaceAccess(ctx, user._id);
 
     const currentProduct = await getOwnedProductOrThrow(
       ctx,
@@ -471,6 +487,7 @@ export const deleteProduct = mutation({
     if (!user) {
       throw new Error("Not authenticated");
     }
+    await assertSellerWorkspaceAccess(ctx, user._id);
 
     const product = await getOwnedProductOrThrow(ctx, user._id, args.productId);
     const storageIds = getStorageIdsFromProduct(product);
