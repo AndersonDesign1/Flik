@@ -179,7 +179,7 @@ export function EditProductForm({ productId }: EditProductFormProps) {
       const uploadedStorageId = await uploadFileToConvex(file);
       const previewUrl = URL.createObjectURL(file);
 
-      if (coverStorageId) {
+      if (coverStorageId && uploadedStorageIdsRef.current.has(coverStorageId)) {
         await deleteUploadedFile({ storageId: coverStorageId });
         uploadedStorageIdsRef.current.delete(coverStorageId);
       }
@@ -232,8 +232,10 @@ export function EditProductForm({ productId }: EditProductFormProps) {
     }
 
     try {
-      await deleteUploadedFile({ storageId: fileToRemove.storageId });
-      uploadedStorageIdsRef.current.delete(fileToRemove.storageId);
+      if (uploadedStorageIdsRef.current.has(fileToRemove.storageId)) {
+        await deleteUploadedFile({ storageId: fileToRemove.storageId });
+        uploadedStorageIdsRef.current.delete(fileToRemove.storageId);
+      }
       setFiles((prev) => prev.filter((_, i) => i !== index));
     } catch {
       toast.error("Failed to remove file");
@@ -247,8 +249,10 @@ export function EditProductForm({ productId }: EditProductFormProps) {
     }
 
     try {
-      await deleteUploadedFile({ storageId: coverStorageId });
-      uploadedStorageIdsRef.current.delete(coverStorageId);
+      if (uploadedStorageIdsRef.current.has(coverStorageId)) {
+        await deleteUploadedFile({ storageId: coverStorageId });
+        uploadedStorageIdsRef.current.delete(coverStorageId);
+      }
       setCoverStorageId(null);
       setCoverPreviewUrl(null);
     } catch {

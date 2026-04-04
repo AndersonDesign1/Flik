@@ -24,21 +24,6 @@ function getStorageIdsFromProduct(product: {
     : fileStorageIds;
 }
 
-async function isStorageOwnedByUserProducts(
-  ctx: MutationCtx,
-  userId: string,
-  storageId: string
-) {
-  const ownedProducts = await ctx.db
-    .query("products")
-    .withIndex("by_user_id", (q) => q.eq("userId", userId))
-    .collect();
-
-  return ownedProducts.some((product) =>
-    getStorageIdsFromProduct(product).some((id) => id === storageId)
-  );
-}
-
 async function getOwnedProductOrThrow(
   ctx: MutationCtx,
   userId: string,
@@ -140,19 +125,11 @@ export const deleteUploadedFile = mutation({
       )
       .first();
 
-    const isOwnedByProduct = await isStorageOwnedByUserProducts(
-      ctx,
-      user._id,
-      args.storageId
-    );
-
-    if (!(uploadRegistration || isOwnedByProduct)) {
-      throw new Error("Not authorized to delete this file");
+    if (!uploadRegistration) {
+      throw new Error("Only pending uploads can be deleted directly");
     }
 
-    if (uploadRegistration) {
-      await ctx.db.delete(uploadRegistration._id);
-    }
+    await ctx.db.delete(uploadRegistration._id);
 
     await ctx.storage.delete(args.storageId);
     return null;
