@@ -1,191 +1,204 @@
-import { AlertTriangle, CheckCircle, Clock, MessageSquare } from "lucide-react";
-import {
-  DashboardList,
-  DashboardListItem,
-} from "@/components/shared/dashboard-list";
+import { ArrowRight, Box, ShieldCheck, Store, Users } from "lucide-react";
+import Link from "next/link";
 import { StatsGrid } from "@/components/shared/stats-grid";
-import { cn } from "@/lib/utils";
+import { Badge } from "@/components/ui/badge";
+import { Card } from "@/components/ui/card";
+import { fetchAuthQuery } from "@/lib/auth-server";
+import { api } from "../../../convex/_generated/api";
 
-const STAFF_METRICS = [
-  {
-    title: "Open Tickets",
-    value: "24",
-    change: "8 urgent",
-    changeType: "negative" as const,
-    icon: MessageSquare,
-  },
-  {
-    title: "Pending Reviews",
-    value: "12",
-    change: "3 new today",
-    changeType: "neutral" as const,
-    icon: Clock,
-  },
-  {
-    title: "Reports",
-    value: "5",
-    change: "2 unresolved",
-    changeType: "negative" as const,
-    icon: AlertTriangle,
-  },
-  {
-    title: "Resolved Today",
-    value: "18",
-    change: "+5 from yesterday",
-    changeType: "positive" as const,
-    icon: CheckCircle,
-  },
-];
+export default async function StaffDashboardPage() {
+  const overview = await fetchAuthQuery(api.platform.getStaffOverview);
 
-const RECENT_TICKETS = [
-  {
-    id: "T-001",
-    subject: "Payment not received",
-    user: "john@example.com",
-    status: "open",
-    priority: "high",
-  },
-  {
-    id: "T-002",
-    subject: "Can't download product",
-    user: "sarah@example.com",
-    status: "open",
-    priority: "medium",
-  },
-  {
-    id: "T-003",
-    subject: "Refund request",
-    user: "mike@example.com",
-    status: "pending",
-    priority: "high",
-  },
-  {
-    id: "T-004",
-    subject: "Account access issue",
-    user: "jane@example.com",
-    status: "open",
-    priority: "low",
-  },
-];
+  const metrics = [
+    {
+      title: "Platform People",
+      value: overview.totalUsers.toString(),
+      change: `${overview.internalTeam} internal team`,
+      changeType: "neutral" as const,
+      icon: Users,
+    },
+    {
+      title: "Seller-enabled",
+      value: overview.sellerEnabledUsers.toString(),
+      change: `${overview.activeStores} active stores`,
+      changeType: "positive" as const,
+      icon: Store,
+    },
+    {
+      title: "Live Products",
+      value: overview.liveProducts.toString(),
+      change: `${overview.totalProducts} total catalog items`,
+      changeType: "neutral" as const,
+      icon: Box,
+    },
+    {
+      title: "Internal Team",
+      value: overview.internalTeam.toString(),
+      change: "Staff + super admin",
+      changeType: "neutral" as const,
+      icon: ShieldCheck,
+    },
+  ];
 
-const PENDING_MODERATION = [
-  {
-    name: "Dark Theme UI Kit",
-    seller: "UI Kit Pro",
-    type: "New product",
-  },
-  { name: "Icon Pack v3", seller: "Icon Foundry", type: "Update" },
-  {
-    name: "Landing Templates",
-    seller: "Template Hub",
-    type: "New product",
-  },
-  {
-    name: "Figma Components",
-    seller: "Design Studio",
-    type: "New product",
-  },
-];
-
-const priorityConfig = {
-  high: "text-error-red",
-  medium: "text-amber-600 dark:text-amber-400",
-  low: "text-muted-foreground",
-} as const;
-
-const ticketStatusConfig = {
-  open: {
-    bg: "bg-primary-violet-50 dark:bg-primary-violet/10",
-    text: "text-primary-violet dark:text-primary-violet",
-    border: "border-primary-violet-200 dark:border-primary-violet/20",
-  },
-  pending: {
-    bg: "bg-amber-50 dark:bg-amber-500/10",
-    text: "text-amber-600 dark:text-amber-400",
-    border: "border-amber-200 dark:border-amber-500/20",
-  },
-  resolved: {
-    bg: "bg-accent-teal-50 dark:bg-accent-teal/10",
-    text: "text-accent-teal-700 dark:text-accent-teal",
-    border: "border-accent-teal-200 dark:border-accent-teal/20",
-  },
-} as const;
-
-export default function StaffDashboardPage() {
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-1">
         <h2 className="font-semibold text-2xl text-foreground">
-          Staff Dashboard
+          Staff Overview
         </h2>
         <p className="text-muted-foreground text-sm">
-          Support queue and moderation overview.
+          Live operator visibility across people, sellers, and products.
         </p>
       </div>
 
-      <StatsGrid metrics={STAFF_METRICS} />
+      <StatsGrid metrics={metrics} />
 
-      <div className="grid gap-6 lg:grid-cols-2">
-        <DashboardList title="Recent Tickets" viewAllHref="/staff/tickets">
-          {RECENT_TICKETS.map((ticket) => {
-            const status =
-              ticketStatusConfig[
-                ticket.status as keyof typeof ticketStatusConfig
-              ];
-            const priority =
-              priorityConfig[ticket.priority as keyof typeof priorityConfig];
-            return (
-              <DashboardListItem key={ticket.id}>
-                <div className="flex flex-col gap-1">
-                  <div className="flex items-center gap-2">
-                    <span className="font-mono text-muted-foreground text-xs">
-                      {ticket.id}
-                    </span>
-                    <span className={cn("font-medium text-xs", priority)}>
-                      {ticket.priority}
-                    </span>
-                  </div>
-                  <p className="font-medium text-foreground text-sm">
-                    {ticket.subject}
-                  </p>
-                  <p className="text-muted-foreground text-xs">{ticket.user}</p>
-                </div>
-                <span
-                  className={cn(
-                    "inline-flex rounded-full border px-2.5 py-1 font-medium text-xs capitalize",
-                    status.bg,
-                    status.text,
-                    status.border
-                  )}
+      <div className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
+        <Card className="p-6">
+          <div className="mb-4 flex items-start justify-between gap-4">
+            <div>
+              <h3 className="font-semibold text-foreground">Recent stores</h3>
+              <p className="text-muted-foreground text-sm">
+                The latest storefronts and how much catalog they already carry.
+              </p>
+            </div>
+            <Link
+              className="inline-flex items-center gap-1 font-medium text-primary-violet text-sm hover:underline"
+              href="/staff/sellers"
+            >
+              View sellers
+              <ArrowRight className="size-4" />
+            </Link>
+          </div>
+          <div className="space-y-3">
+            {overview.recentStores.length === 0 ? (
+              <p className="text-muted-foreground text-sm">
+                No stores have been created yet.
+              </p>
+            ) : (
+              overview.recentStores.map((store) => (
+                <div
+                  className="flex items-center justify-between rounded-lg border border-border/40 p-3"
+                  key={store.slug}
                 >
-                  {ticket.status}
-                </span>
-              </DashboardListItem>
-            );
-          })}
-        </DashboardList>
+                  <div>
+                    <p className="font-medium text-foreground text-sm">
+                      {store.name}
+                    </p>
+                    <p className="text-muted-foreground text-xs">
+                      {store.ownerName}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-medium text-foreground text-sm">
+                      {store.activeProducts} live
+                    </p>
+                    <p className="text-muted-foreground text-xs">
+                      {store.totalProducts} total
+                    </p>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </Card>
 
-        <DashboardList
-          title="Pending Moderation"
-          viewAllHref="/staff/moderation"
-        >
-          {PENDING_MODERATION.map((item) => (
-            <DashboardListItem key={item.name}>
-              <div className="flex flex-col gap-0.5">
-                <p className="font-medium text-foreground text-sm">
-                  {item.name}
-                </p>
-                <p className="text-muted-foreground text-xs">
-                  by {item.seller}
-                </p>
-              </div>
-              <span className="font-medium text-muted-foreground text-xs">
-                {item.type}
-              </span>
-            </DashboardListItem>
-          ))}
-        </DashboardList>
+        <Card className="p-6">
+          <div className="mb-4 flex items-start justify-between gap-4">
+            <div>
+              <h3 className="font-semibold text-foreground">Recent products</h3>
+              <p className="text-muted-foreground text-sm">
+                Newest catalog items across the platform.
+              </p>
+            </div>
+            <Link
+              className="inline-flex items-center gap-1 font-medium text-primary-violet text-sm hover:underline"
+              href="/staff/products"
+            >
+              View products
+              <ArrowRight className="size-4" />
+            </Link>
+          </div>
+          <div className="space-y-3">
+            {overview.recentProducts.length === 0 ? (
+              <p className="text-muted-foreground text-sm">
+                No products have been created yet.
+              </p>
+            ) : (
+              overview.recentProducts.map((product) => (
+                <div
+                  className="flex items-center justify-between rounded-lg border border-border/40 p-3"
+                  key={product._id}
+                >
+                  <div className="min-w-0">
+                    <p className="truncate font-medium text-foreground text-sm">
+                      {product.name}
+                    </p>
+                    <p className="truncate text-muted-foreground text-xs">
+                      {product.ownerName}
+                      {product.storeName ? ` · ${product.storeName}` : ""}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <Badge
+                      variant={
+                        product.status === "active" ? "success" : "secondary"
+                      }
+                    >
+                      {product.status}
+                    </Badge>
+                    <p className="mt-2 font-medium text-foreground text-sm">
+                      ${product.price.toFixed(2)}
+                    </p>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </Card>
       </div>
+
+      <Card className="p-6">
+        <div className="mb-4 flex items-start justify-between gap-4">
+          <div>
+            <h3 className="font-semibold text-foreground">Operator lanes</h3>
+            <p className="text-muted-foreground text-sm">
+              Work from live-backed pages only. Unsupported mock workflows have
+              been removed from the operator surface.
+            </p>
+          </div>
+        </div>
+        <div className="grid gap-3 md:grid-cols-3">
+          <Link
+            className="rounded-xl border border-border/40 p-4 transition-colors hover:bg-muted/30"
+            href="/staff/users"
+          >
+            <p className="font-medium text-foreground">Users</p>
+            <p className="mt-2 text-muted-foreground text-sm">
+              Access, people visibility, and internal role updates.
+            </p>
+          </Link>
+          <Link
+            className="rounded-xl border border-border/40 p-4 transition-colors hover:bg-muted/30"
+            href="/staff/sellers"
+          >
+            <p className="font-medium text-foreground">Sellers</p>
+            <p className="mt-2 text-muted-foreground text-sm">
+              Store owners, catalog volume, and seller-level oversight.
+            </p>
+          </Link>
+          <Link
+            className="rounded-xl border border-border/40 p-4 transition-colors hover:bg-muted/30"
+            href="/staff/products"
+          >
+            <p className="font-medium text-foreground">Products</p>
+            <p className="mt-2 text-muted-foreground text-sm">
+              Platform catalog visibility across live, draft, and archived
+              items.
+            </p>
+          </Link>
+        </div>
+      </Card>
     </div>
   );
 }

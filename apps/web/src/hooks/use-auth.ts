@@ -61,9 +61,7 @@ export function useRequireRole(requiredRole: Role | Role[]) {
 
   const hasAccess =
     allowedRoles.includes(currentRole) ||
-    (allowedRoles.includes("staff") &&
-      (currentRole === "admin" || currentRole === "super_admin")) ||
-    (allowedRoles.includes("admin") && currentRole === "super_admin");
+    (allowedRoles.includes("staff") && currentRole === "super_admin");
 
   return {
     user,

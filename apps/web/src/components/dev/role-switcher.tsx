@@ -1,6 +1,6 @@
 "use client";
 
-import { Shield, Store, User, Users } from "lucide-react";
+import { ShieldCheck, Store, User, Users } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -15,8 +15,13 @@ import {
 import { cn } from "@/lib/utils";
 
 const ROLES = [
-  { name: "Admin", path: "/admin", icon: Shield, color: "text-red-600" },
   { name: "Staff", path: "/staff", icon: Users, color: "text-blue-600" },
+  {
+    name: "Super Admin",
+    path: "/super-admin",
+    icon: ShieldCheck,
+    color: "text-amber-600",
+  },
   { name: "Seller", path: "/dashboard", icon: Store, color: "text-green-600" },
   { name: "User", path: "/account", icon: User, color: "text-purple-600" },
 ];

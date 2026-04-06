@@ -5,7 +5,6 @@ import {
   Box,
   CreditCard,
   Download,
-  FileText,
   Heart,
   Search,
   ShoppingBag,
@@ -221,123 +220,40 @@ const SELLER_CATEGORIES: SearchCategory[] = [
 // Staff search categories
 const STAFF_CATEGORIES: SearchCategory[] = [
   {
-    id: "moderation",
-    label: "Moderation Queue",
-    icon: FileText,
-    items: [
-      {
-        id: "m1",
-        title: "New Product Submission",
-        subtitle: "Pending review",
-        href: "/staff/moderation",
-      },
-      {
-        id: "m2",
-        title: "Reported Product",
-        subtitle: "Needs attention",
-        href: "/staff/moderation",
-      },
-    ],
-  },
-  {
-    id: "users",
-    label: "Users",
+    id: "workspace",
+    label: "Operator Workspace",
     icon: Users,
     items: [
       {
-        id: "u1",
-        title: "John Doe",
-        subtitle: "Buyer",
+        id: "sw1",
+        title: "Staff Overview",
+        subtitle: "Marketplace operations snapshot",
         href: "/staff",
-        meta: "Active",
-      },
-    ],
-  },
-  {
-    id: "tickets",
-    label: "Support Tickets",
-    icon: FileText,
-    items: [
-      {
-        id: "t1",
-        title: "Ticket #456",
-        subtitle: "Payment issue",
-        href: "/staff",
-        meta: "Open",
-      },
-    ],
-  },
-];
-
-// Admin search categories
-const ADMIN_CATEGORIES: SearchCategory[] = [
-  {
-    id: "users",
-    label: "Users",
-    icon: Users,
-    items: [
-      {
-        id: "au1",
-        title: "John Doe",
-        subtitle: "john@example.com",
-        href: "/admin/users",
-        meta: "Buyer",
       },
       {
-        id: "au2",
-        title: "Jane Smith",
-        subtitle: "jane@example.com",
-        href: "/admin/users",
-        meta: "Seller",
+        id: "sw2",
+        title: "All Users",
+        subtitle: "People and access management",
+        href: "/staff/users",
       },
-    ],
-  },
-  {
-    id: "sellers",
-    label: "Sellers",
-    icon: Store,
-    items: [
       {
-        id: "as1",
-        title: "Design Studio",
-        subtitle: "Active",
-        href: "/admin/sellers",
-        meta: "$12.4k",
+        id: "sw3",
+        title: "Sellers",
+        subtitle: "Store oversight",
+        href: "/staff/sellers",
       },
-    ],
-  },
-  {
-    id: "products",
-    label: "Products",
-    icon: Box,
-    items: [
       {
-        id: "ap1",
-        title: "Ultimate Design System",
-        subtitle: "Design Studio",
-        href: "/admin/products",
-        meta: "Active",
-      },
-    ],
-  },
-  {
-    id: "transactions",
-    label: "Transactions",
-    icon: CreditCard,
-    items: [
-      {
-        id: "at1",
-        title: "TXN #12345",
-        subtitle: "John Doe",
-        href: "/admin",
-        meta: "$49",
+        id: "sw4",
+        title: "Products",
+        subtitle: "Catalog oversight",
+        href: "/staff/products",
       },
     ],
   },
 ];
 
 const SUPER_ADMIN_CATEGORIES: SearchCategory[] = [
-  ...ADMIN_CATEGORIES,
+  ...STAFF_CATEGORIES,
   {
     id: "governance",
     label: "Governance",
@@ -345,7 +261,7 @@ const SUPER_ADMIN_CATEGORIES: SearchCategory[] = [
     items: [
       {
         id: "sg1",
-        title: "Admins & Staff",
+        title: "Internal Team",
         subtitle: "Manage internal access",
         href: "/super-admin/admins",
       },
@@ -359,7 +275,7 @@ const SUPER_ADMIN_CATEGORIES: SearchCategory[] = [
   },
 ];
 
-export type SearchRole = "user" | "seller" | "staff" | "admin" | "super_admin";
+export type SearchRole = "user" | "seller" | "staff" | "super_admin";
 
 interface CommandPaletteProps {
   searchRole: SearchRole;
@@ -369,7 +285,6 @@ const ROLE_CATEGORIES: Record<SearchRole, SearchCategory[]> = {
   user: USER_CATEGORIES,
   seller: SELLER_CATEGORIES,
   staff: STAFF_CATEGORIES,
-  admin: ADMIN_CATEGORIES,
   super_admin: SUPER_ADMIN_CATEGORIES,
 };
 

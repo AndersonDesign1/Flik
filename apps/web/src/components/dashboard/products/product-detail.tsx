@@ -1,6 +1,12 @@
 "use client";
 
-import { Archive, DollarSign, ExternalLink, SquarePen, TrendingUp } from "lucide-react";
+import {
+  Archive,
+  DollarSign,
+  ExternalLink,
+  SquarePen,
+  TrendingUp,
+} from "lucide-react";
 import Link from "next/link";
 import type { DashboardProduct } from "@/components/dashboard/products/columns";
 import {
@@ -103,7 +109,7 @@ export function ProductDetail({ product }: ProductDetailProps) {
         </div>
       </div>
 
-      <div className="rounded-lg border border-border/40 bg-muted/20 p-4 text-sm text-muted-foreground">
+      <div className="rounded-lg border border-border/40 bg-muted/20 p-4 text-muted-foreground text-sm">
         Use <span className="font-medium text-foreground">Edit</span> to modify
         product details, files, cover image, and status.
       </div>

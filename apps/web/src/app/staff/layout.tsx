@@ -26,8 +26,8 @@ export default async function StaffLayout({
   // Server-side role check via Convex
   const role = await fetchAuthQuery(api.profiles.getRole);
 
-  // Staff, admin and super admin roles can access
-  if (role !== "staff" && role !== "admin" && role !== "super_admin") {
+  // Staff and super admin roles can access
+  if (role !== "staff" && role !== "super_admin") {
     return <UnauthorizedView isAuthenticated />;
   }
 
@@ -35,7 +35,7 @@ export default async function StaffLayout({
     <DashboardShell
       searchRole="staff"
       sidebar={<StaffSidebar />}
-      title="Staff Panel"
+      title="Staff Workspace"
     >
       {children}
     </DashboardShell>

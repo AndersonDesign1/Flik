@@ -397,7 +397,9 @@ export const updateProduct = mutation({
       ...args.files.map((file) => file.storageId),
     ]);
 
-    const existingStorageIds = new Set(getStorageIdsFromProduct(currentProduct));
+    const existingStorageIds = new Set(
+      getStorageIdsFromProduct(currentProduct)
+    );
 
     const newlyAddedStorageIds = [...nextStorageIds].filter(
       (storageId) => !existingStorageIds.has(storageId)
@@ -409,7 +411,9 @@ export const updateProduct = mutation({
             ctx.db
               .query("product_uploads")
               .withIndex("by_user_id_storage_id", (q) =>
-                q.eq("userId", user._id).eq("storageId", storageId as Id<"_storage">)
+                q
+                  .eq("userId", user._id)
+                  .eq("storageId", storageId as Id<"_storage">)
               )
               .first()
           )

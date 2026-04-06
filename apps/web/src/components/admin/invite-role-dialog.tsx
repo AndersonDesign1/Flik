@@ -25,7 +25,7 @@ import {
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
 
-type Role = "admin" | "staff" | "super_admin";
+type Role = "staff" | "super_admin";
 
 interface PendingInvite {
   _id: Id<"role_invites">;
@@ -117,7 +117,6 @@ export function InviteRoleDialog() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="staff">Staff</SelectItem>
-                <SelectItem value="admin">Admin</SelectItem>
                 {currentRole === "super_admin" && (
                   <SelectItem value="super_admin">Super Admin</SelectItem>
                 )}

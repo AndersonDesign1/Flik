@@ -1,7 +1,7 @@
 import type { VariantProps } from "class-variance-authority";
 import type { badgeVariants } from "@/components/ui/badge";
 
-export type Role = "user" | "staff" | "admin" | "super_admin";
+export type Role = "user" | "staff" | "super_admin";
 
 type BadgeVariant = NonNullable<VariantProps<typeof badgeVariants>["variant"]>;
 
@@ -21,11 +21,6 @@ const ROLE_PRESENTATION: Record<Role, RolePresentation> = {
     label: "Staff",
     badgeVariant: "accent",
     shortLabel: "Staff",
-  },
-  admin: {
-    label: "Admin",
-    badgeVariant: "warning",
-    shortLabel: "Admin",
   },
   super_admin: {
     label: "Super Admin",

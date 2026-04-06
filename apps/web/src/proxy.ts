@@ -10,6 +10,15 @@ import { type NextRequest, NextResponse } from "next/server";
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
+  if (pathname === "/admin" || pathname.startsWith("/admin/")) {
+    const redirectUrl = request.nextUrl.clone();
+    redirectUrl.pathname =
+      pathname === "/admin"
+        ? "/staff"
+        : `/staff/${pathname.slice("/admin/".length)}`;
+    return NextResponse.redirect(redirectUrl);
+  }
+
   // Protected routes that require authentication
   const protectedRoutes = [
     "/admin",
@@ -33,18 +42,6 @@ export function proxy(request: NextRequest) {
     }
   }
 
-  // Public auth routes - redirect authenticated users
-  const authRoutes = ["/login", "/signup", "/forgot-password"];
-  const isAuthRoute = authRoutes.some((route) => pathname === route);
-
-  if (isAuthRoute) {
-    const sessionCookie = getSessionCookie(request);
-
-    if (sessionCookie) {
-      return NextResponse.redirect(new URL("/dashboard", request.url));
-    }
-  }
-
   return NextResponse.next();
 }
 
@@ -55,8 +52,5 @@ export const config = {
     "/dashboard/:path*",
     "/account/:path*",
     "/onboarding",
-    "/login",
-    "/signup",
-    "/forgot-password",
   ],
 };
