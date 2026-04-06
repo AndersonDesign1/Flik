@@ -1,5 +1,6 @@
 "use client";
 
+import { useMutation, useQuery } from "convex/react";
 import {
   ArrowLeft,
   DollarSign,
@@ -13,7 +14,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import {
   AlertDialog,
@@ -37,71 +38,332 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { api } from "../../../../convex/_generated/api";
+import type { Id } from "../../../../convex/_generated/dataModel";
 
-// Mock existing product data
-const EXISTING_PRODUCT = {
-  id: "1",
-  name: "Ultimate Design System",
-  description:
-    "A comprehensive design system with 500+ components, 50+ page templates, and full Figma source files. Perfect for building modern web applications quickly.",
-  category: "templates",
-  tags: "design, templates, figma",
-  price: 49,
-  comparePrice: 99,
-  coverImage: "/mock-cover.jpg",
-  files: ["design-system-v2.zip", "figma-source.fig"],
-};
+const MAX_IMAGE_SIZE_BYTES = 10 * 1024 * 1024;
+const MAX_PRODUCT_FILE_SIZE_BYTES = 250 * 1024 * 1024;
+const MAX_PRODUCT_FILES = 20;
+
+interface UploadedProductFile {
+  storageId: Id<"_storage">;
+  fileName: string;
+  fileSize: number;
+  mimeType?: string;
+}
 
 interface EditProductFormProps {
   productId: string;
 }
 
-export function EditProductForm({
-  productId: _productId,
-}: EditProductFormProps) {
+export function EditProductForm({ productId }: EditProductFormProps) {
   const router = useRouter();
+  const product = useQuery(api.products.getMyProductForEdit, {
+    productId: productId as Id<"products">,
+  });
+
+  const generateProductUploadUrl = useMutation(
+    api.products.generateProductUploadUrl
+  );
+  const deleteUploadedFile = useMutation(api.products.deleteUploadedFile);
+  const registerUploadedFile = useMutation(api.products.registerUploadedFile);
+  const updateProduct = useMutation(api.products.updateProduct);
+  const deleteProduct = useMutation(api.products.deleteProduct);
+
+  const [isInitialized, setIsInitialized] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [coverImage, setCoverImage] = useState<string | null>(
-    EXISTING_PRODUCT.coverImage
-  );
-  const [files, setFiles] = useState<string[]>(EXISTING_PRODUCT.files);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
+  const [category, setCategory] = useState("templates");
+  const [tagsInput, setTagsInput] = useState("");
+  const [priceInput, setPriceInput] = useState("0");
+  const [comparePriceInput, setComparePriceInput] = useState("");
+  const [allowCustomPrice, setAllowCustomPrice] = useState(false);
+  const [status, setStatus] = useState<"draft" | "active">("draft");
+
+  const [coverPreviewUrl, setCoverPreviewUrl] = useState<string | null>(null);
+  const [coverStorageId, setCoverStorageId] = useState<Id<"_storage"> | null>(
+    null
+  );
+  const [files, setFiles] = useState<UploadedProductFile[]>([]);
+
+  const coverInputRef = useRef<HTMLInputElement | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const uploadedStorageIdsRef = useRef<Set<Id<"_storage">>>(new Set());
+
+  useEffect(() => {
+    if (!product || isInitialized) {
+      return;
+    }
+
+    setName(product.name);
+    setDescription(product.description);
+    setCategory(product.category);
+    setTagsInput(product.tags.join(", "));
+    setPriceInput(product.price.toString());
+    setComparePriceInput(product.compareAtPrice?.toString() ?? "");
+    setAllowCustomPrice(product.allowCustomPrice);
+    setStatus(product.status);
+    setCoverStorageId(product.coverStorageId ?? null);
+    setCoverPreviewUrl(product.coverUrl ?? null);
+    setFiles(product.files);
+    setIsInitialized(true);
+  }, [isInitialized, product]);
+
+  useEffect(() => {
+    return () => {
+      for (const storageId of uploadedStorageIdsRef.current) {
+        deleteUploadedFile({ storageId }).catch(() => undefined);
+      }
+    };
+  }, [deleteUploadedFile]);
+
+  const parseTags = () =>
+    tagsInput
+      .split(",")
+      .map((tag) => tag.trim())
+      .filter(Boolean);
+
+  const parsePriceValue = (raw: string, fallback = 0) => {
+    const parsed = Number.parseFloat(raw);
+    return Number.isFinite(parsed) ? parsed : fallback;
+  };
+
+  const uploadFileToConvex = async (file: File): Promise<Id<"_storage">> => {
+    const uploadUrl = await generateProductUploadUrl();
+    const uploadResponse = await fetch(uploadUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": file.type || "application/octet-stream",
+      },
+      body: file,
+    });
+
+    if (!uploadResponse.ok) {
+      throw new Error("Failed to upload file");
+    }
+
+    const { storageId } = (await uploadResponse.json()) as {
+      storageId?: Id<"_storage">;
+    };
+
+    if (!storageId) {
+      throw new Error("Upload did not return a storageId");
+    }
+
+    try {
+      await registerUploadedFile({
+        storageId,
+        fileName: file.name,
+        fileSize: file.size,
+        mimeType: file.type || undefined,
+      });
+      uploadedStorageIdsRef.current.add(storageId);
+    } catch {
+      await deleteUploadedFile({ storageId }).catch(() => undefined);
+      throw new Error("Failed to register uploaded file");
+    }
+
+    return storageId;
+  };
+
+  const uploadCover = async (file: File) => {
+    if (!file.type.startsWith("image/")) {
+      toast.error("Cover must be an image file");
+      return;
+    }
+
+    if (file.size > MAX_IMAGE_SIZE_BYTES) {
+      toast.error("Cover image must be 10MB or smaller");
+      return;
+    }
+
+    try {
+      const uploadedStorageId = await uploadFileToConvex(file);
+      const previewUrl = URL.createObjectURL(file);
+
+      if (coverStorageId && uploadedStorageIdsRef.current.has(coverStorageId)) {
+        await deleteUploadedFile({ storageId: coverStorageId });
+        uploadedStorageIdsRef.current.delete(coverStorageId);
+      }
+
+      setCoverStorageId(uploadedStorageId);
+      setCoverPreviewUrl(previewUrl);
+      toast.success("Cover image uploaded");
+    } catch {
+      toast.error("Failed to upload cover image");
+    }
+  };
+
+  const uploadProductFiles = async (newFiles: File[]) => {
+    const availableSlots = Math.max(0, MAX_PRODUCT_FILES - files.length);
+
+    if (availableSlots <= 0) {
+      toast.error(`Maximum ${MAX_PRODUCT_FILES} files allowed per product`);
+      return;
+    }
+
+    const filesToUpload = newFiles.slice(0, availableSlots);
+
+    for (const file of filesToUpload) {
+      if (file.size > MAX_PRODUCT_FILE_SIZE_BYTES) {
+        toast.error(`${file.name} is larger than 250MB`);
+        continue;
+      }
+
+      try {
+        const uploadedStorageId = await uploadFileToConvex(file);
+        setFiles((prev) => [
+          ...prev,
+          {
+            storageId: uploadedStorageId,
+            fileName: file.name,
+            fileSize: file.size,
+            mimeType: file.type || undefined,
+          },
+        ]);
+      } catch {
+        toast.error(`Failed to upload ${file.name}`);
+      }
+    }
+  };
+
+  const removeFile = async (index: number) => {
+    const fileToRemove = files[index];
+    if (!fileToRemove) {
+      return;
+    }
+
+    try {
+      if (uploadedStorageIdsRef.current.has(fileToRemove.storageId)) {
+        await deleteUploadedFile({ storageId: fileToRemove.storageId });
+        uploadedStorageIdsRef.current.delete(fileToRemove.storageId);
+      }
+      setFiles((prev) => prev.filter((_, i) => i !== index));
+    } catch {
+      toast.error("Failed to remove file");
+    }
+  };
+
+  const removeCover = async () => {
+    if (!coverStorageId) {
+      setCoverPreviewUrl(null);
+      return;
+    }
+
+    try {
+      if (uploadedStorageIdsRef.current.has(coverStorageId)) {
+        await deleteUploadedFile({ storageId: coverStorageId });
+        uploadedStorageIdsRef.current.delete(coverStorageId);
+      }
+      setCoverStorageId(null);
+      setCoverPreviewUrl(null);
+    } catch {
+      toast.error("Failed to remove cover");
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    // TODO: Implement actual product update
-    setTimeout(() => {
-      setIsSubmitting(false);
+
+    const parsedPrice = Math.max(0, parsePriceValue(priceInput, 0));
+    const parsedComparePriceRaw = parsePriceValue(comparePriceInput, 0);
+    const parsedComparePrice =
+      comparePriceInput.trim().length > 0
+        ? Math.max(0, parsedComparePriceRaw)
+        : undefined;
+
+    try {
+      await updateProduct({
+        productId: productId as Id<"products">,
+        name: name.trim(),
+        description: description.trim(),
+        category,
+        tags: parseTags(),
+        price: parsedPrice,
+        compareAtPrice: parsedComparePrice,
+        allowCustomPrice,
+        status,
+        coverStorageId: coverStorageId ?? undefined,
+        files,
+      });
+      uploadedStorageIdsRef.current.clear();
       toast.success("Product updated successfully");
-    }, 1500);
+      router.push("/dashboard/products");
+      router.refresh();
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : "Failed to update product"
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     setIsDeleting(true);
-    // TODO: Implement actual product deletion
-    setTimeout(() => {
-      setIsDeleting(false);
+    try {
+      await deleteProduct({ productId: productId as Id<"products"> });
       toast.success("Product deleted successfully");
       router.push("/dashboard/products");
-    }, 1500);
+      router.refresh();
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : "Failed to delete product"
+      );
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
-  const handleCoverUpload = () => {
-    setCoverImage("/mock-cover.jpg");
-  };
+  if (product === undefined) {
+    return (
+      <div className="flex min-h-[320px] items-center justify-center">
+        <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
+      </div>
+    );
+  }
 
-  const handleFileUpload = () => {
-    setFiles([...files, `product-file-${files.length + 1}.zip`]);
-  };
-
-  const removeFile = (index: number) => {
-    setFiles(files.filter((_, i) => i !== index));
-  };
+  if (product === null) {
+    return (
+      <div className="rounded-lg border border-gray-200 bg-white p-6 text-sm text-gray-600">
+        Product not found.
+      </div>
+    );
+  }
 
   return (
     <form className="space-y-6" onSubmit={handleSubmit}>
-      {/* Header */}
+      <input
+        accept="image/png,image/jpeg,image/webp"
+        className="hidden"
+        onChange={(event) => {
+          const file = event.target.files?.[0];
+          if (file) {
+            uploadCover(file).catch(() => undefined);
+          }
+          event.target.value = "";
+        }}
+        ref={coverInputRef}
+        type="file"
+      />
+      <input
+        className="hidden"
+        multiple
+        onChange={(event) => {
+          const selectedFiles = Array.from(event.target.files ?? []);
+          if (selectedFiles.length > 0) {
+            uploadProductFiles(selectedFiles).catch(() => undefined);
+          }
+          event.target.value = "";
+        }}
+        ref={fileInputRef}
+        type="file"
+      />
+
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-4">
           <Link
@@ -134,8 +396,7 @@ export function EditProductForm({
                 ) : (
                   <Trash2 className="h-4 w-4" />
                 )}
-                <span className="sm:hidden">Delete</span>
-                <span className="hidden sm:inline">Delete</span>
+                Delete
               </Button>
             </AlertDialogTrigger>
             <AlertDialogContent>
@@ -169,19 +430,14 @@ export function EditProductForm({
                 <span className="hidden sm:inline">Saving...</span>
               </>
             ) : (
-              <>
-                <span className="sm:hidden">Save</span>
-                <span className="hidden sm:inline">Save Changes</span>
-              </>
+              <span>Save Changes</span>
             )}
           </Button>
         </div>
       </div>
 
       <div className="grid gap-8 lg:grid-cols-3">
-        {/* Main Content */}
         <div className="space-y-6 lg:col-span-2">
-          {/* Basic Info */}
           <Card className="p-6">
             <div className="mb-6 flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gray-100">
@@ -191,9 +447,6 @@ export function EditProductForm({
                 <h2 className="font-semibold text-gray-900">
                   Product Information
                 </h2>
-                <p className="text-gray-500 text-sm">
-                  Basic details about your product
-                </p>
               </div>
             </div>
 
@@ -202,9 +455,10 @@ export function EditProductForm({
                 <Label htmlFor="name">Product Name</Label>
                 <Input
                   className="h-11"
-                  defaultValue={EXISTING_PRODUCT.name}
                   id="name"
+                  onChange={(event) => setName(event.target.value)}
                   required
+                  value={name}
                 />
               </div>
 
@@ -212,16 +466,17 @@ export function EditProductForm({
                 <Label htmlFor="description">Description</Label>
                 <textarea
                   className="min-h-[150px] w-full resize-none rounded-lg border border-gray-200 bg-white px-4 py-3 text-sm placeholder:text-gray-400 focus:border-gray-400 focus:outline-none focus:ring-0"
-                  defaultValue={EXISTING_PRODUCT.description}
                   id="description"
-                  required
+                  onChange={(event) => setDescription(event.target.value)}
+                  required={status === "active"}
+                  value={description}
                 />
               </div>
 
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
                   <Label htmlFor="category">Category</Label>
-                  <Select defaultValue={EXISTING_PRODUCT.category}>
+                  <Select onValueChange={setCategory} value={category}>
                     <SelectTrigger className="h-11">
                       <SelectValue placeholder="Select category" />
                     </SelectTrigger>
@@ -240,15 +495,15 @@ export function EditProductForm({
                   <Label htmlFor="tags">Tags</Label>
                   <Input
                     className="h-11"
-                    defaultValue={EXISTING_PRODUCT.tags}
                     id="tags"
+                    onChange={(event) => setTagsInput(event.target.value)}
+                    value={tagsInput}
                   />
                 </div>
               </div>
             </div>
           </Card>
 
-          {/* Cover Image */}
           <Card className="p-6">
             <div className="mb-6 flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gray-100">
@@ -256,20 +511,22 @@ export function EditProductForm({
               </div>
               <div>
                 <h2 className="font-semibold text-gray-900">Cover Image</h2>
-                <p className="text-gray-500 text-sm">
-                  This will be displayed on your product page
-                </p>
               </div>
             </div>
 
-            {coverImage ? (
+            {coverPreviewUrl ? (
               <div className="relative aspect-video overflow-hidden rounded-xl border border-gray-200 bg-gray-100">
-                <div className="flex h-full items-center justify-center text-gray-400">
-                  <span className="text-6xl">🖼️</span>
-                </div>
+                {/* biome-ignore lint/performance/noImgElement: remote and object URL previews */}
+                <img
+                  alt="Product cover preview"
+                  className="h-full w-full object-cover"
+                  src={coverPreviewUrl}
+                />
                 <button
                   className="absolute top-3 right-3 flex h-8 w-8 items-center justify-center rounded-full bg-white shadow-md"
-                  onClick={() => setCoverImage(null)}
+                  onClick={() => {
+                    removeCover().catch(() => undefined);
+                  }}
                   type="button"
                 >
                   <X className="h-4 w-4" />
@@ -278,7 +535,7 @@ export function EditProductForm({
             ) : (
               <button
                 className="flex aspect-video w-full flex-col items-center justify-center gap-3 rounded-xl border-2 border-gray-200 border-dashed bg-gray-50 transition-colors hover:border-gray-300 hover:bg-gray-100"
-                onClick={handleCoverUpload}
+                onClick={() => coverInputRef.current?.click()}
                 type="button"
               >
                 <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white shadow-sm">
@@ -289,14 +546,13 @@ export function EditProductForm({
                     Click to upload cover image
                   </p>
                   <p className="text-gray-400 text-xs">
-                    PNG, JPG up to 10MB (1280x720 recommended)
+                    PNG, JPG, WEBP up to 10MB (1280x720 recommended)
                   </p>
                 </div>
               </button>
             )}
           </Card>
 
-          {/* Product Files */}
           <Card className="p-6">
             <div className="mb-6 flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gray-100">
@@ -304,9 +560,6 @@ export function EditProductForm({
               </div>
               <div>
                 <h2 className="font-semibold text-gray-900">Product Files</h2>
-                <p className="text-gray-500 text-sm">
-                  Upload the files customers will download
-                </p>
               </div>
             </div>
 
@@ -314,7 +567,7 @@ export function EditProductForm({
               {files.map((file, index) => (
                 <div
                   className="flex items-center justify-between rounded-lg border border-gray-200 bg-gray-50 p-4"
-                  key={file}
+                  key={file.storageId}
                 >
                   <div className="flex items-center gap-3">
                     <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-white">
@@ -322,14 +575,18 @@ export function EditProductForm({
                     </div>
                     <div>
                       <p className="font-medium text-gray-900 text-sm">
-                        {file}
+                        {file.fileName}
                       </p>
-                      <p className="text-gray-400 text-xs">2.4 MB</p>
+                      <p className="text-gray-400 text-xs">
+                        {(file.fileSize / (1024 * 1024)).toFixed(2)} MB
+                      </p>
                     </div>
                   </div>
                   <button
                     className="text-gray-400 hover:text-gray-600"
-                    onClick={() => removeFile(index)}
+                    onClick={() => {
+                      removeFile(index).catch(() => undefined);
+                    }}
                     type="button"
                   >
                     <X className="h-4 w-4" />
@@ -339,7 +596,7 @@ export function EditProductForm({
 
               <button
                 className="flex w-full items-center justify-center gap-2 rounded-lg border-2 border-gray-200 border-dashed p-4 text-gray-500 transition-colors hover:border-gray-300 hover:bg-gray-50"
-                onClick={handleFileUpload}
+                onClick={() => fileInputRef.current?.click()}
                 type="button"
               >
                 <Plus className="h-4 w-4" />
@@ -349,9 +606,7 @@ export function EditProductForm({
           </Card>
         </div>
 
-        {/* Sidebar */}
         <div className="space-y-6">
-          {/* Pricing */}
           <Card className="p-6">
             <div className="mb-6 flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gray-100">
@@ -359,79 +614,73 @@ export function EditProductForm({
               </div>
               <div>
                 <h2 className="font-semibold text-gray-900">Pricing</h2>
-                <p className="text-gray-500 text-sm">Set your product price</p>
               </div>
             </div>
 
             <div className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="price">Price (USD)</Label>
-                <div className="relative">
-                  <span className="absolute top-1/2 left-4 -translate-y-1/2 text-gray-400">
-                    $
-                  </span>
-                  <Input
-                    className="h-11 pl-8"
-                    defaultValue={EXISTING_PRODUCT.price}
-                    id="price"
-                    min="0"
-                    required
-                    step="0.01"
-                    type="number"
-                  />
-                </div>
+                <Input
+                  className="h-11"
+                  id="price"
+                  min="0"
+                  onChange={(event) => setPriceInput(event.target.value)}
+                  required
+                  step="0.01"
+                  type="number"
+                  value={priceInput}
+                />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="comparePrice">
-                  Compare-at Price (optional)
-                </Label>
-                <div className="relative">
-                  <span className="absolute top-1/2 left-4 -translate-y-1/2 text-gray-400">
-                    $
-                  </span>
-                  <Input
-                    className="h-11 pl-8"
-                    defaultValue={EXISTING_PRODUCT.comparePrice}
-                    id="comparePrice"
-                    min="0"
-                    step="0.01"
-                    type="number"
-                  />
-                </div>
+                <Label htmlFor="comparePrice">Compare-at Price (optional)</Label>
+                <Input
+                  className="h-11"
+                  id="comparePrice"
+                  min="0"
+                  onChange={(event) => setComparePriceInput(event.target.value)}
+                  step="0.01"
+                  type="number"
+                  value={comparePriceInput}
+                />
               </div>
+
+              <label className="flex items-center gap-2 text-sm">
+                <input
+                  checked={allowCustomPrice}
+                  onChange={(event) => setAllowCustomPrice(event.target.checked)}
+                  type="checkbox"
+                />
+                Allow custom price
+              </label>
             </div>
           </Card>
 
-          {/* Status Card */}
           <Card className="p-6">
             <h3 className="mb-4 font-semibold text-gray-900">Product Status</h3>
             <div className="space-y-3">
               <label className="flex items-center gap-3">
                 <input
-                  className="h-4 w-4 rounded border-gray-300"
-                  defaultChecked
+                  checked={status === "active"}
                   name="status"
+                  onChange={() => setStatus("active")}
                   type="radio"
                 />
                 <div>
                   <span className="font-medium text-gray-900 text-sm">
                     Published
                   </span>
-                  <p className="text-gray-500 text-xs">Visible to customers</p>
                 </div>
               </label>
               <label className="flex items-center gap-3">
                 <input
-                  className="h-4 w-4 rounded border-gray-300"
+                  checked={status === "draft"}
                   name="status"
+                  onChange={() => setStatus("draft")}
                   type="radio"
                 />
                 <div>
-                  <span className="font-medium text-gray-900 text-sm">
-                    Draft
-                  </span>
-                  <p className="text-gray-500 text-xs">Only visible to you</p>
+                  <span className="font-medium text-gray-900 text-sm">Draft</span>
                 </div>
               </label>
             </div>
