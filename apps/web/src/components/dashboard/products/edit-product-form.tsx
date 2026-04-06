@@ -153,13 +153,18 @@ export function EditProductForm({ productId }: EditProductFormProps) {
       throw new Error("Upload did not return a storageId");
     }
 
-    await registerUploadedFile({
-      storageId,
-      fileName: file.name,
-      fileSize: file.size,
-      mimeType: file.type || undefined,
-    });
-    uploadedStorageIdsRef.current.add(storageId);
+    try {
+      await registerUploadedFile({
+        storageId,
+        fileName: file.name,
+        fileSize: file.size,
+        mimeType: file.type || undefined,
+      });
+      uploadedStorageIdsRef.current.add(storageId);
+    } catch {
+      await deleteUploadedFile({ storageId }).catch(() => undefined);
+      throw new Error("Failed to register uploaded file");
+    }
 
     return storageId;
   };
@@ -463,7 +468,7 @@ export function EditProductForm({ productId }: EditProductFormProps) {
                   className="min-h-[150px] w-full resize-none rounded-lg border border-gray-200 bg-white px-4 py-3 text-sm placeholder:text-gray-400 focus:border-gray-400 focus:outline-none focus:ring-0"
                   id="description"
                   onChange={(event) => setDescription(event.target.value)}
-                  required
+                  required={status === "active"}
                   value={description}
                 />
               </div>

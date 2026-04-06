@@ -171,11 +171,13 @@ export const columns: ColumnDef<DashboardProduct>[] = [
               Copy product ID
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem asChild className="text-sm">
-              <Link href={`/dashboard/products/${product.id}/edit`}>
-                Edit product
-              </Link>
-            </DropdownMenuItem>
+            {product.status !== "archived" && (
+              <DropdownMenuItem asChild className="text-sm">
+                <Link href={`/dashboard/products/${product.id}/edit`}>
+                  Edit product
+                </Link>
+              </DropdownMenuItem>
+            )}
             <DropdownMenuItem asChild className="text-sm">
               <Link href={`/products/${product.id}`}>View product page</Link>
             </DropdownMenuItem>
