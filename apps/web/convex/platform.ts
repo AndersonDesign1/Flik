@@ -48,6 +48,11 @@ interface DirectoryUser {
   name?: string;
 }
 
+interface PaginatedUsersResponse {
+  continueCursor: string | null;
+  page: DirectoryUser[];
+}
+
 interface DirectoryPerson {
   _id: string;
   createdAt: number;
@@ -119,18 +124,70 @@ function requireOperator(role?: string) {
   }
 }
 
-function getAuthUsers(ctx: QueryCtx) {
-  return ctx.runQuery(components.betterAuth.adapter.findMany, {
+function isDirectoryUser(value: unknown): value is DirectoryUser {
+  if (typeof value !== "object" || value === null) {
+    return false;
+  }
+
+  const candidate = value as Record<string, unknown>;
+  return (
+    typeof candidate._id === "string" &&
+    typeof candidate.email === "string" &&
+    (candidate.name === undefined || typeof candidate.name === "string") &&
+    (candidate.createdAt === undefined ||
+      typeof candidate.createdAt === "number")
+  );
+}
+
+function parsePaginatedUsersResponse(value: unknown): PaginatedUsersResponse {
+  if (typeof value !== "object" || value === null) {
+    throw new ConvexError({
+      code: "INTERNAL_ERROR",
+      message: "Invalid Better Auth user page response.",
+    });
+  }
+
+  const candidate = value as Record<string, unknown>;
+  const page = candidate.page;
+  const continueCursor = candidate.continueCursor;
+
+  if (!(Array.isArray(page) && page.every(isDirectoryUser))) {
+    throw new ConvexError({
+      code: "INTERNAL_ERROR",
+      message: "Better Auth user page payload is malformed.",
+    });
+  }
+
+  if (!(continueCursor === null || typeof continueCursor === "string")) {
+    throw new ConvexError({
+      code: "INTERNAL_ERROR",
+      message: "Better Auth pagination cursor is malformed.",
+    });
+  }
+
+  return { continueCursor, page };
+}
+
+async function getAuthUsers(
+  ctx: QueryCtx,
+  {
+    cursor = null,
+    pageSize = 5000,
+  }: { cursor?: string | null; pageSize?: number }
+) {
+  const response = await ctx.runQuery(components.betterAuth.adapter.findMany, {
     model: "user",
     paginationOpts: {
-      cursor: null,
-      numItems: 5000,
+      cursor,
+      numItems: pageSize,
     },
     sortBy: {
       direction: "desc",
       field: "createdAt",
     },
   });
+
+  return parsePaginatedUsersResponse(response);
 }
 
 async function buildDirectoryPeople(
@@ -138,7 +195,35 @@ async function buildDirectoryPeople(
   profiles: DirectoryProfile[],
   stores: DirectoryStore[]
 ) {
-  const users = await getAuthUsers(ctx);
+  const pageSize = 5000;
+  const maxIterations = 100;
+  const users: DirectoryUser[] = [];
+  let cursor: string | null = null;
+  let iteration = 0;
+
+  while (true) {
+    iteration += 1;
+    if (iteration > maxIterations) {
+      throw new ConvexError({
+        code: "INTERNAL_ERROR",
+        message:
+          "Exceeded Better Auth pagination safeguard while loading users.",
+      });
+    }
+
+    const response = await getAuthUsers(ctx, {
+      cursor,
+      pageSize,
+    });
+    users.push(...response.page);
+
+    if (!response.continueCursor) {
+      break;
+    }
+
+    cursor = response.continueCursor;
+  }
+
   const profileByUserId = new Map(
     profiles.map((entry) => [entry.userId, entry] as const)
   );
@@ -146,13 +231,13 @@ async function buildDirectoryPeople(
     stores.map((store) => [store.ownerId, store] as const)
   );
 
-  const authUsers = (users.page as DirectoryUser[]).map((user) => {
+  const authUsers = users.map((user) => {
     const profile = profileByUserId.get(user._id);
     const store = storeByOwnerId.get(user._id);
 
     return {
       _id: user._id,
-      createdAt: user.createdAt ?? profile?.createdAt ?? Date.now(),
+      createdAt: user.createdAt ?? profile?.createdAt ?? 0,
       email: user.email,
       name: user.name ?? undefined,
       role: normalizeRole(profile?.role),
@@ -358,16 +443,12 @@ export const getSuperAdminOverview = query({
     const { profile } = await requireViewerProfile(ctx);
     requireSuperAdmin(profile?.role);
 
-    const [profiles, stores, products, directory] = await Promise.all([
+    const [profiles, stores, products] = await Promise.all([
       ctx.db.query("profiles").collect(),
       ctx.db.query("stores").collect(),
       ctx.db.query("products").collect(),
-      buildDirectoryPeople(
-        ctx,
-        await ctx.db.query("profiles").collect(),
-        await ctx.db.query("stores").collect()
-      ),
     ]);
+    const directory = await buildDirectoryPeople(ctx, profiles, stores);
 
     const recentStores = await Promise.all(
       stores
@@ -544,16 +625,12 @@ export const getStaffOverview = query({
     const { profile } = await requireViewerProfile(ctx);
     requireOperator(profile?.role);
 
-    const [profiles, stores, products, directory] = await Promise.all([
+    const [profiles, stores, products] = await Promise.all([
       ctx.db.query("profiles").collect(),
       ctx.db.query("stores").collect(),
       ctx.db.query("products").collect(),
-      buildDirectoryPeople(
-        ctx,
-        await ctx.db.query("profiles").collect(),
-        await ctx.db.query("stores").collect()
-      ),
     ]);
+    const directory = await buildDirectoryPeople(ctx, profiles, stores);
 
     const storeByOwnerId = new Map(
       stores.map((store) => [store.ownerId, store] as const)

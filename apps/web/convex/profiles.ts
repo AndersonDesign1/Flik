@@ -61,6 +61,11 @@ interface DirectoryUser {
   name?: string;
 }
 
+interface PaginatedUsersResponse {
+  continueCursor: string | null;
+  page: DirectoryUser[];
+}
+
 interface DirectoryUserSummary {
   _id: string;
   createdAt: number;
@@ -144,32 +149,46 @@ export const getAllUsers = query({
       return [];
     }
 
-    const [profiles, authUsers] = await Promise.all([
-      ctx.db.query("profiles").collect(),
-      ctx.runQuery(components.betterAuth.adapter.findMany, {
-        model: "user",
-        paginationOpts: {
-          cursor: null,
-          numItems: 5000,
-        },
-        sortBy: {
-          direction: "desc",
-          field: "createdAt",
-        },
-      }),
-    ]);
+    const profiles = await ctx.db.query("profiles").collect();
+    const authUsers: DirectoryUser[] = [];
+    const pageSize = 5000;
+    let cursor: string | null = null;
+
+    while (true) {
+      const response = (await ctx.runQuery(
+        components.betterAuth.adapter.findMany,
+        {
+          model: "user",
+          paginationOpts: {
+            cursor,
+            numItems: pageSize,
+          },
+          sortBy: {
+            direction: "desc",
+            field: "createdAt",
+          },
+        }
+      )) as PaginatedUsersResponse;
+
+      authUsers.push(...response.page);
+
+      if (!response.continueCursor) {
+        break;
+      }
+
+      cursor = response.continueCursor;
+    }
 
     const profileByUserId = new Map(
       profiles.map((entry) => [entry.userId, entry] as const)
     );
 
-    const authBackedUsers: DirectoryUserSummary[] = authUsers.page.map(
-      (authUser: DirectoryUser) => {
+    const authBackedUsers: DirectoryUserSummary[] = authUsers.map(
+      (authUser) => {
         const profileEntry = profileByUserId.get(authUser._id);
         return {
           _id: authUser._id,
-          createdAt:
-            authUser.createdAt ?? profileEntry?.createdAt ?? Date.now(),
+          createdAt: authUser.createdAt ?? profileEntry?.createdAt ?? 0,
           email: authUser.email,
           name: authUser.name ?? undefined,
           role: normalizeRole(profileEntry?.role),
@@ -506,12 +525,14 @@ export const inviteToRole = mutation({
       .withIndex("by_email", (q) => q.eq("email", validated.email))
       .first();
 
+    const now = Date.now();
+
     if (existingInvite) {
       // Update existing invite
       await ctx.db.patch(existingInvite._id, {
         role: validated.role,
         invitedBy: user._id,
-        createdAt: Date.now(),
+        updatedAt: now,
       });
       return existingInvite._id;
     }
@@ -520,7 +541,8 @@ export const inviteToRole = mutation({
       email: validated.email,
       role: validated.role,
       invitedBy: user._id,
-      createdAt: Date.now(),
+      createdAt: now,
+      updatedAt: now,
     });
   },
 });
@@ -702,7 +724,7 @@ export const normalizeLegacyAdminRoleData = mutation({
       legacyInvites.map((invite) =>
         ctx.db.patch(invite._id, {
           role: "staff",
-          createdAt: now,
+          updatedAt: now,
         })
       )
     );

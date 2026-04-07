@@ -29,6 +29,7 @@ export default defineSchema({
     role: v.union(v.literal("staff"), v.literal("super_admin")),
     invitedBy: v.string(),
     createdAt: v.float64(),
+    updatedAt: v.optional(v.float64()),
   }).index("by_email", ["email"]),
 
   stores: defineTable({

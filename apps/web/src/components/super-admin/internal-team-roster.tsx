@@ -46,6 +46,10 @@ interface PendingRoleChange {
 }
 
 function formatDate(timestamp: number): string {
+  if (timestamp <= 0) {
+    return "Unknown";
+  }
+
   return new Date(timestamp).toLocaleDateString("en-US", {
     month: "short",
     day: "numeric",
@@ -82,6 +86,7 @@ export function InternalTeamRoster() {
   const [searchValue, setSearchValue] = useState("");
   const [pendingRoleChange, setPendingRoleChange] =
     useState<PendingRoleChange | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const users = useQuery(api.profiles.getAllUsers) ?? [];
   const currentUser = useQuery(api.users.getCurrentUser);
   const updateUserRole = useMutation(api.profiles.updateUserRole);
@@ -129,9 +134,11 @@ export function InternalTeamRoster() {
   );
 
   const handleRoleChange = async () => {
-    if (!pendingRoleChange) {
+    if (isSubmitting || !pendingRoleChange) {
       return;
     }
+
+    setIsSubmitting(true);
 
     try {
       await updateUserRole({
@@ -141,11 +148,13 @@ export function InternalTeamRoster() {
       toast.success(
         `${pendingRoleChange.userEmail} is now ${pendingRoleChange.nextRole.replace("_", " ")}`
       );
-      setPendingRoleChange(null);
     } catch (error) {
       toast.error(
         error instanceof Error ? error.message : "Failed to update role"
       );
+    } finally {
+      setIsSubmitting(false);
+      setPendingRoleChange(null);
     }
   };
 
@@ -269,6 +278,7 @@ export function InternalTeamRoster() {
                         <DropdownMenuTrigger asChild>
                           <Button
                             aria-label={`Manage ${user.email}`}
+                            disabled={isCurrentUser}
                             size="icon"
                             variant="ghost"
                           >
@@ -321,8 +331,11 @@ export function InternalTeamRoster() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleRoleChange}>
-              Confirm override
+            <AlertDialogAction
+              disabled={isSubmitting}
+              onClick={handleRoleChange}
+            >
+              {isSubmitting ? "Saving..." : "Confirm override"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

@@ -8,6 +8,10 @@ import { api } from "../../../convex/_generated/api";
 
 export default async function StaffDashboardPage() {
   const overview = await fetchAuthQuery(api.platform.getStaffOverview);
+  const formatPrice = (value: number | null | undefined) => {
+    const parsed = typeof value === "number" ? value : Number(value);
+    return Number.isFinite(parsed) ? parsed.toFixed(2) : "0.00";
+  };
 
   const metrics = [
     {
@@ -148,7 +152,7 @@ export default async function StaffDashboardPage() {
                       {product.status}
                     </Badge>
                     <p className="mt-2 font-medium text-foreground text-sm">
-                      ${product.price.toFixed(2)}
+                      ${formatPrice(product.price)}
                     </p>
                   </div>
                 </div>

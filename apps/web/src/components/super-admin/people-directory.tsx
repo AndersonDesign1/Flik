@@ -71,6 +71,10 @@ const SEGMENT_FILTERS: Array<{
 ];
 
 function formatDate(timestamp: number): string {
+  if (timestamp <= 0) {
+    return "Unknown";
+  }
+
   return new Date(timestamp).toLocaleDateString("en-US", {
     month: "short",
     day: "numeric",
@@ -215,6 +219,7 @@ export function PeopleDirectory({ people, summary }: PeopleDirectoryProps) {
           <div className="flex items-center gap-2">
             <Search className="size-4 text-muted-foreground" />
             <input
+              aria-label="Search people by name or email"
               className="h-10 w-full rounded-lg border border-border bg-background px-3 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-1"
               onChange={(event) => setSearchValue(event.target.value)}
               placeholder="Search by name or email..."

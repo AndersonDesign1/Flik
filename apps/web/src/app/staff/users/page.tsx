@@ -74,6 +74,10 @@ type PendingAction =
     };
 
 function formatDate(timestamp: number): string {
+  if (timestamp <= 0) {
+    return "Unknown";
+  }
+
   return new Date(timestamp).toLocaleDateString("en-US", {
     month: "short",
     day: "numeric",
@@ -86,8 +90,10 @@ export default function StaffUsersPage() {
   const [pendingAction, setPendingAction] = useState<PendingAction | null>(
     null
   );
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const users = useQuery(api.profiles.getAllUsers) ?? [];
   const myRole = useQuery(api.profiles.getRole);
+  const isRoleLoading = myRole === undefined;
   const updateUserRole = useMutation(api.profiles.updateUserRole);
   const promoteSelfToSuperAdmin = useMutation(
     api.profiles.promoteSelfToSuperAdmin
@@ -176,8 +182,9 @@ export default function StaffUsersPage() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          {myRole !== "super_admin" && !hasSuperAdmin && (
+          {!isRoleLoading && myRole !== "super_admin" && !hasSuperAdmin && (
             <Button
+              disabled={isSubmitting}
               onClick={() => setPendingAction({ type: "bootstrap" })}
               variant="outline"
             >
@@ -296,7 +303,7 @@ export default function StaffUsersPage() {
                           >
                             Set as Staff
                           </DropdownMenuItem>
-                          {myRole === "super_admin" && (
+                          {!isRoleLoading && myRole === "super_admin" && (
                             <DropdownMenuItem
                               onClick={() =>
                                 setPendingAction({
@@ -340,25 +347,31 @@ export default function StaffUsersPage() {
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
+              disabled={isSubmitting}
               onClick={async () => {
-                if (!pendingAction) {
+                if (!pendingAction || isSubmitting) {
                   return;
                 }
 
-                if (pendingAction.type === "bootstrap") {
-                  await handleBootstrapSuperAdmin();
+                setIsSubmitting(true);
+
+                try {
+                  if (pendingAction.type === "bootstrap") {
+                    await handleBootstrapSuperAdmin();
+                    return;
+                  }
+
+                  await handleRoleChange(
+                    pendingAction.userId,
+                    pendingAction.nextRole
+                  );
+                } finally {
+                  setIsSubmitting(false);
                   setPendingAction(null);
-                  return;
                 }
-
-                await handleRoleChange(
-                  pendingAction.userId,
-                  pendingAction.nextRole
-                );
-                setPendingAction(null);
               }}
             >
-              Confirm
+              {isSubmitting ? "Saving..." : "Confirm"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
