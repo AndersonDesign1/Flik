@@ -1,6 +1,8 @@
 import { getSessionCookie } from "better-auth/cookies";
 import { type NextRequest, NextResponse } from "next/server";
 
+const LEADING_SLASHES = /^\/+/;
+
 /**
  * Next.js 16 Proxy - Server-side route protection
  *
@@ -12,10 +14,17 @@ export function proxy(request: NextRequest) {
 
   if (pathname === "/admin" || pathname.startsWith("/admin/")) {
     const redirectUrl = request.nextUrl.clone();
+    const adminPath = pathname
+      .slice("/admin".length)
+      .replace(LEADING_SLASHES, "");
+    const adminRouteMap: Record<string, string> = {
+      products: "/staff/products",
+      sellers: "/staff/sellers",
+      users: "/staff/users",
+    };
+
     redirectUrl.pathname =
-      pathname === "/admin"
-        ? "/staff"
-        : `/staff/${pathname.slice("/admin/".length)}`;
+      pathname === "/admin" ? "/staff" : (adminRouteMap[adminPath] ?? "/staff");
     return NextResponse.redirect(redirectUrl);
   }
 

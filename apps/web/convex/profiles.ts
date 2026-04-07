@@ -74,6 +74,41 @@ interface DirectoryUserSummary {
   role: PlatformRole;
 }
 
+function isDirectoryUser(value: unknown): value is DirectoryUser {
+  if (typeof value !== "object" || value === null) {
+    return false;
+  }
+
+  const candidate = value as Record<string, unknown>;
+  return (
+    typeof candidate._id === "string" &&
+    typeof candidate.email === "string" &&
+    (candidate.name === undefined || typeof candidate.name === "string") &&
+    (candidate.createdAt === undefined ||
+      typeof candidate.createdAt === "number")
+  );
+}
+
+function parsePaginatedUsersResponse(value: unknown): PaginatedUsersResponse {
+  if (typeof value !== "object" || value === null) {
+    throw new Error("Invalid Better Auth user page response");
+  }
+
+  const candidate = value as Record<string, unknown>;
+  const page = candidate.page;
+  const continueCursor = candidate.continueCursor;
+
+  if (!(Array.isArray(page) && page.every(isDirectoryUser))) {
+    throw new Error("Better Auth user page payload is malformed");
+  }
+
+  if (!(continueCursor === null || typeof continueCursor === "string")) {
+    throw new Error("Better Auth pagination cursor is malformed");
+  }
+
+  return { continueCursor, page };
+}
+
 export const getProfile = query({
   args: {},
   returns: v.union(
@@ -152,10 +187,19 @@ export const getAllUsers = query({
     const profiles = await ctx.db.query("profiles").collect();
     const authUsers: DirectoryUser[] = [];
     const pageSize = 5000;
+    const maxIterations = 100;
     let cursor: string | null = null;
+    let iteration = 0;
 
     while (true) {
-      const response = (await ctx.runQuery(
+      iteration += 1;
+      if (iteration > maxIterations) {
+        throw new Error(
+          "Exceeded Better Auth pagination safeguard while loading users"
+        );
+      }
+
+      const rawResponse = await ctx.runQuery(
         components.betterAuth.adapter.findMany,
         {
           model: "user",
@@ -168,7 +212,8 @@ export const getAllUsers = query({
             field: "createdAt",
           },
         }
-      )) as PaginatedUsersResponse;
+      );
+      const response = parsePaginatedUsersResponse(rawResponse);
 
       authUsers.push(...response.page);
 
@@ -183,9 +228,13 @@ export const getAllUsers = query({
       profiles.map((entry) => [entry.userId, entry] as const)
     );
 
-    const authBackedUsers: DirectoryUserSummary[] = authUsers.map(
+    const authBackedUsers: DirectoryUserSummary[] = authUsers.flatMap(
       (authUser) => {
         const profileEntry = profileByUserId.get(authUser._id);
+        if (!profileEntry) {
+          return [];
+        }
+
         return {
           _id: authUser._id,
           createdAt: authUser.createdAt ?? profileEntry?.createdAt ?? 0,
@@ -515,7 +564,10 @@ export const inviteToRole = mutation({
       throw new Error("Only staff or super admins can invite users to roles");
     }
 
-    if (validated.role === "super_admin" && profile?.role !== "super_admin") {
+    if (
+      validated.role === "super_admin" &&
+      normalizeRole(profile?.role) !== "super_admin"
+    ) {
       throw new Error("Only super admins can invite another super admin");
     }
 
@@ -760,19 +812,29 @@ export const promoteSelfToSuperAdmin = mutation({
       );
     }
 
-    if (normalizeRole(profile.role) !== "staff") {
-      throw new Error(
-        "Only staff users can bootstrap the first super admin account"
-      );
-    }
-
+    const normalizedRole = normalizeRole(profile.role);
     const existingSuperAdmin = await ctx.db
       .query("profiles")
       .withIndex("by_role", (q) => q.eq("role", "super_admin"))
       .first();
 
+    const internalProfiles = await ctx.db.query("profiles").collect();
+    const hasExistingOperators = internalProfiles.some(
+      (entry) =>
+        entry.userId !== profile.userId && normalizeRole(entry.role) !== "user"
+    );
+
     if (existingSuperAdmin) {
       throw new Error("A super admin already exists. Ask them for access.");
+    }
+
+    if (
+      normalizedRole !== "staff" &&
+      !(normalizedRole === "user" && !hasExistingOperators)
+    ) {
+      throw new Error(
+        "Only staff users can bootstrap the first super admin account once operators exist"
+      );
     }
 
     await ctx.db.patch(profile._id, {
