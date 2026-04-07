@@ -1,25 +1,17 @@
 "use client";
 
-import {
-  AlertTriangle,
-  HelpCircle,
-  LayoutGrid,
-  MessageSquare,
-  Settings,
-  Shield,
-} from "lucide-react";
+import { Box, LayoutGrid, Settings, Store, Users } from "lucide-react";
 import { RoleSidebar } from "@/components/shared/role-sidebar";
 
 const STAFF_NAV_ITEMS = [
   { href: "/staff", label: "Overview", icon: LayoutGrid },
-  { href: "/staff/moderation", label: "Moderation", icon: Shield },
-  { href: "/staff/tickets", label: "Tickets", icon: MessageSquare },
-  { href: "/staff/reports", label: "Reports", icon: AlertTriangle },
+  { href: "/staff/users", label: "Users", icon: Users },
+  { href: "/staff/sellers", label: "Sellers", icon: Store },
+  { href: "/staff/products", label: "Products", icon: Box },
 ];
 
 const STAFF_FOOTER_ITEMS = [
-  { href: "/staff/settings", label: "Settings", icon: Settings },
-  { href: "/staff/help", label: "Help", icon: HelpCircle },
+  { href: "/account/settings", label: "Settings", icon: Settings },
 ];
 
 export function StaffSidebar() {
@@ -27,7 +19,7 @@ export function StaffSidebar() {
     <RoleSidebar
       footerItems={STAFF_FOOTER_ITEMS}
       navItems={STAFF_NAV_ITEMS}
-      title="Staff Panel"
+      title="Staff Workspace"
       titleShort="S"
     />
   );

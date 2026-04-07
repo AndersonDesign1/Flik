@@ -20,8 +20,8 @@ export function UnauthorizedView({ isAuthenticated }: UnauthorizedViewProps) {
         </h1>
         <p className="max-w-sm text-muted-foreground text-sm">
           {isAuthenticated
-            ? "You don't have permission to access the admin panel. Please contact an administrator."
-            : "Please sign in to access the admin panel."}
+            ? "You don't have permission to access this internal workspace."
+            : "Please sign in to access this internal workspace."}
         </p>
       </div>
       <div className="flex gap-3">

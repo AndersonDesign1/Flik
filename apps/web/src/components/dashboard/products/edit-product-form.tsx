@@ -329,7 +329,7 @@ export function EditProductForm({ productId }: EditProductFormProps) {
 
   if (product === null) {
     return (
-      <div className="rounded-lg border border-gray-200 bg-white p-6 text-sm text-gray-600">
+      <div className="rounded-lg border border-gray-200 bg-white p-6 text-gray-600 text-sm">
         Product not found.
       </div>
     );
@@ -520,7 +520,9 @@ export function EditProductForm({ productId }: EditProductFormProps) {
                 <img
                   alt="Product cover preview"
                   className="h-full w-full object-cover"
+                  height={720}
                   src={coverPreviewUrl}
+                  width={1280}
                 />
                 <button
                   className="absolute top-3 right-3 flex h-8 w-8 items-center justify-center rounded-full bg-white shadow-md"
@@ -633,7 +635,9 @@ export function EditProductForm({ productId }: EditProductFormProps) {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="comparePrice">Compare-at Price (optional)</Label>
+                <Label htmlFor="comparePrice">
+                  Compare-at Price (optional)
+                </Label>
                 <Input
                   className="h-11"
                   id="comparePrice"
@@ -648,7 +652,9 @@ export function EditProductForm({ productId }: EditProductFormProps) {
               <label className="flex items-center gap-2 text-sm">
                 <input
                   checked={allowCustomPrice}
-                  onChange={(event) => setAllowCustomPrice(event.target.checked)}
+                  onChange={(event) =>
+                    setAllowCustomPrice(event.target.checked)
+                  }
                   type="checkbox"
                 />
                 Allow custom price
@@ -680,7 +686,9 @@ export function EditProductForm({ productId }: EditProductFormProps) {
                   type="radio"
                 />
                 <div>
-                  <span className="font-medium text-gray-900 text-sm">Draft</span>
+                  <span className="font-medium text-gray-900 text-sm">
+                    Draft
+                  </span>
                 </div>
               </label>
             </div>

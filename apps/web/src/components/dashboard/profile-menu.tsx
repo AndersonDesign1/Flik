@@ -5,7 +5,6 @@ import {
   BriefcaseBusiness,
   LogOut,
   Settings,
-  Shield,
   ShieldCheck,
   ShoppingBag,
   Users,
@@ -137,14 +136,6 @@ export function ProfileMenu() {
             <Link href="/staff">
               <Users className="size-4" />
               Staff Panel
-            </Link>
-          </DropdownMenuItem>
-        )}
-        {workspaceAccess?.canAccessAdmin && (
-          <DropdownMenuItem asChild className="cursor-pointer gap-2">
-            <Link href="/admin">
-              <Shield className="size-4" />
-              Admin Panel
             </Link>
           </DropdownMenuItem>
         )}

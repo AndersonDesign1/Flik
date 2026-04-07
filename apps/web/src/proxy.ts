@@ -1,6 +1,8 @@
 import { getSessionCookie } from "better-auth/cookies";
 import { type NextRequest, NextResponse } from "next/server";
 
+const LEADING_SLASHES = /^\/+/;
+
 /**
  * Next.js 16 Proxy - Server-side route protection
  *
@@ -9,6 +11,22 @@ import { type NextRequest, NextResponse } from "next/server";
  */
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
+  if (pathname === "/admin" || pathname.startsWith("/admin/")) {
+    const redirectUrl = request.nextUrl.clone();
+    const adminPath = pathname
+      .slice("/admin".length)
+      .replace(LEADING_SLASHES, "");
+    const adminRouteMap: Record<string, string> = {
+      products: "/staff/products",
+      sellers: "/staff/sellers",
+      users: "/staff/users",
+    };
+
+    redirectUrl.pathname =
+      pathname === "/admin" ? "/staff" : (adminRouteMap[adminPath] ?? "/staff");
+    return NextResponse.redirect(redirectUrl);
+  }
 
   // Protected routes that require authentication
   const protectedRoutes = [
@@ -33,18 +51,6 @@ export function proxy(request: NextRequest) {
     }
   }
 
-  // Public auth routes - redirect authenticated users
-  const authRoutes = ["/login", "/signup", "/forgot-password"];
-  const isAuthRoute = authRoutes.some((route) => pathname === route);
-
-  if (isAuthRoute) {
-    const sessionCookie = getSessionCookie(request);
-
-    if (sessionCookie) {
-      return NextResponse.redirect(new URL("/dashboard", request.url));
-    }
-  }
-
   return NextResponse.next();
 }
 
@@ -55,8 +61,5 @@ export const config = {
     "/dashboard/:path*",
     "/account/:path*",
     "/onboarding",
-    "/login",
-    "/signup",
-    "/forgot-password",
   ],
 };

@@ -1,4 +1,5 @@
 import { v } from "convex/values";
+import { components } from "./_generated/api";
 import { mutation, query } from "./_generated/server";
 import { authComponent } from "./auth";
 import { inviteToRoleSchema, updateProfileSchema } from "./validation";
@@ -7,18 +8,31 @@ const WHITESPACE_REGEX = /\s+/;
 const roleHierarchy = {
   user: 0,
   staff: 1,
-  admin: 2,
-  super_admin: 3,
+  super_admin: 2,
 } as const;
 
 type PlatformRole = keyof typeof roleHierarchy;
 
 function getRoleLevel(role?: string): number {
-  return roleHierarchy[(role ?? "user") as PlatformRole] ?? 0;
+  const normalizedRole = normalizeRole(role);
+  return roleHierarchy[normalizedRole] ?? 0;
 }
 
 function canManageUsers(role?: string): boolean {
-  return role === "admin" || role === "super_admin";
+  const normalizedRole = normalizeRole(role);
+  return normalizedRole === "staff" || normalizedRole === "super_admin";
+}
+
+function normalizeRole(role?: string | null): PlatformRole {
+  if (role === "admin") {
+    return "staff";
+  }
+
+  if (role === "staff" || role === "super_admin") {
+    return role;
+  }
+
+  return "user";
 }
 
 function splitName(fullName?: string | null) {
@@ -32,6 +46,67 @@ function splitName(fullName?: string | null) {
     firstName,
     lastName: rest.length > 0 ? rest.join(" ") : undefined,
   };
+}
+
+interface DirectoryProfile {
+  createdAt: number;
+  role?: string;
+  userId: string;
+}
+
+interface DirectoryUser {
+  _id: string;
+  createdAt?: number;
+  email: string;
+  name?: string;
+}
+
+interface PaginatedUsersResponse {
+  continueCursor: string | null;
+  page: DirectoryUser[];
+}
+
+interface DirectoryUserSummary {
+  _id: string;
+  createdAt: number;
+  email: string;
+  name?: string;
+  role: PlatformRole;
+}
+
+function isDirectoryUser(value: unknown): value is DirectoryUser {
+  if (typeof value !== "object" || value === null) {
+    return false;
+  }
+
+  const candidate = value as Record<string, unknown>;
+  return (
+    typeof candidate._id === "string" &&
+    typeof candidate.email === "string" &&
+    (candidate.name === undefined || typeof candidate.name === "string") &&
+    (candidate.createdAt === undefined ||
+      typeof candidate.createdAt === "number")
+  );
+}
+
+function parsePaginatedUsersResponse(value: unknown): PaginatedUsersResponse {
+  if (typeof value !== "object" || value === null) {
+    throw new Error("Invalid Better Auth user page response");
+  }
+
+  const candidate = value as Record<string, unknown>;
+  const page = candidate.page;
+  const continueCursor = candidate.continueCursor;
+
+  if (!(Array.isArray(page) && page.every(isDirectoryUser))) {
+    throw new Error("Better Auth user page payload is malformed");
+  }
+
+  if (!(continueCursor === null || typeof continueCursor === "string")) {
+    throw new Error("Better Auth pagination cursor is malformed");
+  }
+
+  return { continueCursor, page };
 }
 
 export const getProfile = query({
@@ -110,20 +185,88 @@ export const getAllUsers = query({
     }
 
     const profiles = await ctx.db.query("profiles").collect();
-    const usersWithProfiles = await Promise.all(
-      profiles.map(async (p) => {
-        const authUser = await authComponent.getAnyUserById(ctx, p.userId);
-        return {
-          _id: p.userId,
-          name: authUser?.name ?? undefined,
-          email: authUser?.email ?? "Unknown",
-          role: p.role ?? "user",
-          createdAt: p.createdAt,
-        };
-      })
+    const authUsers: DirectoryUser[] = [];
+    const pageSize = 5000;
+    const maxIterations = 100;
+    let cursor: string | null = null;
+    let iteration = 0;
+
+    while (true) {
+      iteration += 1;
+      if (iteration > maxIterations) {
+        throw new Error(
+          "Exceeded Better Auth pagination safeguard while loading users"
+        );
+      }
+
+      const rawResponse = await ctx.runQuery(
+        components.betterAuth.adapter.findMany,
+        {
+          model: "user",
+          paginationOpts: {
+            cursor,
+            numItems: pageSize,
+          },
+          sortBy: {
+            direction: "desc",
+            field: "createdAt",
+          },
+        }
+      );
+      const response = parsePaginatedUsersResponse(rawResponse);
+
+      authUsers.push(...response.page);
+
+      if (!response.continueCursor) {
+        break;
+      }
+
+      cursor = response.continueCursor;
+    }
+
+    const profileByUserId = new Map(
+      profiles.map((entry) => [entry.userId, entry] as const)
     );
 
-    return usersWithProfiles;
+    const authBackedUsers: DirectoryUserSummary[] = authUsers.flatMap(
+      (authUser) => {
+        const profileEntry = profileByUserId.get(authUser._id);
+        if (!profileEntry) {
+          return [];
+        }
+
+        return {
+          _id: authUser._id,
+          createdAt: authUser.createdAt ?? profileEntry?.createdAt ?? 0,
+          email: authUser.email,
+          name: authUser.name ?? undefined,
+          role: normalizeRole(profileEntry?.role),
+        };
+      }
+    );
+
+    const authUserIds = new Set(authBackedUsers.map((entry) => entry._id));
+    const profileOnlyUsers = await Promise.all(
+      profiles
+        .filter((entry: DirectoryProfile) => !authUserIds.has(entry.userId))
+        .map(async (entry: DirectoryProfile) => {
+          const authUser = await authComponent.getAnyUserById(
+            ctx,
+            entry.userId
+          );
+          return {
+            _id: entry.userId,
+            createdAt: authUser?.createdAt ?? entry.createdAt,
+            email: authUser?.email ?? "Unknown",
+            name: authUser?.name ?? undefined,
+            role: normalizeRole(entry.role),
+          };
+        })
+    );
+
+    return [...authBackedUsers, ...profileOnlyUsers].sort(
+      (left, right) => right.createdAt - left.createdAt
+    );
   },
 });
 
@@ -141,7 +284,7 @@ export const getRole = query({
       .withIndex("by_user_id", (q) => q.eq("userId", user._id))
       .first();
 
-    return profile?.role ?? "user";
+    return normalizeRole(profile?.role);
   },
 });
 
@@ -205,7 +348,7 @@ export const updateProfile = mutation({
       .first();
 
     // Use invited role if exists, otherwise default to "user"
-    const role = pendingInvite?.role ?? "user";
+    const role = normalizeRole(pendingInvite?.role);
 
     // Delete the invite if claimed during profile creation
     if (pendingInvite) {
@@ -279,7 +422,7 @@ export const setAvatar = mutation({
       .withIndex("by_email", (q) => q.eq("email", user.email))
       .first();
 
-    const role = pendingInvite?.role ?? "user";
+    const role = normalizeRole(pendingInvite?.role);
 
     if (pendingInvite) {
       await ctx.db.delete(pendingInvite._id);
@@ -356,7 +499,7 @@ export const claimRoleInvite = mutation({
     }
 
     // Store the role before any operations
-    const invitedRole = invite.role;
+    const invitedRole = normalizeRole(invite.role);
 
     const existingProfile = await ctx.db
       .query("profiles")
@@ -395,15 +538,11 @@ export const claimRoleInvite = mutation({
   },
 });
 
-// Invite a user to become admin or staff
+// Invite a user to become staff or super admin
 export const inviteToRole = mutation({
   args: {
     email: v.string(),
-    role: v.union(
-      v.literal("admin"),
-      v.literal("staff"),
-      v.literal("super_admin")
-    ),
+    role: v.union(v.literal("staff"), v.literal("super_admin")),
   },
   returns: v.id("role_invites"),
   handler: async (ctx, args) => {
@@ -415,17 +554,20 @@ export const inviteToRole = mutation({
       throw new Error("Not authenticated");
     }
 
-    // Check if caller is admin
+    // Check if caller can manage internal roles
     const profile = await ctx.db
       .query("profiles")
       .withIndex("by_user_id", (q) => q.eq("userId", user._id))
       .first();
 
     if (!canManageUsers(profile?.role)) {
-      throw new Error("Only admins can invite users to roles");
+      throw new Error("Only staff or super admins can invite users to roles");
     }
 
-    if (validated.role === "super_admin" && profile?.role !== "super_admin") {
+    if (
+      validated.role === "super_admin" &&
+      normalizeRole(profile?.role) !== "super_admin"
+    ) {
       throw new Error("Only super admins can invite another super admin");
     }
 
@@ -435,12 +577,14 @@ export const inviteToRole = mutation({
       .withIndex("by_email", (q) => q.eq("email", validated.email))
       .first();
 
+    const now = Date.now();
+
     if (existingInvite) {
       // Update existing invite
       await ctx.db.patch(existingInvite._id, {
         role: validated.role,
         invitedBy: user._id,
-        createdAt: Date.now(),
+        updatedAt: now,
       });
       return existingInvite._id;
     }
@@ -449,7 +593,8 @@ export const inviteToRole = mutation({
       email: validated.email,
       role: validated.role,
       invitedBy: user._id,
-      createdAt: Date.now(),
+      createdAt: now,
+      updatedAt: now,
     });
   },
 });
@@ -466,14 +611,14 @@ export const revokeInvite = mutation({
       throw new Error("Not authenticated");
     }
 
-    // Check if caller is admin
+    // Check if caller can manage internal roles
     const profile = await ctx.db
       .query("profiles")
       .withIndex("by_user_id", (q) => q.eq("userId", user._id))
       .first();
 
     if (!canManageUsers(profile?.role)) {
-      throw new Error("Only admins can revoke invites");
+      throw new Error("Only staff or super admins can revoke invites");
     }
 
     const invite = await ctx.db
@@ -490,7 +635,7 @@ export const revokeInvite = mutation({
   },
 });
 
-// Get all pending invites (admin only)
+// Get all pending invites (staff/super admin only)
 export const getPendingInvites = query({
   args: {},
   returns: v.array(
@@ -507,7 +652,7 @@ export const getPendingInvites = query({
       return [];
     }
 
-    // Check if caller is admin
+    // Check if caller can manage internal roles
     const profile = await ctx.db
       .query("profiles")
       .withIndex("by_user_id", (q) => q.eq("userId", user._id))
@@ -521,7 +666,7 @@ export const getPendingInvites = query({
     return invites.map((invite) => ({
       _id: invite._id,
       email: invite.email,
-      role: invite.role,
+      role: normalizeRole(invite.role),
       createdAt: invite.createdAt,
     }));
   },
@@ -533,7 +678,6 @@ export const updateUserRole = mutation({
     role: v.union(
       v.literal("user"),
       v.literal("staff"),
-      v.literal("admin"),
       v.literal("super_admin")
     ),
   },
@@ -548,12 +692,13 @@ export const updateUserRole = mutation({
       .query("profiles")
       .withIndex("by_user_id", (q) => q.eq("userId", actor._id))
       .first();
+    const actorRole = normalizeRole(actorProfile?.role);
 
-    if (!canManageUsers(actorProfile?.role)) {
-      throw new Error("Only admins can update user roles");
+    if (!canManageUsers(actorRole)) {
+      throw new Error("Only staff or super admins can update user roles");
     }
 
-    if (args.role === "super_admin" && actorProfile?.role !== "super_admin") {
+    if (args.role === "super_admin" && actorRole !== "super_admin") {
       throw new Error("Only super admins can assign super admin role");
     }
 
@@ -565,16 +710,14 @@ export const updateUserRole = mutation({
     if (!targetProfile) {
       throw new Error("Target user profile not found");
     }
+    const targetRole = normalizeRole(targetProfile.role);
 
-    if (actor._id === args.userId && args.role !== targetProfile.role) {
+    if (actor._id === args.userId && args.role !== targetRole) {
       throw new Error("You can't change your own role");
     }
 
-    if (
-      actorProfile?.role !== "super_admin" &&
-      getRoleLevel(targetProfile.role) >= getRoleLevel("admin")
-    ) {
-      throw new Error("Only super admins can modify admin accounts");
+    if (actorRole !== "super_admin" && targetRole === "super_admin") {
+      throw new Error("Only super admins can modify super admin accounts");
     }
 
     await ctx.db.patch(targetProfile._id, {
@@ -583,6 +726,65 @@ export const updateUserRole = mutation({
     });
 
     return true;
+  },
+});
+
+export const normalizeLegacyAdminRoleData = mutation({
+  args: {},
+  returns: v.object({
+    invitesUpdated: v.number(),
+    profilesUpdated: v.number(),
+  }),
+  handler: async (ctx) => {
+    const actor = await authComponent.getAuthUser(ctx);
+    if (!actor) {
+      throw new Error("Not authenticated");
+    }
+
+    const actorProfile = await ctx.db
+      .query("profiles")
+      .withIndex("by_user_id", (q) => q.eq("userId", actor._id))
+      .first();
+
+    if (normalizeRole(actorProfile?.role) !== "super_admin") {
+      throw new Error("Only super admins can normalize legacy operator roles");
+    }
+
+    const [profiles, invites] = await Promise.all([
+      ctx.db.query("profiles").collect(),
+      ctx.db.query("role_invites").collect(),
+    ]);
+
+    const now = Date.now();
+    const legacyProfiles = profiles.filter(
+      (profile) => (profile.role as string | undefined) === "admin"
+    );
+    const legacyInvites = invites.filter(
+      (invite) => (invite.role as string | undefined) === "admin"
+    );
+
+    await Promise.all(
+      legacyProfiles.map((profile) =>
+        ctx.db.patch(profile._id, {
+          role: "staff",
+          updatedAt: now,
+        })
+      )
+    );
+
+    await Promise.all(
+      legacyInvites.map((invite) =>
+        ctx.db.patch(invite._id, {
+          role: "staff",
+          updatedAt: now,
+        })
+      )
+    );
+
+    return {
+      invitesUpdated: legacyInvites.length,
+      profilesUpdated: legacyProfiles.length,
+    };
   },
 });
 
@@ -599,15 +801,6 @@ export const promoteSelfToSuperAdmin = mutation({
       throw new Error("Email must be verified before role elevation");
     }
 
-    const existingSuperAdmin = await ctx.db
-      .query("profiles")
-      .withIndex("by_role", (q) => q.eq("role", "super_admin"))
-      .first();
-
-    if (existingSuperAdmin) {
-      throw new Error("A super admin already exists. Ask them for access.");
-    }
-
     const profile = await ctx.db
       .query("profiles")
       .withIndex("by_user_id", (q) => q.eq("userId", user._id))
@@ -616,6 +809,31 @@ export const promoteSelfToSuperAdmin = mutation({
     if (!profile) {
       throw new Error(
         "Complete onboarding before requesting super admin access"
+      );
+    }
+
+    const normalizedRole = normalizeRole(profile.role);
+    const existingSuperAdmin = await ctx.db
+      .query("profiles")
+      .withIndex("by_role", (q) => q.eq("role", "super_admin"))
+      .first();
+
+    const internalProfiles = await ctx.db.query("profiles").collect();
+    const hasExistingOperators = internalProfiles.some(
+      (entry) =>
+        entry.userId !== profile.userId && normalizeRole(entry.role) !== "user"
+    );
+
+    if (existingSuperAdmin) {
+      throw new Error("A super admin already exists. Ask them for access.");
+    }
+
+    if (
+      normalizedRole !== "staff" &&
+      !(normalizedRole === "user" && !hasExistingOperators)
+    ) {
+      throw new Error(
+        "Only staff users can bootstrap the first super admin account once operators exist"
       );
     }
 
