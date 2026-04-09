@@ -12,6 +12,14 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "images.unsplash.com",
       },
+      {
+        protocol: "https",
+        hostname: "tough-bullfrog-76.convex.cloud",
+      },
+      {
+        protocol: "https",
+        hostname: "peaceful-capybara-929.convex.cloud",
+      },
     ],
   },
 };

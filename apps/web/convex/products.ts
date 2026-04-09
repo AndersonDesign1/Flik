@@ -6,6 +6,7 @@ import { mutation, query } from "./_generated/server";
 import { authComponent } from "./auth";
 
 const MAX_FILE_COUNT = 20;
+const MAX_GALLERY_IMAGE_COUNT = 8;
 
 const productFileValidator = v.object({
   storageId: v.id("_storage"),
@@ -14,14 +15,24 @@ const productFileValidator = v.object({
   mimeType: v.optional(v.string()),
 });
 
+const productImageValidator = v.object({
+  storageId: v.id("_storage"),
+  fileName: v.string(),
+  fileSize: v.number(),
+  mimeType: v.optional(v.string()),
+});
+
 function getStorageIdsFromProduct(product: {
   coverStorageId?: string;
+  galleryImages?: Array<{ storageId: string }>;
   files: Array<{ storageId: string }>;
 }) {
   const fileStorageIds = product.files.map((file) => file.storageId);
+  const galleryStorageIds =
+    product.galleryImages?.map((image) => image.storageId) ?? [];
   return product.coverStorageId
-    ? [product.coverStorageId, ...fileStorageIds]
-    : fileStorageIds;
+    ? [product.coverStorageId, ...galleryStorageIds, ...fileStorageIds]
+    : [...galleryStorageIds, ...fileStorageIds];
 }
 
 async function getOwnedProductOrThrow(
@@ -147,6 +158,7 @@ export const createProduct = mutation({
     allowCustomPrice: v.boolean(),
     status: v.union(v.literal("draft"), v.literal("active")),
     coverStorageId: v.optional(v.id("_storage")),
+    galleryImages: v.array(productImageValidator),
     files: v.array(productFileValidator),
   },
   returns: v.id("products"),
@@ -185,8 +197,15 @@ export const createProduct = mutation({
       throw new Error(`Maximum ${MAX_FILE_COUNT} product files allowed`);
     }
 
+    if (args.galleryImages.length > MAX_GALLERY_IMAGE_COUNT) {
+      throw new Error(
+        `Maximum ${MAX_GALLERY_IMAGE_COUNT} gallery images allowed`
+      );
+    }
+
     const requiredStorageIds = [
       ...(args.coverStorageId ? [args.coverStorageId] : []),
+      ...args.galleryImages.map((image) => image.storageId),
       ...args.files.map((file) => file.storageId),
     ];
 
@@ -220,6 +239,7 @@ export const createProduct = mutation({
       allowCustomPrice: args.allowCustomPrice,
       status: args.status,
       coverStorageId: args.coverStorageId,
+      galleryImages: args.galleryImages,
       files: args.files,
       sales: 0,
       createdAt: now,
@@ -296,6 +316,15 @@ export const getMyProductForEdit = query({
       status: v.union(v.literal("draft"), v.literal("active")),
       coverStorageId: v.optional(v.id("_storage")),
       coverUrl: v.optional(v.string()),
+      galleryImages: v.array(
+        v.object({
+          storageId: v.id("_storage"),
+          fileName: v.string(),
+          fileSize: v.number(),
+          mimeType: v.optional(v.string()),
+          url: v.optional(v.string()),
+        })
+      ),
       files: v.array(productFileValidator),
     }),
     v.null()
@@ -318,6 +347,15 @@ export const getMyProductForEdit = query({
     const coverUrl = product.coverStorageId
       ? await ctx.storage.getUrl(product.coverStorageId)
       : undefined;
+    const galleryImages = await Promise.all(
+      (product.galleryImages ?? []).map(async (image) => ({
+        storageId: image.storageId,
+        fileName: image.fileName,
+        fileSize: image.fileSize,
+        mimeType: image.mimeType,
+        url: (await ctx.storage.getUrl(image.storageId)) ?? undefined,
+      }))
+    );
 
     return {
       _id: product._id,
@@ -331,7 +369,100 @@ export const getMyProductForEdit = query({
       status: product.status,
       coverStorageId: product.coverStorageId,
       coverUrl: coverUrl ?? undefined,
+      galleryImages,
       files: product.files,
+    };
+  },
+});
+
+export const getPublicProductById = query({
+  args: {
+    productId: v.id("products"),
+  },
+  returns: v.union(
+    v.object({
+      _id: v.id("products"),
+      name: v.string(),
+      description: v.string(),
+      category: v.string(),
+      tags: v.array(v.string()),
+      price: v.number(),
+      compareAtPrice: v.optional(v.number()),
+      allowCustomPrice: v.boolean(),
+      coverUrl: v.optional(v.string()),
+      galleryImages: v.array(
+        v.object({
+          fileName: v.string(),
+          fileSize: v.number(),
+          mimeType: v.optional(v.string()),
+          url: v.optional(v.string()),
+        })
+      ),
+      sales: v.number(),
+      inventoryCount: v.number(),
+      files: v.array(
+        v.object({
+          fileName: v.string(),
+          fileSize: v.number(),
+          mimeType: v.optional(v.string()),
+        })
+      ),
+      sellerName: v.string(),
+      storeName: v.optional(v.string()),
+      storeSlug: v.optional(v.string()),
+    }),
+    v.null()
+  ),
+  handler: async (ctx, args) => {
+    const product = await ctx.db.get(args.productId);
+    if (!product || product.status !== "active") {
+      return null;
+    }
+
+    const [coverUrl, galleryImages, owner, store] = await Promise.all([
+      product.coverStorageId
+        ? ctx.storage.getUrl(product.coverStorageId)
+        : Promise.resolve(null),
+      Promise.all(
+        (product.galleryImages ?? []).map(async (image) => ({
+          fileName: image.fileName,
+          fileSize: image.fileSize,
+          mimeType: image.mimeType,
+          url: (await ctx.storage.getUrl(image.storageId)) ?? undefined,
+        }))
+      ),
+      authComponent.getAnyUserById(ctx, product.userId),
+      ctx.db
+        .query("stores")
+        .withIndex("by_owner_id", (q) => q.eq("ownerId", product.userId))
+        .first(),
+    ]);
+
+    const activeStore = store?.status === "active" ? store : null;
+    const sellerName =
+      activeStore?.name ?? owner?.name ?? owner?.email ?? "Store owner";
+
+    return {
+      _id: product._id,
+      name: product.name,
+      description: product.description,
+      category: product.category,
+      tags: product.tags,
+      price: product.price,
+      compareAtPrice: product.compareAtPrice,
+      allowCustomPrice: product.allowCustomPrice,
+      coverUrl: coverUrl ?? undefined,
+      galleryImages,
+      sales: product.sales ?? 0,
+      inventoryCount: product.files.length,
+      files: product.files.map((file) => ({
+        fileName: file.fileName,
+        fileSize: file.fileSize,
+        mimeType: file.mimeType,
+      })),
+      sellerName,
+      storeName: activeStore?.name,
+      storeSlug: activeStore?.slug,
     };
   },
 });
@@ -348,6 +479,7 @@ export const updateProduct = mutation({
     allowCustomPrice: v.boolean(),
     status: v.union(v.literal("draft"), v.literal("active")),
     coverStorageId: v.optional(v.id("_storage")),
+    galleryImages: v.array(productImageValidator),
     files: v.array(productFileValidator),
   },
   returns: v.id("products"),
@@ -392,8 +524,15 @@ export const updateProduct = mutation({
       throw new Error(`Maximum ${MAX_FILE_COUNT} product files allowed`);
     }
 
+    if (args.galleryImages.length > MAX_GALLERY_IMAGE_COUNT) {
+      throw new Error(
+        `Maximum ${MAX_GALLERY_IMAGE_COUNT} gallery images allowed`
+      );
+    }
+
     const nextStorageIds = new Set<string>([
       ...(args.coverStorageId ? [args.coverStorageId] : []),
+      ...args.galleryImages.map((image) => image.storageId),
       ...args.files.map((file) => file.storageId),
     ]);
 
@@ -438,6 +577,7 @@ export const updateProduct = mutation({
       allowCustomPrice: args.allowCustomPrice,
       status: args.status,
       coverStorageId: args.coverStorageId,
+      galleryImages: args.galleryImages,
       files: args.files,
       updatedAt: Date.now(),
     });

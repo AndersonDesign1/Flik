@@ -32,12 +32,17 @@ import type { Id } from "../../../../convex/_generated/dataModel";
 const MAX_IMAGE_SIZE_BYTES = 10 * 1024 * 1024;
 const MAX_PRODUCT_FILE_SIZE_BYTES = 250 * 1024 * 1024;
 const MAX_PRODUCT_FILES = 20;
+const MAX_GALLERY_IMAGES = 8;
 
 interface UploadedProductFile {
   storageId: Id<"_storage">;
   fileName: string;
   fileSize: number;
   mimeType?: string;
+}
+
+interface UploadedProductImage extends UploadedProductFile {
+  previewUrl: string;
 }
 
 export function AddProductForm() {
@@ -64,17 +69,27 @@ export function AddProductForm() {
   const [coverStorageId, setCoverStorageId] = useState<Id<"_storage"> | null>(
     null
   );
+  const [galleryImages, setGalleryImages] = useState<UploadedProductImage[]>([]);
   const [files, setFiles] = useState<UploadedProductFile[]>([]);
 
   const coverInputRef = useRef<HTMLInputElement | null>(null);
+  const galleryInputRef = useRef<HTMLInputElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const uploadedStorageIdsRef = useRef<Set<Id<"_storage">>>(new Set());
+  const galleryImagesRef = useRef<UploadedProductImage[]>([]);
   const isSubmittedRef = useRef(false);
+
+  useEffect(() => {
+    galleryImagesRef.current = galleryImages;
+  }, [galleryImages]);
 
   useEffect(() => {
     return () => {
       if (coverPreviewUrl) {
         URL.revokeObjectURL(coverPreviewUrl);
+      }
+      for (const image of galleryImagesRef.current) {
+        URL.revokeObjectURL(image.previewUrl);
       }
     };
   }, [coverPreviewUrl]);
@@ -210,6 +225,46 @@ export function AddProductForm() {
     }
   };
 
+  const uploadGalleryImages = async (newFiles: File[]) => {
+    const availableSlots = Math.max(0, MAX_GALLERY_IMAGES - galleryImages.length);
+
+    if (availableSlots <= 0) {
+      toast.error(`Maximum ${MAX_GALLERY_IMAGES} gallery images allowed`);
+      return;
+    }
+
+    const imagesToUpload = newFiles.slice(0, availableSlots);
+
+    for (const file of imagesToUpload) {
+      if (!file.type.startsWith("image/")) {
+        toast.error(`${file.name} is not an image file`);
+        continue;
+      }
+
+      if (file.size > MAX_IMAGE_SIZE_BYTES) {
+        toast.error(`${file.name} must be 10MB or smaller`);
+        continue;
+      }
+
+      try {
+        const uploadedStorageId = await uploadFileToConvex(file);
+        const previewUrl = URL.createObjectURL(file);
+        setGalleryImages((prev) => [
+          ...prev,
+          {
+            storageId: uploadedStorageId,
+            fileName: file.name,
+            fileSize: file.size,
+            mimeType: file.type || undefined,
+            previewUrl,
+          },
+        ]);
+      } catch {
+        toast.error(`Failed to upload ${file.name}`);
+      }
+    }
+  };
+
   const removeFile = async (index: number) => {
     const fileToRemove = files[index];
     if (!fileToRemove) {
@@ -223,6 +278,23 @@ export function AddProductForm() {
       toast.success("File removed");
     } catch {
       toast.error("Failed to remove file");
+    }
+  };
+
+  const removeGalleryImage = async (index: number) => {
+    const imageToRemove = galleryImages[index];
+    if (!imageToRemove) {
+      return;
+    }
+
+    try {
+      await deleteUploadedFile({ storageId: imageToRemove.storageId });
+      uploadedStorageIdsRef.current.delete(imageToRemove.storageId);
+      URL.revokeObjectURL(imageToRemove.previewUrl);
+      setGalleryImages((prev) => prev.filter((_, i) => i !== index));
+      toast.success("Gallery image removed");
+    } catch {
+      toast.error("Failed to remove gallery image");
     }
   };
 
@@ -286,6 +358,12 @@ export function AddProductForm() {
       allowCustomPrice,
       status,
       coverStorageId: coverStorageId ?? undefined,
+      galleryImages: galleryImages.map((image) => ({
+        storageId: image.storageId,
+        fileName: image.fileName,
+        fileSize: image.fileSize,
+        mimeType: image.mimeType,
+      })),
       files,
     });
 
@@ -353,6 +431,20 @@ export function AddProductForm() {
           event.target.value = "";
         }}
         ref={coverInputRef}
+        type="file"
+      />
+      <input
+        accept="image/png,image/jpeg,image/webp"
+        className="hidden"
+        multiple
+        onChange={(event) => {
+          const selectedImages = Array.from(event.target.files ?? []);
+          if (selectedImages.length > 0) {
+            uploadGalleryImages(selectedImages).catch(() => undefined);
+          }
+          event.target.value = "";
+        }}
+        ref={galleryInputRef}
         type="file"
       />
       <input
@@ -495,6 +587,61 @@ export function AddProductForm() {
                   />
                 </div>
               </div>
+            </div>
+          </Card>
+
+          <Card className="p-6">
+            <div className="mb-6 flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gray-100">
+                <ImageIcon className="h-5 w-5 text-gray-600" />
+              </div>
+              <div>
+                <h2 className="font-semibold text-gray-900">Gallery Images</h2>
+                <p className="text-gray-500 text-sm">
+                  Add extra screenshots or product previews
+                </p>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              {galleryImages.length > 0 ? (
+                <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                  {galleryImages.map((image, index) => (
+                    <div
+                      className="group relative overflow-hidden rounded-xl border border-gray-200 bg-gray-100"
+                      key={image.storageId}
+                    >
+                      <img
+                        alt={image.fileName}
+                        className="aspect-[4/3] h-full w-full object-cover"
+                        src={image.previewUrl}
+                      />
+                      <button
+                        className="absolute top-3 right-3 flex h-8 w-8 items-center justify-center rounded-full bg-white/95 shadow-sm transition hover:bg-white"
+                        onClick={() => {
+                          removeGalleryImage(index).catch(() => undefined);
+                        }}
+                        type="button"
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="rounded-xl border border-dashed border-gray-200 bg-gray-50 px-4 py-6 text-center text-gray-500 text-sm">
+                  Add supporting images to make the storefront page feel richer.
+                </div>
+              )}
+
+              <button
+                className="flex w-full items-center justify-center gap-2 rounded-lg border-2 border-gray-200 border-dashed p-4 text-gray-500 transition-colors hover:border-gray-300 hover:bg-gray-50"
+                onClick={() => galleryInputRef.current?.click()}
+                type="button"
+              >
+                <Plus className="h-4 w-4" />
+                <span className="text-sm">Add gallery images</span>
+              </button>
             </div>
           </Card>
 

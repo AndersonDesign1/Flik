@@ -72,6 +72,16 @@ export default defineSchema({
       v.literal("archived")
     ),
     coverStorageId: v.optional(v.id("_storage")),
+    galleryImages: v.optional(
+      v.array(
+        v.object({
+          storageId: v.id("_storage"),
+          fileName: v.string(),
+          fileSize: v.float64(),
+          mimeType: v.optional(v.string()),
+        })
+      )
+    ),
     files: v.array(
       v.object({
         storageId: v.id("_storage"),
