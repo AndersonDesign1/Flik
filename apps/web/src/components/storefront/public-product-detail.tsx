@@ -16,6 +16,7 @@ import { useCart } from "@/contexts/cart-context";
 
 export interface PublicProductDetailData {
   _id: string;
+  slug: string;
   name: string;
   description: string;
   category: string;
@@ -208,7 +209,7 @@ export function PublicProductDetail({ product }: PublicProductDetailProps) {
                   Active
                 </span>
                 <span>{product.sales.toLocaleString()} sales</span>
-                <span className="font-mono text-xs">{product._id}</span>
+                <span>Instant access</span>
               </div>
 
               <h1 className="font-bold text-3xl text-foreground tracking-tight">

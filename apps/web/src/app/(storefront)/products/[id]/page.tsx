@@ -12,9 +12,9 @@ interface ProductPageProps {
 }
 
 export default async function ProductPage({ params }: ProductPageProps) {
-  const { id } = await params;
-  const product = await fetchQuery(api.products.getPublicProductById, {
-    productId: id as Id<"products">,
+  const { id: slugOrId } = await params;
+  const product = await fetchQuery(api.products.getPublicProductBySlug, {
+    slugOrId,
   });
 
   if (!product) {

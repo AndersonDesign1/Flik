@@ -45,6 +45,30 @@ interface UploadedProductImage extends UploadedProductFile {
   previewUrl: string;
 }
 
+function slugifyProductName(input: string) {
+  return input
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
+}
+
+function normalizeCategoryValue(input: string) {
+  const normalized = input.trim().toLowerCase();
+  const allowedCategories = new Set([
+    "templates",
+    "courses",
+    "ebooks",
+    "software",
+    "design",
+    "other",
+  ]);
+
+  return allowedCategories.has(normalized) ? normalized : "other";
+}
+
 export function AddProductForm() {
   const router = useRouter();
   const generateProductUploadUrl = useMutation(
@@ -58,6 +82,7 @@ export function AddProductForm() {
   const [isSavingDraft, setIsSavingDraft] = useState(false);
 
   const [name, setName] = useState("");
+  const [slug, setSlug] = useState("");
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState("templates");
   const [tagsInput, setTagsInput] = useState("");
@@ -71,6 +96,7 @@ export function AddProductForm() {
   );
   const [galleryImages, setGalleryImages] = useState<UploadedProductImage[]>([]);
   const [files, setFiles] = useState<UploadedProductFile[]>([]);
+  const [isSlugManuallyEdited, setIsSlugManuallyEdited] = useState(false);
 
   const coverInputRef = useRef<HTMLInputElement | null>(null);
   const galleryInputRef = useRef<HTMLInputElement | null>(null);
@@ -82,6 +108,14 @@ export function AddProductForm() {
   useEffect(() => {
     galleryImagesRef.current = galleryImages;
   }, [galleryImages]);
+
+  useEffect(() => {
+    if (isSlugManuallyEdited) {
+      return;
+    }
+
+    setSlug(slugifyProductName(name));
+  }, [isSlugManuallyEdited, name]);
 
   useEffect(() => {
     return () => {
@@ -320,10 +354,16 @@ export function AddProductForm() {
 
   const submitProduct = async (status: "active" | "draft") => {
     const trimmedName = name.trim();
+    const trimmedSlug = slugifyProductName(slug);
     const trimmedDescription = description.trim();
 
     if (!trimmedName) {
       toast.error("Product name is required");
+      return false;
+    }
+
+    if (trimmedSlug.length < 3) {
+      toast.error("Product URL must be at least 3 characters");
       return false;
     }
 
@@ -350,8 +390,9 @@ export function AddProductForm() {
 
     await createProduct({
       name: trimmedName,
+      slug: trimmedSlug,
       description: trimmedDescription,
-      category,
+      category: normalizeCategoryValue(category),
       tags: parseTags(),
       price: parsedPrice,
       compareAtPrice: parsedComparePrice,
@@ -544,6 +585,26 @@ export function AddProductForm() {
                   required
                   value={name}
                 />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="slug">Product URL</Label>
+                <Input
+                  className="h-11"
+                  id="slug"
+                  onChange={(event) => {
+                    setIsSlugManuallyEdited(true);
+                    setSlug(slugifyProductName(event.target.value));
+                  }}
+                  placeholder="ultimate-design-system"
+                  value={slug}
+                />
+                <p className="text-gray-500 text-xs">
+                  Public link:{" "}
+                  <span className="font-medium text-gray-900">
+                    /products/{slug || "your-product"}
+                  </span>
+                </p>
               </div>
 
               <div className="space-y-2">

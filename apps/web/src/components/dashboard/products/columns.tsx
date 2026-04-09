@@ -18,12 +18,15 @@ import {
 
 export interface DashboardProduct {
   id: string;
+  slug: string;
   name: string;
   status: "active" | "draft" | "archived";
   price: number;
   inventory: number;
   sales: number;
   image: string;
+  storeName?: string;
+  storeSlug?: string;
 }
 
 export const columns: ColumnDef<DashboardProduct>[] = [
@@ -173,14 +176,22 @@ export const columns: ColumnDef<DashboardProduct>[] = [
             <DropdownMenuSeparator />
             {product.status !== "archived" && (
               <DropdownMenuItem asChild className="text-sm">
-                <Link href={`/dashboard/products/${product.id}/edit`}>
+                <Link href={`/dashboard/products/${product.slug}/edit`}>
                   Edit product
                 </Link>
               </DropdownMenuItem>
             )}
-            <DropdownMenuItem asChild className="text-sm">
-              <Link href={`/products/${product.id}`}>View product page</Link>
-            </DropdownMenuItem>
+            {product.storeSlug ? (
+              <DropdownMenuItem asChild className="text-sm">
+                <Link href={`/products/${product.slug}`}>
+                  View product page
+                </Link>
+              </DropdownMenuItem>
+            ) : (
+              <DropdownMenuItem asChild className="text-sm">
+                <Link href="/account/start-selling">Finish storefront setup</Link>
+              </DropdownMenuItem>
+            )}
           </DropdownMenuContent>
         </DropdownMenu>
       );

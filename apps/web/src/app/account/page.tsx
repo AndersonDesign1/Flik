@@ -19,6 +19,8 @@ export default async function AccountDashboardPage() {
   const emailUsername = user?.email ? user.email.split("@")[0] : undefined;
   const displayName =
     profileDisplayName || user?.name || emailUsername || "there";
+  const hasSellerWorkspace = !!workspaceAccess?.canAccessSeller;
+  const hasStore = !!myStore;
 
   const userMetrics = [
     {
@@ -63,33 +65,41 @@ export default async function AccountDashboardPage() {
             <div className="flex items-center gap-2 text-primary-violet text-sm">
               <Store className="size-4" />
               <span className="font-medium">
-                {workspaceAccess?.canAccessSeller
+                {hasSellerWorkspace && hasStore
                   ? "Seller workspace active"
-                  : "Expand into selling"}
+                  : hasSellerWorkspace
+                    ? "Finish your storefront"
+                    : "Expand into selling"}
               </span>
             </div>
             <h3 className="font-semibold text-foreground text-xl">
-              {workspaceAccess?.canAccessSeller
+              {hasSellerWorkspace && hasStore
                 ? (myStore?.name ?? "Manage your store")
+                : hasSellerWorkspace
+                  ? "Create your store"
                 : "Create your store"}
             </h3>
             <p className="max-w-2xl text-muted-foreground text-sm">
-              {workspaceAccess?.canAccessSeller
+              {hasSellerWorkspace && hasStore
                 ? "Your buyer account stays active while you sell through a separate workspace."
+                : hasSellerWorkspace
+                  ? "Your seller role is enabled, but you still need to create a store before your storefront can go live."
                 : "Launch a seller workspace without creating a second account. Buyers and sellers can coexist on one profile."}
             </p>
           </div>
           <Link
             className="inline-flex items-center gap-2 rounded-lg bg-primary-violet px-4 py-2 font-medium text-sm text-white transition-colors hover:bg-primary-violet/90"
             href={
-              workspaceAccess?.canAccessSeller
+              hasSellerWorkspace && hasStore
                 ? "/dashboard"
                 : "/account/start-selling"
             }
           >
-            {workspaceAccess?.canAccessSeller
+            {hasSellerWorkspace && hasStore
               ? "Open Seller Workspace"
-              : "Start Selling"}
+              : hasSellerWorkspace
+                ? "Finish Store Setup"
+                : "Start Selling"}
             <ArrowRight className="size-4" />
           </Link>
         </div>

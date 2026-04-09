@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { NuqsAdapter } from "nuqs/adapters/next/app";
 import { DevTools } from "@/components/dev/dev-tools";
 import { ConvexClientProvider } from "@/components/providers/convex-provider";
 import { Toaster } from "@/components/ui/sonner";
@@ -33,8 +34,10 @@ export default function RootLayout({
         suppressHydrationWarning
       >
         <ConvexClientProvider>
-          {children}
-          <DevTools />
+          <NuqsAdapter>
+            {children}
+            <DevTools />
+          </NuqsAdapter>
         </ConvexClientProvider>
         <Toaster />
       </body>

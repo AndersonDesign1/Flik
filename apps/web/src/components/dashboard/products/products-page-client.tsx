@@ -22,12 +22,15 @@ export function ProductsPageClient() {
     () =>
       (productsResult?.page ?? []).map((product) => ({
         id: product._id,
+        slug: product.slug,
         name: product.name,
         status: product.status,
         price: product.price,
         inventory: product.inventory,
         sales: product.sales,
         image: product.coverUrl ?? "",
+        storeName: product.storeName,
+        storeSlug: product.storeSlug,
       })),
     [productsResult]
   );

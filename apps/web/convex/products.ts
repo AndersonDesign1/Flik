@@ -22,6 +22,50 @@ const productImageValidator = v.object({
   mimeType: v.optional(v.string()),
 });
 
+function slugifyProductName(input: string) {
+  return input
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
+}
+
+function getProductSlugForId(name: string, productId: Id<"products"> | string) {
+  const baseSlug = slugifyProductName(name) || "product";
+  const stableSuffix = productId.toString().slice(-6).toLowerCase();
+  return `${baseSlug}-${stableSuffix}`;
+}
+
+function normalizeCategoryValue(input: string) {
+  return input.trim().toLowerCase();
+}
+
+async function ensureUniqueProductSlug(
+  ctx: MutationCtx,
+  desiredSlug: string,
+  excludeProductId?: Id<"products">
+) {
+  const normalizedBaseSlug = slugifyProductName(desiredSlug);
+  if (normalizedBaseSlug.length < 3) {
+    throw new Error("Product slug must be at least 3 characters");
+  }
+
+  const allProducts = await ctx.db.query("products").collect();
+  const takenSlugs = new Set(
+    allProducts
+      .filter((product) => product._id !== excludeProductId)
+      .map((product) => product.slug ?? getProductSlugForId(product.name, product._id))
+  );
+
+  if (!takenSlugs.has(normalizedBaseSlug)) {
+    return normalizedBaseSlug;
+  }
+
+  throw new Error("That product URL is already taken");
+}
+
 function getStorageIdsFromProduct(product: {
   coverStorageId?: string;
   galleryImages?: Array<{ storageId: string }>;
@@ -150,6 +194,7 @@ export const deleteUploadedFile = mutation({
 export const createProduct = mutation({
   args: {
     name: v.string(),
+    slug: v.optional(v.string()),
     description: v.string(),
     category: v.string(),
     tags: v.array(v.string()),
@@ -226,13 +271,15 @@ export const createProduct = mutation({
       throw new Error("One or more files are not owned by the current user");
     }
 
+    const resolvedSlug = await ensureUniqueProductSlug(ctx, args.slug ?? name);
     const now = Date.now();
 
     const productId = await ctx.db.insert("products", {
       userId: user._id,
+      slug: resolvedSlug,
       name,
       description,
-      category: args.category,
+      category: normalizeCategoryValue(args.category),
       tags: args.tags,
       price: args.price,
       compareAtPrice: args.compareAtPrice,
@@ -244,6 +291,10 @@ export const createProduct = mutation({
       sales: 0,
       createdAt: now,
       updatedAt: now,
+    });
+
+    await ctx.db.patch(productId, {
+      slug: getProductSlugForId(name, productId),
     });
 
     await Promise.all(
@@ -272,6 +323,11 @@ export const listMyProducts = query({
       };
     }
 
+    const store = await ctx.db
+      .query("stores")
+      .withIndex("by_owner_id", (q) => q.eq("ownerId", user._id))
+      .first();
+
     const paginatedProducts = await ctx.db
       .query("products")
       .withIndex("by_user_id", (q) => q.eq("userId", user._id))
@@ -281,6 +337,7 @@ export const listMyProducts = query({
     const page = await Promise.all(
       paginatedProducts.page.map(async (product) => ({
         _id: product._id,
+        slug: product.slug ?? getProductSlugForId(product.name, product._id),
         name: product.name,
         status: product.status,
         price: product.price,
@@ -289,6 +346,8 @@ export const listMyProducts = query({
         coverUrl: product.coverStorageId
           ? ((await ctx.storage.getUrl(product.coverStorageId)) ?? undefined)
           : undefined,
+        storeName: store?.name ?? undefined,
+        storeSlug: store?.slug ?? undefined,
       }))
     );
 
@@ -301,11 +360,12 @@ export const listMyProducts = query({
 
 export const getMyProductForEdit = query({
   args: {
-    productId: v.id("products"),
+    slugOrId: v.string(),
   },
   returns: v.union(
     v.object({
       _id: v.id("products"),
+      slug: v.string(),
       name: v.string(),
       description: v.string(),
       category: v.string(),
@@ -335,8 +395,22 @@ export const getMyProductForEdit = query({
       return null;
     }
 
-    const product = await ctx.db.get(args.productId);
-    if (!product || product.userId !== user._id) {
+    const allProducts = await ctx.db
+      .query("products")
+      .withIndex("by_user_id", (q) => q.eq("userId", user._id))
+      .collect();
+    const normalizedSlugOrId = args.slugOrId.trim().toLowerCase();
+    const product =
+      allProducts.find((candidate) => {
+        const candidateSlug =
+          candidate.slug ?? getProductSlugForId(candidate.name, candidate._id);
+        return (
+          candidate._id === args.slugOrId ||
+          candidateSlug === normalizedSlugOrId
+        );
+      }) ?? null;
+
+    if (!product) {
       return null;
     }
 
@@ -359,6 +433,7 @@ export const getMyProductForEdit = query({
 
     return {
       _id: product._id,
+      slug: product.slug ?? getProductSlugForId(product.name, product._id),
       name: product.name,
       description: product.description,
       category: product.category,
@@ -375,13 +450,14 @@ export const getMyProductForEdit = query({
   },
 });
 
-export const getPublicProductById = query({
+export const getPublicProductBySlug = query({
   args: {
-    productId: v.id("products"),
+    slugOrId: v.string(),
   },
   returns: v.union(
     v.object({
       _id: v.id("products"),
+      slug: v.string(),
       name: v.string(),
       description: v.string(),
       category: v.string(),
@@ -414,7 +490,18 @@ export const getPublicProductById = query({
     v.null()
   ),
   handler: async (ctx, args) => {
-    const product = await ctx.db.get(args.productId);
+    const normalizedSlugOrId = args.slugOrId.trim().toLowerCase();
+    const allProducts = await ctx.db.query("products").collect();
+    const product =
+      allProducts.find((candidate) => {
+        const productSlug =
+          candidate.slug ?? getProductSlugForId(candidate.name, candidate._id);
+        return (
+          candidate._id === args.slugOrId ||
+          productSlug === normalizedSlugOrId
+        );
+      }) ?? null;
+
     if (!product || product.status !== "active") {
       return null;
     }
@@ -444,6 +531,7 @@ export const getPublicProductById = query({
 
     return {
       _id: product._id,
+      slug: product.slug ?? getProductSlugForId(product.name, product._id),
       name: product.name,
       description: product.description,
       category: product.category,
@@ -471,6 +559,7 @@ export const updateProduct = mutation({
   args: {
     productId: v.id("products"),
     name: v.string(),
+    slug: v.optional(v.string()),
     description: v.string(),
     category: v.string(),
     tags: v.array(v.string()),
@@ -502,6 +591,11 @@ export const updateProduct = mutation({
     }
 
     const description = args.description.trim();
+    const resolvedSlug = await ensureUniqueProductSlug(
+      ctx,
+      args.slug ?? name,
+      args.productId
+    );
     if (args.status === "active" && !description) {
       throw new Error("Description is required to publish");
     }
@@ -568,9 +662,10 @@ export const updateProduct = mutation({
     );
 
     await ctx.db.patch(args.productId, {
+      slug: resolvedSlug,
       name,
       description,
-      category: args.category,
+      category: normalizeCategoryValue(args.category),
       tags: args.tags,
       price: args.price,
       compareAtPrice: args.compareAtPrice,

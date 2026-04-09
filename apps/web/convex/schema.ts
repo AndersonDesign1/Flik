@@ -59,6 +59,7 @@ export default defineSchema({
     .index("by_user_id_storage_id", ["userId", "storageId"]),
   products: defineTable({
     userId: v.string(),
+    slug: v.optional(v.string()),
     name: v.string(),
     description: v.string(),
     category: v.string(),

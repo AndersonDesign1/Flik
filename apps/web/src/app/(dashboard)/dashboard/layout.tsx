@@ -26,12 +26,17 @@ export default async function DashboardLayout({
   }
 
   const profile = await fetchAuthQuery(api.profiles.getProfile);
+  const myStore = await fetchAuthQuery(api.stores.getMyStore);
 
   if (!profile?.onboardingCompleted) {
     redirect("/onboarding");
   }
 
   if (!canAccessSellerWorkspace(profile.userType)) {
+    redirect("/account/start-selling");
+  }
+
+  if (!myStore) {
     redirect("/account/start-selling");
   }
 

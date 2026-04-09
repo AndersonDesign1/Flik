@@ -56,7 +56,9 @@ export function ProductDetail({ product }: ProductDetailProps) {
           <div>
             <SheetTitle className="text-left">{product.name}</SheetTitle>
             <SheetDescription className="flex items-center gap-2 text-left">
-              <span className="font-mono">{product.id}</span>
+              <span className="font-mono text-xs text-muted-foreground">
+                /products/{product.slug}
+              </span>
               <span
                 className={cn(
                   "inline-flex items-center rounded-full border px-2 py-0.5 font-medium text-xs capitalize",
@@ -71,7 +73,7 @@ export function ProductDetail({ product }: ProductDetailProps) {
           </div>
           <Link
             className="inline-flex h-9 items-center gap-2 rounded-md border border-border/50 px-3 text-sm hover:bg-muted"
-            href={`/dashboard/products/${product.id}/edit`}
+            href={`/dashboard/products/${product.slug}/edit`}
           >
             <SquarePen className="h-4 w-4" />
             Edit
@@ -117,18 +119,28 @@ export function ProductDetail({ product }: ProductDetailProps) {
       <SheetFooter>
         <Link
           className="inline-flex h-9 items-center gap-2 rounded-md bg-primary px-3 text-primary-foreground text-sm hover:opacity-90"
-          href={`/dashboard/products/${product.id}/edit`}
+          href={`/dashboard/products/${product.slug}/edit`}
         >
           <SquarePen className="h-4 w-4" />
           Open full editor
         </Link>
-        <Link
-          className="inline-flex h-9 items-center gap-2 rounded-md border border-border/50 px-3 text-sm hover:bg-muted"
-          href={`/products/${product.id}`}
-        >
-          <ExternalLink className="h-4 w-4" />
-          View storefront page
-        </Link>
+        {product.storeSlug ? (
+          <Link
+            className="inline-flex h-9 items-center gap-2 rounded-md border border-border/50 px-3 text-sm hover:bg-muted"
+            href={`/products/${product.slug}`}
+          >
+            <ExternalLink className="h-4 w-4" />
+            View storefront page
+          </Link>
+        ) : (
+          <Link
+            className="inline-flex h-9 items-center gap-2 rounded-md border border-border/50 px-3 text-muted-foreground text-sm hover:bg-muted"
+            href="/account/start-selling"
+          >
+            <ExternalLink className="h-4 w-4" />
+            Finish storefront setup
+          </Link>
+        )}
       </SheetFooter>
     </div>
   );
