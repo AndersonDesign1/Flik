@@ -96,5 +96,7 @@ export default defineSchema({
     updatedAt: v.float64(),
   })
     .index("by_user_id", ["userId"])
-    .index("by_user_id_status", ["userId", "status"]),
+    .index("by_user_id_status", ["userId", "status"])
+    .index("by_slug", ["slug"])
+    .index("by_user_id_slug", ["userId", "slug"]),
 });

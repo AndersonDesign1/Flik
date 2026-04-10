@@ -200,6 +200,7 @@ export function StorePageClient({
 
             <div className="inline-flex rounded-full border border-border p-1">
               <Button
+                aria-label="Grid view"
                 className="rounded-full"
                 onClick={() => {
                   setQueryState({ view: "grid" }).catch(() => undefined);
@@ -211,6 +212,7 @@ export function StorePageClient({
                 <Grid3X3 className="h-4 w-4" />
               </Button>
               <Button
+                aria-label="List view"
                 className="rounded-full"
                 onClick={() => {
                   setQueryState({ view: "list" }).catch(() => undefined);
@@ -227,6 +229,7 @@ export function StorePageClient({
 
         <div className="grid gap-3 lg:grid-cols-[1fr_1fr_220px_220px]">
           <select
+            aria-label="Filter by category"
             className="h-11 rounded-2xl border border-border bg-background px-4 text-sm"
             onChange={(event) => {
               setQueryState({
@@ -245,6 +248,7 @@ export function StorePageClient({
           </select>
 
           <select
+            aria-label="Filter by tag"
             className="h-11 rounded-2xl border border-border bg-background px-4 text-sm"
             onChange={(event) => {
               setQueryState({
@@ -263,6 +267,7 @@ export function StorePageClient({
           </select>
 
           <select
+            aria-label="Sort products"
             className="h-11 rounded-2xl border border-border bg-background px-4 text-sm"
             onChange={(event) => {
               setQueryState({

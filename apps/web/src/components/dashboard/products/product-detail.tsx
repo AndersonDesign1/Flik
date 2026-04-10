@@ -124,7 +124,7 @@ export function ProductDetail({ product }: ProductDetailProps) {
           <SquarePen className="h-4 w-4" />
           Open full editor
         </Link>
-        {product.storeSlug ? (
+        {product.storeSlug && product.status === "active" ? (
           <Link
             className="inline-flex h-9 items-center gap-2 rounded-md border border-border/50 px-3 text-sm hover:bg-muted"
             href={`/products/${product.slug}`}
@@ -132,6 +132,11 @@ export function ProductDetail({ product }: ProductDetailProps) {
             <ExternalLink className="h-4 w-4" />
             View storefront page
           </Link>
+        ) : product.storeSlug ? (
+          <span className="inline-flex h-9 items-center gap-2 rounded-md border border-border/50 px-3 text-muted-foreground text-sm">
+            <ExternalLink className="h-4 w-4" />
+            Publish product to view page
+          </span>
         ) : (
           <Link
             className="inline-flex h-9 items-center gap-2 rounded-md border border-border/50 px-3 text-muted-foreground text-sm hover:bg-muted"

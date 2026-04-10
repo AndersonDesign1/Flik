@@ -181,11 +181,15 @@ export const columns: ColumnDef<DashboardProduct>[] = [
                 </Link>
               </DropdownMenuItem>
             )}
-            {product.storeSlug ? (
+            {product.storeSlug && product.status === "active" ? (
               <DropdownMenuItem asChild className="text-sm">
                 <Link href={`/products/${product.slug}`}>
                   View product page
                 </Link>
+              </DropdownMenuItem>
+            ) : product.storeSlug ? (
+              <DropdownMenuItem className="text-sm" disabled>
+                Publish product to view page
               </DropdownMenuItem>
             ) : (
               <DropdownMenuItem asChild className="text-sm">

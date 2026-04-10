@@ -10,7 +10,7 @@ import {
   Tag,
 } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/contexts/cart-context";
 
@@ -99,29 +99,35 @@ export function PublicProductDetail({ product }: PublicProductDetailProps) {
       ? Math.round(((compareAtPrice - product.price) / compareAtPrice) * 100)
       : null;
   const categoryLabel = getCategoryLabel(product.category);
-  const mediaItems = [
-    ...(product.coverUrl
-      ? [
-          {
-            url: product.coverUrl,
-            label: `${product.name} cover image`,
-          },
-        ]
-      : []),
-    ...product.galleryImages
-      .filter((image) => image.url)
-      .map((image) => ({
-        url: image.url as string,
-        label: image.fileName,
-      })),
-  ];
+  const galleryUrlsKey = product.galleryImages
+    .map((image) => image.url ?? "")
+    .join(",");
+  const mediaItems = useMemo(
+    () => [
+      ...(product.coverUrl
+        ? [
+            {
+              url: product.coverUrl,
+              label: `${product.name} cover image`,
+            },
+          ]
+        : []),
+      ...product.galleryImages
+        .filter((image) => image.url)
+        .map((image) => ({
+          url: image.url as string,
+          label: image.fileName,
+        })),
+    ],
+    [galleryUrlsKey, product.coverUrl, product.name]
+  );
   const [selectedImage, setSelectedImage] = useState<string | null>(
     mediaItems[0]?.url ?? null
   );
 
   useEffect(() => {
     setSelectedImage(mediaItems[0]?.url ?? null);
-  }, [product._id, product.coverUrl, product.galleryImages]);
+  }, [mediaItems, product._id]);
 
   const details = [
     product.category ? `Category: ${categoryLabel}` : null,

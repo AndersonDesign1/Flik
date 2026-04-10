@@ -52,14 +52,12 @@ async function ensureUniqueProductSlug(
     throw new Error("Product slug must be at least 3 characters");
   }
 
-  const allProducts = await ctx.db.query("products").collect();
-  const takenSlugs = new Set(
-    allProducts
-      .filter((product) => product._id !== excludeProductId)
-      .map((product) => product.slug ?? getProductSlugForId(product.name, product._id))
-  );
+  const existingProduct = await ctx.db
+    .query("products")
+    .withIndex("by_slug", (q) => q.eq("slug", normalizedBaseSlug))
+    .first();
 
-  if (!takenSlugs.has(normalizedBaseSlug)) {
+  if (!existingProduct || existingProduct._id === excludeProductId) {
     return normalizedBaseSlug;
   }
 
@@ -293,10 +291,6 @@ export const createProduct = mutation({
       updatedAt: now,
     });
 
-    await ctx.db.patch(productId, {
-      slug: getProductSlugForId(name, productId),
-    });
-
     await Promise.all(
       uploadRegistrations
         .filter((registration) => registration !== null)
@@ -395,20 +389,16 @@ export const getMyProductForEdit = query({
       return null;
     }
 
-    const allProducts = await ctx.db
-      .query("products")
-      .withIndex("by_user_id", (q) => q.eq("userId", user._id))
-      .collect();
     const normalizedSlugOrId = args.slugOrId.trim().toLowerCase();
+    const productById = await ctx.db.get(args.slugOrId as Id<"products">);
     const product =
-      allProducts.find((candidate) => {
-        const candidateSlug =
-          candidate.slug ?? getProductSlugForId(candidate.name, candidate._id);
-        return (
-          candidate._id === args.slugOrId ||
-          candidateSlug === normalizedSlugOrId
-        );
-      }) ?? null;
+      (productById && productById.userId === user._id ? productById : null) ??
+      (await ctx.db
+        .query("products")
+        .withIndex("by_user_id_slug", (q) =>
+          q.eq("userId", user._id).eq("slug", normalizedSlugOrId)
+        )
+        .first());
 
     if (!product) {
       return null;
@@ -491,16 +481,12 @@ export const getPublicProductBySlug = query({
   ),
   handler: async (ctx, args) => {
     const normalizedSlugOrId = args.slugOrId.trim().toLowerCase();
-    const allProducts = await ctx.db.query("products").collect();
     const product =
-      allProducts.find((candidate) => {
-        const productSlug =
-          candidate.slug ?? getProductSlugForId(candidate.name, candidate._id);
-        return (
-          candidate._id === args.slugOrId ||
-          productSlug === normalizedSlugOrId
-        );
-      }) ?? null;
+      (await ctx.db.get(args.slugOrId as Id<"products">)) ??
+      (await ctx.db
+        .query("products")
+        .withIndex("by_slug", (q) => q.eq("slug", normalizedSlugOrId))
+        .first());
 
     if (!product || product.status !== "active") {
       return null;
