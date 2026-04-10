@@ -9,5 +9,5 @@ export default async function EditProductPage({
 }: EditProductPageProps) {
   const { id } = await params;
 
-  return <EditProductForm productId={id} />;
+  return <EditProductForm productSlugOrId={id} />;
 }

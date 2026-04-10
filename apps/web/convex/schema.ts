@@ -59,6 +59,7 @@ export default defineSchema({
     .index("by_user_id_storage_id", ["userId", "storageId"]),
   products: defineTable({
     userId: v.string(),
+    slug: v.optional(v.string()),
     name: v.string(),
     description: v.string(),
     category: v.string(),
@@ -72,6 +73,16 @@ export default defineSchema({
       v.literal("archived")
     ),
     coverStorageId: v.optional(v.id("_storage")),
+    galleryImages: v.optional(
+      v.array(
+        v.object({
+          storageId: v.id("_storage"),
+          fileName: v.string(),
+          fileSize: v.float64(),
+          mimeType: v.optional(v.string()),
+        })
+      )
+    ),
     files: v.array(
       v.object({
         storageId: v.id("_storage"),
@@ -85,5 +96,7 @@ export default defineSchema({
     updatedAt: v.float64(),
   })
     .index("by_user_id", ["userId"])
-    .index("by_user_id_status", ["userId", "status"]),
+    .index("by_user_id_status", ["userId", "status"])
+    .index("by_slug", ["slug"])
+    .index("by_user_id_slug", ["userId", "slug"]),
 });

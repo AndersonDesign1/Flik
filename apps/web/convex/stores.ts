@@ -15,6 +15,19 @@ function slugifyStoreName(input: string) {
     .replace(/^-|-$/g, "");
 }
 
+function getProductSlug(name: string, productId: string) {
+  const baseSlug =
+    name
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9\s-]/g, "")
+      .replace(/\s+/g, "-")
+      .replace(/-+/g, "-")
+      .replace(/^-|-$/g, "") || "product";
+
+  return `${baseSlug}-${productId.slice(-6).toLowerCase()}`;
+}
+
 function normalizeOptionalString(input?: string) {
   const trimmed = input?.trim();
   return trimmed || undefined;
@@ -62,6 +75,12 @@ export const getMyStore = query({
 export const getStoreBySlug = query({
   args: {
     slug: v.string(),
+    search: v.optional(v.string()),
+    category: v.optional(v.string()),
+    tag: v.optional(v.string()),
+    sort: v.optional(v.string()),
+    page: v.optional(v.number()),
+    pageSize: v.optional(v.number()),
   },
   returns: v.union(
     v.object({
@@ -70,11 +89,23 @@ export const getStoreBySlug = query({
       description: v.optional(v.string()),
       ownerName: v.string(),
       productCount: v.number(),
+      totalSales: v.number(),
+      total: v.number(),
+      page: v.number(),
+      pageSize: v.number(),
+      pageCount: v.number(),
+      availableCategories: v.array(v.string()),
+      availableTags: v.array(v.string()),
       products: v.array(
         v.object({
           _id: v.id("products"),
+          slug: v.string(),
           name: v.string(),
           price: v.number(),
+          compareAtPrice: v.optional(v.number()),
+          coverUrl: v.optional(v.string()),
+          category: v.string(),
+          tags: v.array(v.string()),
           status: v.union(
             v.literal("draft"),
             v.literal("active"),
@@ -92,7 +123,7 @@ export const getStoreBySlug = query({
       .withIndex("by_slug", (q) => q.eq("slug", args.slug.toLowerCase()))
       .first();
 
-    if (!store) {
+    if (!store || store.status !== "active") {
       return null;
     }
 
@@ -102,23 +133,93 @@ export const getStoreBySlug = query({
       .withIndex("by_user_id", (q) => q.eq("userId", store.ownerId))
       .collect();
 
-    const activeProducts = products
-      .filter((product) => product.status === "active")
-      .map((product) => ({
+    const normalizedSearch = args.search?.trim().toLowerCase() || undefined;
+    const normalizedCategory = args.category?.trim().toLowerCase() || undefined;
+    const normalizedTag = args.tag?.trim().toLowerCase() || undefined;
+    const sort = args.sort ?? "featured";
+    const pageSize = Math.min(Math.max(Math.floor(args.pageSize ?? 12), 1), 48);
+    const page = Math.max(Math.floor(args.page ?? 1), 1);
+
+    const activeProducts = products.filter((product) => product.status === "active");
+    const availableCategories = [...new Set(activeProducts.map((product) => product.category))]
+      .filter(Boolean)
+      .sort((left, right) => left.localeCompare(right));
+    const availableTags = [
+      ...new Set(activeProducts.flatMap((product) => product.tags ?? [])),
+    ]
+      .filter(Boolean)
+      .sort((left, right) => left.localeCompare(right));
+
+    const filteredProducts = activeProducts.filter((product) => {
+      const matchesSearch =
+        !normalizedSearch ||
+        product.name.toLowerCase().includes(normalizedSearch) ||
+        product.description.toLowerCase().includes(normalizedSearch) ||
+        product.tags.some((tag) => tag.toLowerCase().includes(normalizedSearch));
+      const matchesCategory =
+        !normalizedCategory || product.category.toLowerCase() === normalizedCategory;
+      const matchesTag =
+        !normalizedTag ||
+        product.tags.some((tag) => tag.toLowerCase() === normalizedTag);
+
+      return matchesSearch && matchesCategory && matchesTag;
+    });
+
+    const sortedProducts = [...filteredProducts].sort((left, right) => {
+      switch (sort) {
+        case "price_asc":
+          return left.price - right.price;
+        case "price_desc":
+          return right.price - left.price;
+        case "newest":
+          return right.createdAt - left.createdAt;
+        case "best_selling":
+          return (right.sales ?? 0) - (left.sales ?? 0);
+        case "featured":
+        default:
+          return (right.sales ?? 0) - (left.sales ?? 0) || right.createdAt - left.createdAt;
+      }
+    });
+
+    const total = sortedProducts.length;
+    const pageCount = Math.max(1, Math.ceil(total / pageSize));
+    const currentPage = Math.min(page, pageCount);
+    const startIndex = (currentPage - 1) * pageSize;
+    const paginatedProducts = sortedProducts.slice(startIndex, startIndex + pageSize);
+    const productsWithAssets = await Promise.all(
+      paginatedProducts.map(async (product) => ({
         _id: product._id,
+        slug: product.slug ?? getProductSlug(product.name, product._id),
         name: product.name,
         price: product.price,
+        compareAtPrice: product.compareAtPrice,
+        coverUrl: product.coverStorageId
+          ? ((await ctx.storage.getUrl(product.coverStorageId)) ?? undefined)
+          : undefined,
+        category: product.category,
+        tags: product.tags,
         sales: product.sales ?? 0,
         status: product.status,
-      }));
+      }))
+    );
 
     return {
       description: store.description,
       name: store.name,
       ownerName: owner?.name ?? owner?.email ?? "Store owner",
       productCount: activeProducts.length,
-      products: activeProducts,
       slug: store.slug,
+      totalSales: activeProducts.reduce(
+        (sum, product) => sum + (product.sales ?? 0),
+        0
+      ),
+      total,
+      page: currentPage,
+      pageSize,
+      pageCount,
+      availableCategories,
+      availableTags,
+      products: productsWithAssets,
     };
   },
 });

@@ -6,6 +6,7 @@ import { mutation, query } from "./_generated/server";
 import { authComponent } from "./auth";
 
 const MAX_FILE_COUNT = 20;
+const MAX_GALLERY_IMAGE_COUNT = 8;
 
 const productFileValidator = v.object({
   storageId: v.id("_storage"),
@@ -14,14 +15,66 @@ const productFileValidator = v.object({
   mimeType: v.optional(v.string()),
 });
 
+const productImageValidator = v.object({
+  storageId: v.id("_storage"),
+  fileName: v.string(),
+  fileSize: v.number(),
+  mimeType: v.optional(v.string()),
+});
+
+function slugifyProductName(input: string) {
+  return input
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
+}
+
+function getProductSlugForId(name: string, productId: Id<"products"> | string) {
+  const baseSlug = slugifyProductName(name) || "product";
+  const stableSuffix = productId.toString().slice(-6).toLowerCase();
+  return `${baseSlug}-${stableSuffix}`;
+}
+
+function normalizeCategoryValue(input: string) {
+  return input.trim().toLowerCase();
+}
+
+async function ensureUniqueProductSlug(
+  ctx: MutationCtx,
+  desiredSlug: string,
+  excludeProductId?: Id<"products">
+) {
+  const normalizedBaseSlug = slugifyProductName(desiredSlug);
+  if (normalizedBaseSlug.length < 3) {
+    throw new Error("Product slug must be at least 3 characters");
+  }
+
+  const existingProduct = await ctx.db
+    .query("products")
+    .withIndex("by_slug", (q) => q.eq("slug", normalizedBaseSlug))
+    .first();
+
+  if (!existingProduct || existingProduct._id === excludeProductId) {
+    return normalizedBaseSlug;
+  }
+
+  throw new Error("That product URL is already taken");
+}
+
 function getStorageIdsFromProduct(product: {
   coverStorageId?: string;
+  galleryImages?: Array<{ storageId: string }>;
   files: Array<{ storageId: string }>;
 }) {
   const fileStorageIds = product.files.map((file) => file.storageId);
+  const galleryStorageIds =
+    product.galleryImages?.map((image) => image.storageId) ?? [];
   return product.coverStorageId
-    ? [product.coverStorageId, ...fileStorageIds]
-    : fileStorageIds;
+    ? [product.coverStorageId, ...galleryStorageIds, ...fileStorageIds]
+    : [...galleryStorageIds, ...fileStorageIds];
 }
 
 async function getOwnedProductOrThrow(
@@ -139,6 +192,7 @@ export const deleteUploadedFile = mutation({
 export const createProduct = mutation({
   args: {
     name: v.string(),
+    slug: v.optional(v.string()),
     description: v.string(),
     category: v.string(),
     tags: v.array(v.string()),
@@ -147,6 +201,7 @@ export const createProduct = mutation({
     allowCustomPrice: v.boolean(),
     status: v.union(v.literal("draft"), v.literal("active")),
     coverStorageId: v.optional(v.id("_storage")),
+    galleryImages: v.array(productImageValidator),
     files: v.array(productFileValidator),
   },
   returns: v.id("products"),
@@ -185,8 +240,15 @@ export const createProduct = mutation({
       throw new Error(`Maximum ${MAX_FILE_COUNT} product files allowed`);
     }
 
+    if (args.galleryImages.length > MAX_GALLERY_IMAGE_COUNT) {
+      throw new Error(
+        `Maximum ${MAX_GALLERY_IMAGE_COUNT} gallery images allowed`
+      );
+    }
+
     const requiredStorageIds = [
       ...(args.coverStorageId ? [args.coverStorageId] : []),
+      ...args.galleryImages.map((image) => image.storageId),
       ...args.files.map((file) => file.storageId),
     ];
 
@@ -207,19 +269,22 @@ export const createProduct = mutation({
       throw new Error("One or more files are not owned by the current user");
     }
 
+    const resolvedSlug = await ensureUniqueProductSlug(ctx, args.slug ?? name);
     const now = Date.now();
 
     const productId = await ctx.db.insert("products", {
       userId: user._id,
+      slug: resolvedSlug,
       name,
       description,
-      category: args.category,
+      category: normalizeCategoryValue(args.category),
       tags: args.tags,
       price: args.price,
       compareAtPrice: args.compareAtPrice,
       allowCustomPrice: args.allowCustomPrice,
       status: args.status,
       coverStorageId: args.coverStorageId,
+      galleryImages: args.galleryImages,
       files: args.files,
       sales: 0,
       createdAt: now,
@@ -252,6 +317,11 @@ export const listMyProducts = query({
       };
     }
 
+    const store = await ctx.db
+      .query("stores")
+      .withIndex("by_owner_id", (q) => q.eq("ownerId", user._id))
+      .first();
+
     const paginatedProducts = await ctx.db
       .query("products")
       .withIndex("by_user_id", (q) => q.eq("userId", user._id))
@@ -261,6 +331,7 @@ export const listMyProducts = query({
     const page = await Promise.all(
       paginatedProducts.page.map(async (product) => ({
         _id: product._id,
+        slug: product.slug ?? getProductSlugForId(product.name, product._id),
         name: product.name,
         status: product.status,
         price: product.price,
@@ -269,6 +340,8 @@ export const listMyProducts = query({
         coverUrl: product.coverStorageId
           ? ((await ctx.storage.getUrl(product.coverStorageId)) ?? undefined)
           : undefined,
+        storeName: store?.name ?? undefined,
+        storeSlug: store?.slug ?? undefined,
       }))
     );
 
@@ -281,11 +354,12 @@ export const listMyProducts = query({
 
 export const getMyProductForEdit = query({
   args: {
-    productId: v.id("products"),
+    slugOrId: v.string(),
   },
   returns: v.union(
     v.object({
       _id: v.id("products"),
+      slug: v.string(),
       name: v.string(),
       description: v.string(),
       category: v.string(),
@@ -296,6 +370,15 @@ export const getMyProductForEdit = query({
       status: v.union(v.literal("draft"), v.literal("active")),
       coverStorageId: v.optional(v.id("_storage")),
       coverUrl: v.optional(v.string()),
+      galleryImages: v.array(
+        v.object({
+          storageId: v.id("_storage"),
+          fileName: v.string(),
+          fileSize: v.number(),
+          mimeType: v.optional(v.string()),
+          url: v.optional(v.string()),
+        })
+      ),
       files: v.array(productFileValidator),
     }),
     v.null()
@@ -306,8 +389,18 @@ export const getMyProductForEdit = query({
       return null;
     }
 
-    const product = await ctx.db.get(args.productId);
-    if (!product || product.userId !== user._id) {
+    const normalizedSlugOrId = args.slugOrId.trim().toLowerCase();
+    const productById = await ctx.db.get(args.slugOrId as Id<"products">);
+    const product =
+      (productById && productById.userId === user._id ? productById : null) ??
+      (await ctx.db
+        .query("products")
+        .withIndex("by_user_id_slug", (q) =>
+          q.eq("userId", user._id).eq("slug", normalizedSlugOrId)
+        )
+        .first());
+
+    if (!product) {
       return null;
     }
 
@@ -318,9 +411,19 @@ export const getMyProductForEdit = query({
     const coverUrl = product.coverStorageId
       ? await ctx.storage.getUrl(product.coverStorageId)
       : undefined;
+    const galleryImages = await Promise.all(
+      (product.galleryImages ?? []).map(async (image) => ({
+        storageId: image.storageId,
+        fileName: image.fileName,
+        fileSize: image.fileSize,
+        mimeType: image.mimeType,
+        url: (await ctx.storage.getUrl(image.storageId)) ?? undefined,
+      }))
+    );
 
     return {
       _id: product._id,
+      slug: product.slug ?? getProductSlugForId(product.name, product._id),
       name: product.name,
       description: product.description,
       category: product.category,
@@ -331,7 +434,109 @@ export const getMyProductForEdit = query({
       status: product.status,
       coverStorageId: product.coverStorageId,
       coverUrl: coverUrl ?? undefined,
+      galleryImages,
       files: product.files,
+    };
+  },
+});
+
+export const getPublicProductBySlug = query({
+  args: {
+    slugOrId: v.string(),
+  },
+  returns: v.union(
+    v.object({
+      _id: v.id("products"),
+      slug: v.string(),
+      name: v.string(),
+      description: v.string(),
+      category: v.string(),
+      tags: v.array(v.string()),
+      price: v.number(),
+      compareAtPrice: v.optional(v.number()),
+      allowCustomPrice: v.boolean(),
+      coverUrl: v.optional(v.string()),
+      galleryImages: v.array(
+        v.object({
+          fileName: v.string(),
+          fileSize: v.number(),
+          mimeType: v.optional(v.string()),
+          url: v.optional(v.string()),
+        })
+      ),
+      sales: v.number(),
+      inventoryCount: v.number(),
+      files: v.array(
+        v.object({
+          fileName: v.string(),
+          fileSize: v.number(),
+          mimeType: v.optional(v.string()),
+        })
+      ),
+      sellerName: v.string(),
+      storeName: v.optional(v.string()),
+      storeSlug: v.optional(v.string()),
+    }),
+    v.null()
+  ),
+  handler: async (ctx, args) => {
+    const normalizedSlugOrId = args.slugOrId.trim().toLowerCase();
+    const product =
+      (await ctx.db.get(args.slugOrId as Id<"products">)) ??
+      (await ctx.db
+        .query("products")
+        .withIndex("by_slug", (q) => q.eq("slug", normalizedSlugOrId))
+        .first());
+
+    if (!product || product.status !== "active") {
+      return null;
+    }
+
+    const [coverUrl, galleryImages, owner, store] = await Promise.all([
+      product.coverStorageId
+        ? ctx.storage.getUrl(product.coverStorageId)
+        : Promise.resolve(null),
+      Promise.all(
+        (product.galleryImages ?? []).map(async (image) => ({
+          fileName: image.fileName,
+          fileSize: image.fileSize,
+          mimeType: image.mimeType,
+          url: (await ctx.storage.getUrl(image.storageId)) ?? undefined,
+        }))
+      ),
+      authComponent.getAnyUserById(ctx, product.userId),
+      ctx.db
+        .query("stores")
+        .withIndex("by_owner_id", (q) => q.eq("ownerId", product.userId))
+        .first(),
+    ]);
+
+    const activeStore = store?.status === "active" ? store : null;
+    const sellerName =
+      activeStore?.name ?? owner?.name ?? owner?.email ?? "Store owner";
+
+    return {
+      _id: product._id,
+      slug: product.slug ?? getProductSlugForId(product.name, product._id),
+      name: product.name,
+      description: product.description,
+      category: product.category,
+      tags: product.tags,
+      price: product.price,
+      compareAtPrice: product.compareAtPrice,
+      allowCustomPrice: product.allowCustomPrice,
+      coverUrl: coverUrl ?? undefined,
+      galleryImages,
+      sales: product.sales ?? 0,
+      inventoryCount: product.files.length,
+      files: product.files.map((file) => ({
+        fileName: file.fileName,
+        fileSize: file.fileSize,
+        mimeType: file.mimeType,
+      })),
+      sellerName,
+      storeName: activeStore?.name,
+      storeSlug: activeStore?.slug,
     };
   },
 });
@@ -340,6 +545,7 @@ export const updateProduct = mutation({
   args: {
     productId: v.id("products"),
     name: v.string(),
+    slug: v.optional(v.string()),
     description: v.string(),
     category: v.string(),
     tags: v.array(v.string()),
@@ -348,6 +554,7 @@ export const updateProduct = mutation({
     allowCustomPrice: v.boolean(),
     status: v.union(v.literal("draft"), v.literal("active")),
     coverStorageId: v.optional(v.id("_storage")),
+    galleryImages: v.array(productImageValidator),
     files: v.array(productFileValidator),
   },
   returns: v.id("products"),
@@ -370,6 +577,11 @@ export const updateProduct = mutation({
     }
 
     const description = args.description.trim();
+    const resolvedSlug = await ensureUniqueProductSlug(
+      ctx,
+      args.slug ?? name,
+      args.productId
+    );
     if (args.status === "active" && !description) {
       throw new Error("Description is required to publish");
     }
@@ -392,8 +604,15 @@ export const updateProduct = mutation({
       throw new Error(`Maximum ${MAX_FILE_COUNT} product files allowed`);
     }
 
+    if (args.galleryImages.length > MAX_GALLERY_IMAGE_COUNT) {
+      throw new Error(
+        `Maximum ${MAX_GALLERY_IMAGE_COUNT} gallery images allowed`
+      );
+    }
+
     const nextStorageIds = new Set<string>([
       ...(args.coverStorageId ? [args.coverStorageId] : []),
+      ...args.galleryImages.map((image) => image.storageId),
       ...args.files.map((file) => file.storageId),
     ]);
 
@@ -429,15 +648,17 @@ export const updateProduct = mutation({
     );
 
     await ctx.db.patch(args.productId, {
+      slug: resolvedSlug,
       name,
       description,
-      category: args.category,
+      category: normalizeCategoryValue(args.category),
       tags: args.tags,
       price: args.price,
       compareAtPrice: args.compareAtPrice,
       allowCustomPrice: args.allowCustomPrice,
       status: args.status,
       coverStorageId: args.coverStorageId,
+      galleryImages: args.galleryImages,
       files: args.files,
       updatedAt: Date.now(),
     });

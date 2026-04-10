@@ -1,5 +1,8 @@
 import type { NextConfig } from "next";
 
+const convexUrl = process.env.NEXT_PUBLIC_CONVEX_URL ?? "";
+const convexHostname = convexUrl ? new URL(convexUrl).hostname : "";
+
 const nextConfig: NextConfig = {
   /* config options here */
   reactCompiler: true,
@@ -12,6 +15,14 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "images.unsplash.com",
       },
+      ...(convexHostname
+        ? [
+            {
+              protocol: "https" as const,
+              hostname: convexHostname,
+            },
+          ]
+        : []),
     ],
   },
 };

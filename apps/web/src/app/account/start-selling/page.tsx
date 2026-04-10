@@ -12,6 +12,9 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { api } from "../../../../convex/_generated/api";
 
+const primaryCtaClassName =
+  "bg-gray-950 text-white shadow-sm hover:bg-gray-900 disabled:bg-gray-200 disabled:text-gray-500";
+
 function slugifyStoreName(input: string) {
   return input
     .trim()
@@ -81,6 +84,30 @@ export default function StartSellingPage() {
         </p>
       </div>
 
+      {!hasStore ? (
+        <Card className="border-primary-violet/20 bg-primary-violet-50/40 p-5">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="space-y-1">
+              <p className="font-semibold text-foreground text-base">
+                Your seller access is enabled, but your storefront is not created yet.
+              </p>
+              <p className="text-muted-foreground text-sm">
+                Add a store name below, then use the create button to finish setup and continue to the dashboard.
+              </p>
+            </div>
+            <Button
+              className={primaryCtaClassName}
+              disabled={isSubmitting || !canSubmit}
+              form="create-store-form"
+              type="submit"
+            >
+              {isSubmitting ? "Creating Store..." : "Create Store & Continue"}
+              <ArrowRight className="size-4" />
+            </Button>
+          </div>
+        </Card>
+      ) : null}
+
       <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
         <Card className="p-6">
           {hasStore ? (
@@ -105,18 +132,22 @@ export default function StartSellingPage() {
                 </p>
               </div>
               <Button
+                className={primaryCtaClassName}
                 onClick={() => {
                   router.push("/dashboard");
                   router.refresh();
                 }}
-                variant="primary"
               >
                 Open Seller Workspace
                 <ArrowRight className="size-4" />
               </Button>
             </div>
           ) : (
-            <form className="flex flex-col gap-5" onSubmit={handleSubmit}>
+            <form
+              className="flex flex-col gap-5"
+              id="create-store-form"
+              onSubmit={handleSubmit}
+            >
               <div className="space-y-2">
                 <label
                   className="font-medium text-foreground text-sm"
@@ -170,13 +201,18 @@ export default function StartSellingPage() {
               </div>
 
               <Button
+                className={primaryCtaClassName}
                 disabled={isSubmitting || !canSubmit}
                 type="submit"
-                variant="primary"
               >
-                {isSubmitting ? "Creating Store..." : "Create Store"}
+                {isSubmitting ? "Creating Store..." : "Create Store & Continue"}
                 <ArrowRight className="size-4" />
               </Button>
+              {!canSubmit ? (
+                <p className="text-muted-foreground text-xs">
+                  Enter at least 2 characters for the store name to enable the button.
+                </p>
+              ) : null}
             </form>
           )}
         </Card>
@@ -222,7 +258,7 @@ export default function StartSellingPage() {
             >
               Return to buyer account
             </Link>
-            {hasSellerWorkspace && (
+            {hasStore && hasSellerWorkspace && (
               <Link
                 className="font-medium text-primary-violet hover:underline"
                 href="/dashboard"
