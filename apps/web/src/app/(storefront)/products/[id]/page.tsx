@@ -1,11 +1,10 @@
 import { fetchQuery } from "convex/nextjs";
 import { notFound } from "next/navigation";
-import type { Id } from "../../../../../convex/_generated/dataModel";
-import { api } from "../../../../../convex/_generated/api";
 import {
   PublicProductDetail,
   type PublicProductDetailData,
 } from "@/components/storefront/public-product-detail";
+import { api } from "../../../../../convex/_generated/api";
 
 interface ProductPageProps {
   params: Promise<{ id: string }>;
