@@ -390,7 +390,8 @@ export const getMyProductForEdit = query({
     }
 
     const normalizedSlugOrId = args.slugOrId.trim().toLowerCase();
-    const productById = await ctx.db.get(args.slugOrId as Id<"products">);
+    const productId = ctx.db.normalizeId("products", args.slugOrId);
+    const productById = productId ? await ctx.db.get(productId) : null;
     const product =
       (productById && productById.userId === user._id ? productById : null) ??
       (await ctx.db
@@ -481,8 +482,9 @@ export const getPublicProductBySlug = query({
   ),
   handler: async (ctx, args) => {
     const normalizedSlugOrId = args.slugOrId.trim().toLowerCase();
+    const productId = ctx.db.normalizeId("products", args.slugOrId);
     const product =
-      (await ctx.db.get(args.slugOrId as Id<"products">)) ??
+      (productId ? await ctx.db.get(productId) : null) ??
       (await ctx.db
         .query("products")
         .withIndex("by_slug", (q) => q.eq("slug", normalizedSlugOrId))
