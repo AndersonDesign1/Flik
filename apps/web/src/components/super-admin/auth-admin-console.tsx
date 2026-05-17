@@ -121,6 +121,15 @@ function getRoleLabel(role?: string | string[] | null) {
   return value.replaceAll("_", " ");
 }
 
+function isFlikRole(value: unknown): value is FlikRole {
+  return typeof value === "string" && roles.includes(value as FlikRole);
+}
+
+function normalizeFlikRole(role?: string | string[] | null): FlikRole {
+  const value = Array.isArray(role) ? role[0] : role;
+  return isFlikRole(value) ? value : "user";
+}
+
 function formatDate(value: Date | string) {
   return new Intl.DateTimeFormat("en", {
     dateStyle: "medium",
@@ -138,6 +147,7 @@ export function AuthAdminConsole() {
   const [searchValue, setSearchValue] = useState("");
   const [loading, setLoading] = useState(false);
   const [confirmation, setConfirmation] = useState<Confirmation | null>(null);
+  const [isConfirming, setIsConfirming] = useState(false);
   const [createForm, setCreateForm] = useState({
     email: "",
     name: "",
@@ -211,13 +221,14 @@ export function AuthAdminConsole() {
     }
 
     setUpdateForm({ email: selectedUser.email, name: selectedUser.name });
-    setRoleForm((selectedUser.role as FlikRole | undefined) ?? "user");
+    setRoleForm(normalizeFlikRole(selectedUser.role));
     refreshSessions(selectedUser.id);
   }, [refreshSessions, selectedUser]);
 
   const runAdminAction = async (
     action: () => Promise<ApiResult<unknown> | undefined>,
-    successMessage: string
+    successMessage: string,
+    targetUserId = selectedUserId
   ) => {
     const result = await action();
     if (result?.error) {
@@ -227,7 +238,7 @@ export function AuthAdminConsole() {
 
     toast.success(successMessage);
     await refreshUsers();
-    await refreshSessions();
+    await refreshSessions(targetUserId);
   };
 
   const ask = (nextConfirmation: Confirmation) => {
@@ -269,7 +280,8 @@ export function AuthAdminConsole() {
           },
           userId: selectedUser.id,
         }),
-      "User updated"
+      "User updated",
+      selectedUser.id
     );
   };
 
@@ -283,19 +295,23 @@ export function AuthAdminConsole() {
       description: `Set ${selectedUser.email} to ${getRoleLabel(roleForm)}. This also mirrors the role to Convex profiles for current guards.`,
       title: "Change this role?",
       run: async () => {
-        await runAdminAction(async () => {
-          const result = await adminApi.setRole({
-            role: roleForm,
-            userId: selectedUser.id,
-          });
-          if (!result.error) {
-            await mirrorProfileRole({
+        await runAdminAction(
+          async () => {
+            const result = await adminApi.setRole({
               role: roleForm,
               userId: selectedUser.id,
             });
-          }
-          return result;
-        }, "Role updated");
+            if (!result.error) {
+              await mirrorProfileRole({
+                role: roleForm,
+                userId: selectedUser.id,
+              });
+            }
+            return result;
+          },
+          "Role updated",
+          selectedUser.id
+        );
       },
     });
   };
@@ -316,7 +332,8 @@ export function AuthAdminConsole() {
               banReason: banReason.trim() || undefined,
               userId: selectedUser.id,
             }),
-          "User banned"
+          "User banned",
+          selectedUser.id
         );
       },
     });
@@ -329,7 +346,8 @@ export function AuthAdminConsole() {
 
     await runAdminAction(
       () => adminApi.unbanUser({ userId: selectedUser.id }),
-      "User unbanned"
+      "User unbanned",
+      selectedUser.id
     );
   };
 
@@ -349,7 +367,8 @@ export function AuthAdminConsole() {
               newPassword: password,
               userId: selectedUser.id,
             }),
-          "Password updated"
+          "Password updated",
+          selectedUser.id
         );
         setPassword("");
       },
@@ -368,7 +387,8 @@ export function AuthAdminConsole() {
       run: async () => {
         await runAdminAction(
           () => adminApi.impersonateUser({ userId: selectedUser.id }),
-          "Impersonation started"
+          "Impersonation started",
+          selectedUser.id
         );
       },
     });
@@ -386,7 +406,8 @@ export function AuthAdminConsole() {
       run: async () => {
         await runAdminAction(
           () => adminApi.removeUser({ userId: selectedUser.id }),
-          "User deleted"
+          "User deleted",
+          selectedUser.id
         );
         setSelectedUserId(null);
       },
@@ -401,7 +422,8 @@ export function AuthAdminConsole() {
       run: async () => {
         await runAdminAction(
           () => adminApi.revokeUserSession({ sessionToken: session.token }),
-          "Session revoked"
+          "Session revoked",
+          session.userId
         );
       },
     });
@@ -418,7 +440,8 @@ export function AuthAdminConsole() {
       run: async () => {
         await runAdminAction(
           () => adminApi.revokeUserSessions({ userId: selectedUser.id }),
-          "All sessions revoked"
+          "All sessions revoked",
+          selectedUser.id
         );
       },
     });
@@ -680,6 +703,9 @@ export function AuthAdminConsole() {
 
       <AlertDialog
         onOpenChange={(open) => {
+          if (isConfirming) {
+            return;
+          }
           if (!open) {
             setConfirmation(null);
           }
@@ -694,12 +720,33 @@ export function AuthAdminConsole() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={isConfirming}>
+              Cancel
+            </AlertDialogCancel>
             <AlertDialogAction
-              onClick={() => {
-                confirmation?.run();
+              disabled={isConfirming}
+              onClick={async (event) => {
+                event.preventDefault();
+                if (!(confirmation && !isConfirming)) {
+                  return;
+                }
+
+                setIsConfirming(true);
+                try {
+                  await confirmation.run();
+                  setConfirmation(null);
+                } catch (error) {
+                  toast.error(
+                    error instanceof Error ? error.message : "Action failed"
+                  );
+                } finally {
+                  setIsConfirming(false);
+                }
               }}
             >
+              {isConfirming ? (
+                <span className="size-3 animate-spin rounded-full border border-current border-t-transparent" />
+              ) : null}
               {confirmation?.actionLabel}
             </AlertDialogAction>
           </AlertDialogFooter>

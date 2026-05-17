@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { authClient } from "@/lib/auth-client";
@@ -8,6 +9,7 @@ import { authClient } from "@/lib/auth-client";
 export function ImpersonationBanner() {
   const router = useRouter();
   const { data } = authClient.useSession();
+  const [isStopping, setIsStopping] = useState(false);
   const session = data?.session as { impersonatedBy?: string } | undefined;
 
   if (!session?.impersonatedBy) {
@@ -15,16 +17,25 @@ export function ImpersonationBanner() {
   }
 
   const stopImpersonating = async () => {
-    const result = await authClient.admin.stopImpersonating();
-
-    if (result.error) {
-      toast.error(result.error.message || "Could not stop impersonating");
+    if (isStopping) {
       return;
     }
 
-    toast.success("Returned to your admin session");
-    router.push("/super-admin/admins");
-    router.refresh();
+    setIsStopping(true);
+    try {
+      const result = await authClient.admin.stopImpersonating();
+
+      if (result.error) {
+        toast.error(result.error.message || "Could not stop impersonating");
+        return;
+      }
+
+      toast.success("Returned to your admin session");
+      router.push("/super-admin/admins");
+      router.refresh();
+    } finally {
+      setIsStopping(false);
+    }
   };
 
   return (
@@ -32,7 +43,15 @@ export function ImpersonationBanner() {
       <span className="font-medium">
         You are impersonating another account.
       </span>
-      <Button onClick={stopImpersonating} size="sm" variant="outline">
+      <Button
+        disabled={isStopping}
+        onClick={stopImpersonating}
+        size="sm"
+        variant="outline"
+      >
+        {isStopping ? (
+          <span className="size-3 animate-spin rounded-full border border-current border-t-transparent" />
+        ) : null}
         Stop
       </Button>
     </div>
