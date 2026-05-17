@@ -2,6 +2,7 @@
 
 import { FaGithub, FaGoogle } from "react-icons/fa";
 import { toast } from "sonner";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { authClient } from "@/lib/auth-client";
 
@@ -10,6 +11,8 @@ interface OAuthButtonsProps {
 }
 
 export function OAuthButtons({ isLoading }: OAuthButtonsProps) {
+  const lastLoginMethod = authClient.getLastUsedLoginMethod();
+
   const handleGoogleSignIn = async () => {
     try {
       await authClient.signIn.social({
@@ -47,6 +50,11 @@ export function OAuthButtons({ isLoading }: OAuthButtonsProps) {
           <FaGoogle className="size-4" />
         )}
         Google
+        {lastLoginMethod === "google" ? (
+          <Badge className="ml-auto" variant="secondary">
+            Last
+          </Badge>
+        ) : null}
       </Button>
       <Button
         className="h-11 gap-2 border-border bg-card text-foreground hover:bg-muted"
@@ -61,6 +69,11 @@ export function OAuthButtons({ isLoading }: OAuthButtonsProps) {
           <FaGithub className="size-4" />
         )}
         GitHub
+        {lastLoginMethod === "github" ? (
+          <Badge className="ml-auto" variant="secondary">
+            Last
+          </Badge>
+        ) : null}
       </Button>
     </div>
   );

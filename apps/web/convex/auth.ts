@@ -4,9 +4,20 @@ import { createClient, type GenericCtx } from "@convex-dev/better-auth";
 import { convex } from "@convex-dev/better-auth/plugins";
 import { render } from "@react-email/render";
 import { betterAuth } from "better-auth";
-import { emailOTP, twoFactor } from "better-auth/plugins";
+import {
+  admin,
+  emailOTP,
+  haveIBeenPwned,
+  lastLoginMethod,
+  twoFactor,
+} from "better-auth/plugins";
 import { Resend } from "resend";
 import { OTPEmail } from "../emails/otp-email";
+import {
+  FLIK_AUTH_ADMIN_ROLES,
+  flikAuthAccessControl,
+  flikAuthRoles,
+} from "../src/lib/auth-permissions";
 import { components } from "./_generated/api";
 import type { DataModel } from "./_generated/dataModel";
 import authConfig from "./auth.config";
@@ -54,6 +65,10 @@ function getOAuthProvider(
 }
 
 const convexSiteUrl = getRequiredEnv("CONVEX_SITE_URL");
+const adminUserIds =
+  process.env.BETTER_AUTH_ADMIN_USER_IDS?.split(",")
+    .map((id) => id.trim())
+    .filter(Boolean) ?? [];
 
 export const authComponent = createClient<DataModel>(components.betterAuth);
 
@@ -130,6 +145,20 @@ export const createAuth = (ctx: GenericCtx<DataModel>) => {
     },
     plugins: [
       convex({ authConfig }),
+      haveIBeenPwned({
+        enabled: process.env.NODE_ENV === "production",
+      }),
+      lastLoginMethod({
+        storeInDatabase: false,
+      }),
+      admin({
+        ac: flikAuthAccessControl,
+        adminRoles: FLIK_AUTH_ADMIN_ROLES,
+        adminUserIds,
+        defaultRole: "user",
+        impersonationSessionDuration: 60 * 60,
+        roles: flikAuthRoles,
+      }),
       emailOTP({
         async sendVerificationOTP({ email, otp, type }) {
           let subject = "Your Flik verification code";

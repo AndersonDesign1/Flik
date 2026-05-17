@@ -16,6 +16,7 @@ export function LoginForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const lastLoginMethod = authClient.getLastUsedLoginMethod();
 
   const getLoginErrorMessage = (message?: string) => {
     if (!message) {
@@ -117,6 +118,11 @@ export function LoginForm() {
             required
             value={password}
           />
+          {lastLoginMethod === "email" ? (
+            <p className="text-muted-foreground text-xs">
+              Last signed in with email.
+            </p>
+          ) : null}
         </div>
 
         <Button

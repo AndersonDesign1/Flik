@@ -35,6 +35,26 @@ function normalizeRole(role?: string | null): PlatformRole {
   return "user";
 }
 
+async function mirrorBetterAuthRole(
+  // TODO(auth-role-migration): replace this escape hatch after Convex codegen
+  // includes Better Auth Admin's role fields in the component adapter types.
+  // biome-ignore lint/suspicious/noExplicitAny: Component adapter generated types lag plugin schema generation here.
+  ctx: any,
+  userId: string,
+  role: PlatformRole
+) {
+  await ctx.runMutation(components.betterAuth.adapter.updateMany, {
+    input: {
+      model: "user",
+      update: {
+        role,
+        updatedAt: Date.now(),
+      },
+      where: [{ field: "_id", operator: "eq", value: userId }],
+    },
+  });
+}
+
 function splitName(fullName?: string | null) {
   const trimmed = fullName?.trim();
   if (!trimmed) {
@@ -724,8 +744,34 @@ export const updateUserRole = mutation({
       role: args.role,
       updatedAt: Date.now(),
     });
+    await mirrorBetterAuthRole(ctx, args.userId, args.role);
 
     return true;
+  },
+});
+
+export const syncMyBetterAuthRole = mutation({
+  args: {},
+  returns: v.union(
+    v.literal("user"),
+    v.literal("staff"),
+    v.literal("super_admin")
+  ),
+  handler: async (ctx) => {
+    const user = await authComponent.getAuthUser(ctx);
+    if (!user) {
+      throw new Error("Not authenticated");
+    }
+
+    const profile = await ctx.db
+      .query("profiles")
+      .withIndex("by_user_id", (q) => q.eq("userId", user._id))
+      .first();
+    const role = normalizeRole(profile?.role);
+
+    await mirrorBetterAuthRole(ctx, user._id, role);
+
+    return role;
   },
 });
 
@@ -841,6 +887,7 @@ export const promoteSelfToSuperAdmin = mutation({
       role: "super_admin",
       updatedAt: Date.now(),
     });
+    await mirrorBetterAuthRole(ctx, user._id, "super_admin");
 
     return true;
   },
