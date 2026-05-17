@@ -2,7 +2,7 @@
 
 import { useMutation } from "convex/react";
 import { Ban, KeyRound, RefreshCw, Search, Shield, Trash2 } from "lucide-react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import {
   AlertDialog,
@@ -146,8 +146,11 @@ export function AuthAdminConsole() {
   const [sessions, setSessions] = useState<AdminSession[]>([]);
   const [searchValue, setSearchValue] = useState("");
   const [loading, setLoading] = useState(false);
+  const [debouncedSearchValue, setDebouncedSearchValue] = useState("");
   const [confirmation, setConfirmation] = useState<Confirmation | null>(null);
   const [isConfirming, setIsConfirming] = useState(false);
+  const inFlightRef = useRef(false);
+  const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [createForm, setCreateForm] = useState({
     email: "",
     name: "",
@@ -164,17 +167,40 @@ export function AuthAdminConsole() {
     [selectedUserId, users]
   );
 
+  // Sync the admin's role once on mount so the admin API accepts our requests.
+  useEffect(() => {
+    void syncMyBetterAuthRole({});
+  }, [syncMyBetterAuthRole]);
+
+  // Debounce search input so we only fire once the user stops typing.
+  useEffect(() => {
+    if (debounceTimerRef.current !== null) {
+      clearTimeout(debounceTimerRef.current);
+    }
+    debounceTimerRef.current = setTimeout(() => {
+      setDebouncedSearchValue(searchValue);
+    }, 300);
+    return () => {
+      if (debounceTimerRef.current !== null) {
+        clearTimeout(debounceTimerRef.current);
+      }
+    };
+  }, [searchValue]);
+
   const refreshUsers = useCallback(async () => {
+    if (inFlightRef.current) {
+      return;
+    }
+    inFlightRef.current = true;
     setLoading(true);
     try {
-      await syncMyBetterAuthRole({});
       const result = await adminApi.listUsers({
         query: {
           limit: 100,
           offset: 0,
-          searchField: searchValue.trim() ? "email" : undefined,
-          searchOperator: searchValue.trim() ? "contains" : undefined,
-          searchValue: searchValue.trim() || undefined,
+          searchField: debouncedSearchValue.trim() ? "email" : undefined,
+          searchOperator: debouncedSearchValue.trim() ? "contains" : undefined,
+          searchValue: debouncedSearchValue.trim() || undefined,
           sortBy: "createdAt",
           sortDirection: "desc",
         },
@@ -190,8 +216,9 @@ export function AuthAdminConsole() {
       setSelectedUserId((current) => current ?? nextUsers[0]?.id ?? null);
     } finally {
       setLoading(false);
+      inFlightRef.current = false;
     }
-  }, [adminApi, searchValue, syncMyBetterAuthRole]);
+  }, [adminApi, debouncedSearchValue]);
 
   const refreshSessions = useCallback(
     async (userId = selectedUserId) => {
@@ -292,22 +319,18 @@ export function AuthAdminConsole() {
 
     ask({
       actionLabel: "Set role",
-      description: `Set ${selectedUser.email} to ${getRoleLabel(roleForm)}. This also mirrors the role to Convex profiles for current guards.`,
+      description: `Set ${selectedUser.email} to ${getRoleLabel(roleForm)}. This updates the Convex profile and mirrors the role to Better Auth.`,
       title: "Change this role?",
       run: async () => {
         await runAdminAction(
           async () => {
-            const result = await adminApi.setRole({
+            const success = await mirrorProfileRole({
               role: roleForm,
               userId: selectedUser.id,
             });
-            if (!result.error) {
-              await mirrorProfileRole({
-                role: roleForm,
-                userId: selectedUser.id,
-              });
-            }
-            return result;
+            return success
+              ? undefined
+              : { error: { message: "Failed to update role" } };
           },
           "Role updated",
           selectedUser.id

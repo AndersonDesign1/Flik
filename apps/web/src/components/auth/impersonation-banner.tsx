@@ -31,7 +31,6 @@ export function ImpersonationBanner() {
       }
 
       toast.success("Returned to your admin session");
-      router.push("/super-admin/admins");
       router.refresh();
     } finally {
       setIsStopping(false);
