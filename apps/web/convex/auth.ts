@@ -4,20 +4,9 @@ import { createClient, type GenericCtx } from "@convex-dev/better-auth";
 import { convex } from "@convex-dev/better-auth/plugins";
 import { render } from "@react-email/render";
 import { betterAuth, type BetterAuthOptions } from "better-auth";
-import {
-  admin,
-  emailOTP,
-  haveIBeenPwned,
-  lastLoginMethod,
-  twoFactor,
-} from "better-auth/plugins";
+import { getSharedAuthPlugins } from "./betterAuth/shared-plugins";
 import { Resend } from "resend";
 import { OTPEmail } from "../emails/otp-email";
-import {
-  FLIK_AUTH_ADMIN_ROLES,
-  flikAuthAccessControl,
-  flikAuthRoles,
-} from "../src/lib/auth-permissions";
 import { components } from "./_generated/api";
 import type { DataModel } from "./_generated/dataModel";
 import authConfig from "./auth.config";
@@ -142,6 +131,7 @@ export const createAuthOptions = (
       "https://flikapp.xyz",
       "https://www.flikapp.xyz",
       convexSiteUrl,
+      ...(process.env.SITE_URL ? [process.env.SITE_URL] : []),
     ],
     emailAndPassword: {
       enabled: true,
@@ -155,21 +145,10 @@ export const createAuthOptions = (
     },
     plugins: [
       convex({ authConfig }),
-      haveIBeenPwned({
-        enabled: process.env.NODE_ENV === "production",
-      }),
-      lastLoginMethod({
-        storeInDatabase: false,
-      }),
-      admin({
-        ac: flikAuthAccessControl,
-        adminRoles: FLIK_AUTH_ADMIN_ROLES,
+      ...getSharedAuthPlugins({
+        haveIBeenPwnedEnabled: process.env.NODE_ENV === "production",
         adminUserIds,
-        defaultRole: "user",
         impersonationSessionDuration: 60 * 60,
-        roles: flikAuthRoles,
-      }),
-      emailOTP({
         async sendVerificationOTP({ email, otp, type }) {
           let subject = "Your Flik verification code";
           if (type === "email-verification") {
@@ -179,17 +158,13 @@ export const createAuthOptions = (
           }
           await sendEmailWithResend(email, subject, otp);
         },
-      }),
-      twoFactor({
-        otpOptions: {
-          async sendOTP({ user, otp }) {
-            await sendEmailWithResend(
-              user.email,
-              "Your Flik verification code",
-              otp,
-              user.name
-            );
-          },
+        async sendTwoFactorOTP({ user, otp }) {
+          await sendEmailWithResend(
+            user.email,
+            "Your Flik verification code",
+            otp,
+            user.name
+          );
         },
       }),
     ],
