@@ -3,24 +3,14 @@
 import { createClient, type GenericCtx } from "@convex-dev/better-auth";
 import { convex } from "@convex-dev/better-auth/plugins";
 import { render } from "@react-email/render";
-import { betterAuth } from "better-auth";
-import {
-  admin,
-  emailOTP,
-  haveIBeenPwned,
-  lastLoginMethod,
-  twoFactor,
-} from "better-auth/plugins";
+import { betterAuth, type BetterAuthOptions } from "better-auth";
+import { getSharedAuthPlugins } from "./betterAuth/shared-plugins";
 import { Resend } from "resend";
 import { OTPEmail } from "../emails/otp-email";
-import {
-  FLIK_AUTH_ADMIN_ROLES,
-  flikAuthAccessControl,
-  flikAuthRoles,
-} from "../src/lib/auth-permissions";
 import { components } from "./_generated/api";
 import type { DataModel } from "./_generated/dataModel";
 import authConfig from "./auth.config";
+import authSchema from "./betterAuth/schema";
 
 function getRequiredEnv(name: string): string {
   const value = process.env[name];
@@ -64,46 +54,55 @@ function getOAuthProvider(
   return { clientId, clientSecret };
 }
 
-const convexSiteUrl = getRequiredEnv("CONVEX_SITE_URL");
-const adminUserIds =
-  process.env.BETTER_AUTH_ADMIN_USER_IDS?.split(",")
-    .map((id) => id.trim())
-    .filter(Boolean) ?? [];
-
-export const authComponent = createClient<DataModel>(components.betterAuth);
-
-// Initialize Resend SDK
-const resend = new Resend(getRequiredEnv("RESEND_API_KEY"));
-const FROM_EMAIL = "Flik <noreply@notification.flikapp.xyz>";
-
-/**
- * Send email using Resend SDK with React Email templates
- */
-async function sendEmailWithResend(
-  to: string,
-  subject: string,
-  otp: string,
-  userName?: string
-): Promise<void> {
-  // Render React Email template to HTML
-  const html = await render(OTPEmail({ otp, userName }));
-
-  const { error } = await resend.emails.send({
-    from: FROM_EMAIL,
-    to: [to],
-    subject,
-    html,
-  });
-
-  if (error) {
-    console.error("Failed to send email:", error);
-    throw new Error(
-      "Failed to send verification email. Please try again later."
-    );
+export const authComponent = createClient<DataModel, typeof authSchema>(
+  components.betterAuth,
+  {
+    local: {
+      schema: authSchema,
+    },
   }
-}
+);
 
-export const createAuth = (ctx: GenericCtx<DataModel>) => {
+export const createAuthOptions = (
+  ctx: GenericCtx<DataModel>
+): BetterAuthOptions => {
+  const convexSiteUrl = getRequiredEnv("CONVEX_SITE_URL");
+  const adminUserIds =
+    process.env.BETTER_AUTH_ADMIN_USER_IDS?.split(",")
+      .map((id) => id.trim())
+      .filter(Boolean) ?? [];
+
+  // Initialize Resend SDK
+  const resend = new Resend(getRequiredEnv("RESEND_API_KEY"));
+  const FROM_EMAIL = "Flik <noreply@notification.flikapp.xyz>";
+
+  /**
+   * Send email using Resend SDK with React Email templates
+   */
+  async function sendEmailWithResend(
+    to: string,
+    subject: string,
+    otp: string,
+    userName?: string
+  ): Promise<void> {
+    // Render React Email template to HTML
+    const html = await render(OTPEmail({ otp, userName }));
+
+    const { error } = await resend.emails.send({
+      from: FROM_EMAIL,
+      to: [to],
+      subject,
+      html,
+    });
+
+    if (error) {
+      console.error("Failed to send email:", error);
+      throw new Error(
+        "Failed to send verification email. Please try again later."
+      );
+    }
+  }
+
   const googleProvider = getOAuthProvider(
     "google",
     "GOOGLE_CLIENT_ID",
@@ -115,7 +114,7 @@ export const createAuth = (ctx: GenericCtx<DataModel>) => {
     "GITHUB_CLIENT_SECRET"
   );
 
-  return betterAuth({
+  return {
     appName: "Flik",
     baseURL: process.env.BETTER_AUTH_URL ?? convexSiteUrl,
     database: authComponent.adapter(ctx),
@@ -132,6 +131,7 @@ export const createAuth = (ctx: GenericCtx<DataModel>) => {
       "https://flikapp.xyz",
       "https://www.flikapp.xyz",
       convexSiteUrl,
+      ...(process.env.SITE_URL ? [process.env.SITE_URL] : []),
     ],
     emailAndPassword: {
       enabled: true,
@@ -145,21 +145,10 @@ export const createAuth = (ctx: GenericCtx<DataModel>) => {
     },
     plugins: [
       convex({ authConfig }),
-      haveIBeenPwned({
-        enabled: process.env.NODE_ENV === "production",
-      }),
-      lastLoginMethod({
-        storeInDatabase: false,
-      }),
-      admin({
-        ac: flikAuthAccessControl,
-        adminRoles: FLIK_AUTH_ADMIN_ROLES,
+      ...getSharedAuthPlugins({
+        haveIBeenPwnedEnabled: process.env.NODE_ENV === "production",
         adminUserIds,
-        defaultRole: "user",
         impersonationSessionDuration: 60 * 60,
-        roles: flikAuthRoles,
-      }),
-      emailOTP({
         async sendVerificationOTP({ email, otp, type }) {
           let subject = "Your Flik verification code";
           if (type === "email-verification") {
@@ -169,19 +158,19 @@ export const createAuth = (ctx: GenericCtx<DataModel>) => {
           }
           await sendEmailWithResend(email, subject, otp);
         },
-      }),
-      twoFactor({
-        otpOptions: {
-          async sendOTP({ user, otp }) {
-            await sendEmailWithResend(
-              user.email,
-              "Your Flik verification code",
-              otp,
-              user.name
-            );
-          },
+        async sendTwoFactorOTP({ user, otp }) {
+          await sendEmailWithResend(
+            user.email,
+            "Your Flik verification code",
+            otp,
+            user.name
+          );
         },
       }),
     ],
-  });
+  };
+};
+
+export const createAuth = (ctx: GenericCtx<DataModel>) => {
+  return betterAuth(createAuthOptions(ctx));
 };
