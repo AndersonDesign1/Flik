@@ -18,7 +18,7 @@ interface SharedPluginsOpts {
   sendVerificationOTP?: (params: {
     email: string;
     otp: string;
-    type: "email-verification" | "forget-password";
+    type: "sign-in" | "email-verification" | "forget-password" | "change-email";
   }) => Promise<void>;
   sendTwoFactorOTP?: (params: {
     user: { email: string; name?: string };
