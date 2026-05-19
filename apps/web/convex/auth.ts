@@ -3,7 +3,7 @@
 import { createClient, type GenericCtx } from "@convex-dev/better-auth";
 import { convex } from "@convex-dev/better-auth/plugins";
 import { render } from "@react-email/render";
-import { betterAuth } from "better-auth";
+import { betterAuth, type BetterAuthOptions } from "better-auth";
 import {
   admin,
   emailOTP,
@@ -21,6 +21,7 @@ import {
 import { components } from "./_generated/api";
 import type { DataModel } from "./_generated/dataModel";
 import authConfig from "./auth.config";
+import authSchema from "./betterAuth/schema";
 
 function getRequiredEnv(name: string): string {
   const value = process.env[name];
@@ -64,46 +65,55 @@ function getOAuthProvider(
   return { clientId, clientSecret };
 }
 
-const convexSiteUrl = getRequiredEnv("CONVEX_SITE_URL");
-const adminUserIds =
-  process.env.BETTER_AUTH_ADMIN_USER_IDS?.split(",")
-    .map((id) => id.trim())
-    .filter(Boolean) ?? [];
-
-export const authComponent = createClient<DataModel>(components.betterAuth);
-
-// Initialize Resend SDK
-const resend = new Resend(getRequiredEnv("RESEND_API_KEY"));
-const FROM_EMAIL = "Flik <noreply@notification.flikapp.xyz>";
-
-/**
- * Send email using Resend SDK with React Email templates
- */
-async function sendEmailWithResend(
-  to: string,
-  subject: string,
-  otp: string,
-  userName?: string
-): Promise<void> {
-  // Render React Email template to HTML
-  const html = await render(OTPEmail({ otp, userName }));
-
-  const { error } = await resend.emails.send({
-    from: FROM_EMAIL,
-    to: [to],
-    subject,
-    html,
-  });
-
-  if (error) {
-    console.error("Failed to send email:", error);
-    throw new Error(
-      "Failed to send verification email. Please try again later."
-    );
+export const authComponent = createClient<DataModel, typeof authSchema>(
+  components.betterAuth,
+  {
+    local: {
+      schema: authSchema,
+    },
   }
-}
+);
 
-export const createAuth = (ctx: GenericCtx<DataModel>) => {
+export const createAuthOptions = (
+  ctx: GenericCtx<DataModel>
+): BetterAuthOptions => {
+  const convexSiteUrl = getRequiredEnv("CONVEX_SITE_URL");
+  const adminUserIds =
+    process.env.BETTER_AUTH_ADMIN_USER_IDS?.split(",")
+      .map((id) => id.trim())
+      .filter(Boolean) ?? [];
+
+  // Initialize Resend SDK
+  const resend = new Resend(getRequiredEnv("RESEND_API_KEY"));
+  const FROM_EMAIL = "Flik <noreply@notification.flikapp.xyz>";
+
+  /**
+   * Send email using Resend SDK with React Email templates
+   */
+  async function sendEmailWithResend(
+    to: string,
+    subject: string,
+    otp: string,
+    userName?: string
+  ): Promise<void> {
+    // Render React Email template to HTML
+    const html = await render(OTPEmail({ otp, userName }));
+
+    const { error } = await resend.emails.send({
+      from: FROM_EMAIL,
+      to: [to],
+      subject,
+      html,
+    });
+
+    if (error) {
+      console.error("Failed to send email:", error);
+      throw new Error(
+        "Failed to send verification email. Please try again later."
+      );
+    }
+  }
+
   const googleProvider = getOAuthProvider(
     "google",
     "GOOGLE_CLIENT_ID",
@@ -115,7 +125,7 @@ export const createAuth = (ctx: GenericCtx<DataModel>) => {
     "GITHUB_CLIENT_SECRET"
   );
 
-  return betterAuth({
+  return {
     appName: "Flik",
     baseURL: process.env.BETTER_AUTH_URL ?? convexSiteUrl,
     database: authComponent.adapter(ctx),
@@ -183,5 +193,9 @@ export const createAuth = (ctx: GenericCtx<DataModel>) => {
         },
       }),
     ],
-  });
+  };
+};
+
+export const createAuth = (ctx: GenericCtx<DataModel>) => {
+  return betterAuth(createAuthOptions(ctx));
 };
