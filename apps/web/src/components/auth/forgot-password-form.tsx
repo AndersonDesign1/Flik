@@ -1,6 +1,5 @@
 "use client";
 
-import { useConvex } from "convex/react";
 import { REGEXP_ONLY_DIGITS } from "input-otp";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
@@ -16,13 +15,11 @@ import {
 } from "@/components/ui/input-otp";
 import { Label } from "@/components/ui/label";
 import { authClient } from "@/lib/auth-client";
-import { api } from "../../../convex/_generated/api";
 
 type Step = "email" | "otp" | "password";
 
 export function ForgotPasswordForm() {
   const router = useRouter();
-  const convex = useConvex();
   const [step, setStep] = useState<Step>("email");
   const [email, setEmail] = useState("");
   const [otp, setOtp] = useState("");
@@ -36,15 +33,6 @@ export function ForgotPasswordForm() {
 
     try {
       const normalizedEmail = email.trim().toLowerCase();
-      const hasAccount = await convex.query(api.users.checkEmailExists, {
-        email: normalizedEmail,
-      });
-
-      if (!hasAccount) {
-        toast.error("No account found for this email. Sign up first.");
-        return;
-      }
-
       const result = await authClient.forgetPassword.emailOtp({
         email: normalizedEmail,
       });
@@ -54,7 +42,7 @@ export function ForgotPasswordForm() {
         return;
       }
 
-      toast.success("Code sent to your email!");
+      toast.success("If an account exists, a code has been sent.");
       setStep("otp");
     } catch {
       toast.error("Failed to send code");
@@ -77,16 +65,6 @@ export function ForgotPasswordForm() {
 
     try {
       const normalizedEmail = email.trim().toLowerCase();
-      const hasAccount = await convex.query(api.users.checkEmailExists, {
-        email: normalizedEmail,
-      });
-
-      if (!hasAccount) {
-        toast.error("No account found for this email. Sign up first.");
-        setStep("email");
-        return;
-      }
-
       const result = await authClient.forgetPassword.emailOtp({
         email: normalizedEmail,
       });
@@ -96,7 +74,7 @@ export function ForgotPasswordForm() {
         return;
       }
 
-      toast.success("A new code has been sent.");
+      toast.success("If an account exists, a new code has been sent.");
       setOtp("");
     } catch {
       toast.error("Failed to resend code");

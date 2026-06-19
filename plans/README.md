@@ -20,9 +20,9 @@ Repo facts every plan relies on (verified during recon):
 | 001 | Establish a test baseline + cover role/validation logic | P1 | M | — | DONE |
 | 002 | Consolidate duplicated directory/pagination helpers | P1 | M | 001 | DONE |
 | 003 | Eliminate N+1 user lookups in admin/staff queries | P2 | M | 001, 002 | DONE |
-| 004 | Delete stale duplicate `dashboard` route files | P2 | S | — | TODO |
-| 005 | Stop disclosing account existence in password reset | P2 | S | — | TODO |
-| 006 | Remove the orphaned legacy-role migration mutation | P3 | S | — | TODO |
+| 004 | Delete stale duplicate `dashboard` route files | P2 | S | — | DONE |
+| 005 | Stop disclosing account existence in password reset | P2 | S | — | DONE |
+| 006 | Remove the orphaned legacy-role migration mutation | P3 | S | — | DONE |
 | 007 | Design spike — orders/transactions model + checkout | P3 | L | — | TODO |
 
 Status values: TODO | IN PROGRESS | DONE | BLOCKED (one-line reason) | REJECTED
