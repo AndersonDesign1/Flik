@@ -1,5 +1,4 @@
 import { v } from "convex/values";
-import { components } from "./_generated/api";
 import { query } from "./_generated/server";
 import { authComponent } from "./auth";
 
@@ -31,27 +30,5 @@ export const getCurrentUser = query({
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
     };
-  },
-});
-
-export const checkEmailExists = query({
-  args: {
-    email: v.string(),
-  },
-  returns: v.boolean(),
-  handler: async (ctx, args) => {
-    const email = args.email.trim().toLowerCase();
-    const user = await ctx.runQuery(components.betterAuth.adapter.findOne, {
-      model: "user",
-      where: [
-        {
-          field: "email",
-          operator: "eq",
-          value: email,
-        },
-      ],
-    });
-
-    return user !== null;
   },
 });

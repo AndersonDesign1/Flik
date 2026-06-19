@@ -2,38 +2,16 @@ import { v } from "convex/values";
 import { components } from "./_generated/api";
 import { mutation, query } from "./_generated/server";
 import { authComponent } from "./auth";
+import { collectAllAuthUsers } from "./lib/directory";
+import {
+  canManageUsers,
+  getRoleLevel,
+  normalizeRole,
+  type PlatformRole,
+} from "./lib/roles";
 import { inviteToRoleSchema, updateProfileSchema } from "./validation";
 
 const WHITESPACE_REGEX = /\s+/;
-const roleHierarchy = {
-  user: 0,
-  staff: 1,
-  super_admin: 2,
-} as const;
-
-type PlatformRole = keyof typeof roleHierarchy;
-
-function getRoleLevel(role?: string): number {
-  const normalizedRole = normalizeRole(role);
-  return roleHierarchy[normalizedRole] ?? 0;
-}
-
-function canManageUsers(role?: string): boolean {
-  const normalizedRole = normalizeRole(role);
-  return normalizedRole === "staff" || normalizedRole === "super_admin";
-}
-
-function normalizeRole(role?: string | null): PlatformRole {
-  if (role === "admin") {
-    return "staff";
-  }
-
-  if (role === "staff" || role === "super_admin") {
-    return role;
-  }
-
-  return "user";
-}
 
 async function mirrorBetterAuthRole(
   // TODO(auth-role-migration): replace this escape hatch after Convex codegen
@@ -74,59 +52,12 @@ interface DirectoryProfile {
   userId: string;
 }
 
-interface DirectoryUser {
-  _id: string;
-  createdAt?: number;
-  email: string;
-  name?: string;
-}
-
-interface PaginatedUsersResponse {
-  continueCursor: string | null;
-  page: DirectoryUser[];
-}
-
 interface DirectoryUserSummary {
   _id: string;
   createdAt: number;
   email: string;
   name?: string;
   role: PlatformRole;
-}
-
-function isDirectoryUser(value: unknown): value is DirectoryUser {
-  if (typeof value !== "object" || value === null) {
-    return false;
-  }
-
-  const candidate = value as Record<string, unknown>;
-  return (
-    typeof candidate._id === "string" &&
-    typeof candidate.email === "string" &&
-    (candidate.name === undefined || typeof candidate.name === "string") &&
-    (candidate.createdAt === undefined ||
-      typeof candidate.createdAt === "number")
-  );
-}
-
-function parsePaginatedUsersResponse(value: unknown): PaginatedUsersResponse {
-  if (typeof value !== "object" || value === null) {
-    throw new Error("Invalid Better Auth user page response");
-  }
-
-  const candidate = value as Record<string, unknown>;
-  const page = candidate.page;
-  const continueCursor = candidate.continueCursor;
-
-  if (!(Array.isArray(page) && page.every(isDirectoryUser))) {
-    throw new Error("Better Auth user page payload is malformed");
-  }
-
-  if (!(continueCursor === null || typeof continueCursor === "string")) {
-    throw new Error("Better Auth pagination cursor is malformed");
-  }
-
-  return { continueCursor, page };
 }
 
 export const getProfile = query({
@@ -205,44 +136,10 @@ export const getAllUsers = query({
     }
 
     const profiles = await ctx.db.query("profiles").collect();
-    const authUsers: DirectoryUser[] = [];
-    const pageSize = 5000;
-    const maxIterations = 100;
-    let cursor: string | null = null;
-    let iteration = 0;
-
-    while (true) {
-      iteration += 1;
-      if (iteration > maxIterations) {
-        throw new Error(
-          "Exceeded Better Auth pagination safeguard while loading users"
-        );
-      }
-
-      const rawResponse = await ctx.runQuery(
-        components.betterAuth.adapter.findMany,
-        {
-          model: "user",
-          paginationOpts: {
-            cursor,
-            numItems: pageSize,
-          },
-          sortBy: {
-            direction: "desc",
-            field: "createdAt",
-          },
-        }
-      );
-      const response = parsePaginatedUsersResponse(rawResponse);
-
-      authUsers.push(...response.page);
-
-      if (!response.continueCursor) {
-        break;
-      }
-
-      cursor = response.continueCursor;
-    }
+    const authUsers = await collectAllAuthUsers(
+      ctx,
+      (message) => new Error(message)
+    );
 
     const profileByUserId = new Map(
       profiles.map((entry) => [entry.userId, entry] as const)
@@ -772,65 +669,6 @@ export const syncMyBetterAuthRole = mutation({
     await mirrorBetterAuthRole(ctx, user._id, role);
 
     return role;
-  },
-});
-
-export const normalizeLegacyAdminRoleData = mutation({
-  args: {},
-  returns: v.object({
-    invitesUpdated: v.number(),
-    profilesUpdated: v.number(),
-  }),
-  handler: async (ctx) => {
-    const actor = await authComponent.getAuthUser(ctx);
-    if (!actor) {
-      throw new Error("Not authenticated");
-    }
-
-    const actorProfile = await ctx.db
-      .query("profiles")
-      .withIndex("by_user_id", (q) => q.eq("userId", actor._id))
-      .first();
-
-    if (normalizeRole(actorProfile?.role) !== "super_admin") {
-      throw new Error("Only super admins can normalize legacy operator roles");
-    }
-
-    const [profiles, invites] = await Promise.all([
-      ctx.db.query("profiles").collect(),
-      ctx.db.query("role_invites").collect(),
-    ]);
-
-    const now = Date.now();
-    const legacyProfiles = profiles.filter(
-      (profile) => (profile.role as string | undefined) === "admin"
-    );
-    const legacyInvites = invites.filter(
-      (invite) => (invite.role as string | undefined) === "admin"
-    );
-
-    await Promise.all(
-      legacyProfiles.map((profile) =>
-        ctx.db.patch(profile._id, {
-          role: "staff",
-          updatedAt: now,
-        })
-      )
-    );
-
-    await Promise.all(
-      legacyInvites.map((invite) =>
-        ctx.db.patch(invite._id, {
-          role: "staff",
-          updatedAt: now,
-        })
-      )
-    );
-
-    return {
-      invitesUpdated: legacyInvites.length,
-      profilesUpdated: legacyProfiles.length,
-    };
   },
 });
 
