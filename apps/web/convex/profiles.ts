@@ -2,6 +2,7 @@ import { v } from "convex/values";
 import { components } from "./_generated/api";
 import { mutation, query } from "./_generated/server";
 import { authComponent } from "./auth";
+import { collectAllAuthUsers } from "./lib/directory";
 import {
   canManageUsers,
   getRoleLevel,
@@ -51,59 +52,12 @@ interface DirectoryProfile {
   userId: string;
 }
 
-interface DirectoryUser {
-  _id: string;
-  createdAt?: number;
-  email: string;
-  name?: string;
-}
-
-interface PaginatedUsersResponse {
-  continueCursor: string | null;
-  page: DirectoryUser[];
-}
-
 interface DirectoryUserSummary {
   _id: string;
   createdAt: number;
   email: string;
   name?: string;
   role: PlatformRole;
-}
-
-function isDirectoryUser(value: unknown): value is DirectoryUser {
-  if (typeof value !== "object" || value === null) {
-    return false;
-  }
-
-  const candidate = value as Record<string, unknown>;
-  return (
-    typeof candidate._id === "string" &&
-    typeof candidate.email === "string" &&
-    (candidate.name === undefined || typeof candidate.name === "string") &&
-    (candidate.createdAt === undefined ||
-      typeof candidate.createdAt === "number")
-  );
-}
-
-function parsePaginatedUsersResponse(value: unknown): PaginatedUsersResponse {
-  if (typeof value !== "object" || value === null) {
-    throw new Error("Invalid Better Auth user page response");
-  }
-
-  const candidate = value as Record<string, unknown>;
-  const page = candidate.page;
-  const continueCursor = candidate.continueCursor;
-
-  if (!(Array.isArray(page) && page.every(isDirectoryUser))) {
-    throw new Error("Better Auth user page payload is malformed");
-  }
-
-  if (!(continueCursor === null || typeof continueCursor === "string")) {
-    throw new Error("Better Auth pagination cursor is malformed");
-  }
-
-  return { continueCursor, page };
 }
 
 export const getProfile = query({
@@ -182,44 +136,10 @@ export const getAllUsers = query({
     }
 
     const profiles = await ctx.db.query("profiles").collect();
-    const authUsers: DirectoryUser[] = [];
-    const pageSize = 5000;
-    const maxIterations = 100;
-    let cursor: string | null = null;
-    let iteration = 0;
-
-    while (true) {
-      iteration += 1;
-      if (iteration > maxIterations) {
-        throw new Error(
-          "Exceeded Better Auth pagination safeguard while loading users"
-        );
-      }
-
-      const rawResponse = await ctx.runQuery(
-        components.betterAuth.adapter.findMany,
-        {
-          model: "user",
-          paginationOpts: {
-            cursor,
-            numItems: pageSize,
-          },
-          sortBy: {
-            direction: "desc",
-            field: "createdAt",
-          },
-        }
-      );
-      const response = parsePaginatedUsersResponse(rawResponse);
-
-      authUsers.push(...response.page);
-
-      if (!response.continueCursor) {
-        break;
-      }
-
-      cursor = response.continueCursor;
-    }
+    const authUsers = await collectAllAuthUsers(
+      ctx,
+      (message) => new Error(message)
+    );
 
     const profileByUserId = new Map(
       profiles.map((entry) => [entry.userId, entry] as const)

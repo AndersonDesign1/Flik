@@ -1,8 +1,8 @@
 import { ConvexError, v } from "convex/values";
-import { components } from "./_generated/api";
 import type { QueryCtx } from "./_generated/server";
 import { query } from "./_generated/server";
 import { authComponent } from "./auth";
+import { collectAllAuthUsers } from "./lib/directory";
 import { normalizeRole } from "./lib/roles";
 
 const ROLE_VALIDATOR = v.union(
@@ -40,18 +40,6 @@ interface DirectoryStore {
   ownerId: string;
   slug: string;
   status: "draft" | "active";
-}
-
-interface DirectoryUser {
-  _id: string;
-  createdAt?: number;
-  email: string;
-  name?: string;
-}
-
-interface PaginatedUsersResponse {
-  continueCursor: string | null;
-  page: DirectoryUser[];
 }
 
 interface DirectoryPerson {
@@ -113,105 +101,15 @@ function requireOperator(role?: string) {
   }
 }
 
-function isDirectoryUser(value: unknown): value is DirectoryUser {
-  if (typeof value !== "object" || value === null) {
-    return false;
-  }
-
-  const candidate = value as Record<string, unknown>;
-  return (
-    typeof candidate._id === "string" &&
-    typeof candidate.email === "string" &&
-    (candidate.name === undefined || typeof candidate.name === "string") &&
-    (candidate.createdAt === undefined ||
-      typeof candidate.createdAt === "number")
-  );
-}
-
-function parsePaginatedUsersResponse(value: unknown): PaginatedUsersResponse {
-  if (typeof value !== "object" || value === null) {
-    throw new ConvexError({
-      code: "INTERNAL_ERROR",
-      message: "Invalid Better Auth user page response.",
-    });
-  }
-
-  const candidate = value as Record<string, unknown>;
-  const page = candidate.page;
-  const continueCursor = candidate.continueCursor;
-
-  if (!(Array.isArray(page) && page.every(isDirectoryUser))) {
-    throw new ConvexError({
-      code: "INTERNAL_ERROR",
-      message: "Better Auth user page payload is malformed.",
-    });
-  }
-
-  if (!(continueCursor === null || typeof continueCursor === "string")) {
-    throw new ConvexError({
-      code: "INTERNAL_ERROR",
-      message: "Better Auth pagination cursor is malformed.",
-    });
-  }
-
-  return { continueCursor, page };
-}
-
-async function getAuthUsers(
-  ctx: QueryCtx,
-  {
-    cursor = null,
-    pageSize = 5000,
-  }: { cursor?: string | null; pageSize?: number }
-) {
-  const response = await ctx.runQuery(components.betterAuth.adapter.findMany, {
-    model: "user",
-    paginationOpts: {
-      cursor,
-      numItems: pageSize,
-    },
-    sortBy: {
-      direction: "desc",
-      field: "createdAt",
-    },
-  });
-
-  return parsePaginatedUsersResponse(response);
-}
-
 async function buildDirectoryPeople(
   ctx: QueryCtx,
   profiles: DirectoryProfile[],
   stores: DirectoryStore[]
 ) {
-  const pageSize = 5000;
-  const maxIterations = 100;
-  const users: DirectoryUser[] = [];
-  let cursor: string | null = null;
-  let iteration = 0;
-
-  while (true) {
-    iteration += 1;
-    if (iteration > maxIterations) {
-      throw new ConvexError({
-        code: "INTERNAL_ERROR",
-        message:
-          "Exceeded Better Auth pagination safeguard while loading users.",
-      });
-    }
-
-    const response = await getAuthUsers(ctx, {
-      cursor,
-      pageSize,
-    });
-    users.push(...response.page);
-
-    if (!response.continueCursor) {
-      break;
-    }
-
-    cursor = response.continueCursor;
-  }
+  const users = await collectAllAuthUsers(
+    ctx,
+    (message) => new ConvexError({ code: "INTERNAL_ERROR", message })
+  );
 
   const profileByUserId = new Map(
     profiles.map((entry) => [entry.userId, entry] as const)
