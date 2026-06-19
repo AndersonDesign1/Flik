@@ -30,7 +30,9 @@ export async function sendEmailWithResend(
   });
 
   if (error) {
-    console.error("Failed to send email:", error);
+    // Avoid logging the raw provider error object — it can carry delivery
+    // metadata (recipient address, provider internals) into logs.
+    console.error("Failed to send verification email via email provider");
     throw new Error(
       "Failed to send verification email. Please try again later."
     );

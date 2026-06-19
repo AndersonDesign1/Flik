@@ -38,13 +38,13 @@ function getOAuthProvider(
   provider: "google" | "github",
   clientIdEnv: string,
   clientSecretEnv: string,
-  forSchemaGeneration?: boolean
+  forAdapterInit?: boolean
 ): OAuthProviderConfig | undefined {
   const clientId = getOAuthEnv(clientIdEnv);
   const clientSecret = getOAuthEnv(clientSecretEnv);
 
   if (!(clientId || clientSecret)) {
-    if (!forSchemaGeneration) {
+    if (!forAdapterInit) {
       console.warn(
         `[Auth Warning] ${provider} OAuth is disabled because ${clientIdEnv} and ${clientSecretEnv} are not set.`
       );
@@ -53,7 +53,7 @@ function getOAuthProvider(
   }
 
   if (!(clientId && clientSecret)) {
-    if (forSchemaGeneration) {
+    if (forAdapterInit) {
       return undefined;
     }
     throw new Error(
@@ -65,7 +65,7 @@ function getOAuthProvider(
 }
 
 type CreateAuthOptionsConfig = {
-  forSchemaGeneration?: boolean;
+  forAdapterInit?: boolean;
 };
 
 export function createAuthOptions(
@@ -73,8 +73,8 @@ export function createAuthOptions(
   database: BetterAuthOptions["database"],
   config: CreateAuthOptionsConfig = {}
 ): BetterAuthOptions {
-  const { forSchemaGeneration = false } = config;
-  const convexSiteUrl = forSchemaGeneration
+  const { forAdapterInit = false } = config;
+  const convexSiteUrl = forAdapterInit
     ? "https://placeholder.convex.site"
     : getRequiredEnv("CONVEX_SITE_URL");
   const adminUserIds =
@@ -86,13 +86,13 @@ export function createAuthOptions(
     "google",
     "GOOGLE_CLIENT_ID",
     "GOOGLE_CLIENT_SECRET",
-    forSchemaGeneration
+    forAdapterInit
   );
   const githubProvider = getOAuthProvider(
     "github",
     "GITHUB_CLIENT_ID",
     "GITHUB_CLIENT_SECRET",
-    forSchemaGeneration
+    forAdapterInit
   );
 
   return {
@@ -125,9 +125,7 @@ export function createAuthOptions(
     plugins: [
       convex({ authConfig }),
       haveIBeenPwned({
-        enabled: forSchemaGeneration
-          ? false
-          : process.env.NODE_ENV === "production",
+        enabled: forAdapterInit ? false : process.env.NODE_ENV === "production",
       }),
       lastLoginMethod({
         storeInDatabase: false,

@@ -35,8 +35,14 @@ describe("updateProfileSchema", () => {
     ).toThrow();
   });
   test("rejects more than 10 offer types", () => {
+    const tenOfferTypes = new Array(10).fill("x");
+    // Boundary control: exactly 10 is allowed, so a failure on 11 proves the
+    // length rule rather than some other constraint on the "x" value.
     expect(() =>
-      updateProfileSchema.parse({ offerTypes: new Array(11).fill("x") })
+      updateProfileSchema.parse({ offerTypes: tenOfferTypes })
+    ).not.toThrow();
+    expect(() =>
+      updateProfileSchema.parse({ offerTypes: [...tenOfferTypes, "x"] })
     ).toThrow();
   });
 });

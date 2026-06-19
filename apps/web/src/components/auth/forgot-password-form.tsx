@@ -18,6 +18,10 @@ import { authClient } from "@/lib/auth-client";
 
 type Step = "email" | "otp" | "password";
 
+// Keep the pre-OTP error generic so a provider error (e.g. "user not found")
+// can't be used to probe whether an account exists.
+const GENERIC_SEND_CODE_ERROR = "Unable to send a code. Please try again.";
+
 export function ForgotPasswordForm() {
   const router = useRouter();
   const [step, setStep] = useState<Step>("email");
@@ -38,7 +42,7 @@ export function ForgotPasswordForm() {
       });
 
       if (result.error) {
-        toast.error(result.error.message ?? "Failed to send code");
+        toast.error(GENERIC_SEND_CODE_ERROR);
         return;
       }
 
@@ -70,7 +74,7 @@ export function ForgotPasswordForm() {
       });
 
       if (result.error) {
-        toast.error(result.error.message ?? "Failed to resend code");
+        toast.error(GENERIC_SEND_CODE_ERROR);
         return;
       }
 
