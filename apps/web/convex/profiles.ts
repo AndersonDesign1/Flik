@@ -672,65 +672,6 @@ export const syncMyBetterAuthRole = mutation({
   },
 });
 
-export const normalizeLegacyAdminRoleData = mutation({
-  args: {},
-  returns: v.object({
-    invitesUpdated: v.number(),
-    profilesUpdated: v.number(),
-  }),
-  handler: async (ctx) => {
-    const actor = await authComponent.getAuthUser(ctx);
-    if (!actor) {
-      throw new Error("Not authenticated");
-    }
-
-    const actorProfile = await ctx.db
-      .query("profiles")
-      .withIndex("by_user_id", (q) => q.eq("userId", actor._id))
-      .first();
-
-    if (normalizeRole(actorProfile?.role) !== "super_admin") {
-      throw new Error("Only super admins can normalize legacy operator roles");
-    }
-
-    const [profiles, invites] = await Promise.all([
-      ctx.db.query("profiles").collect(),
-      ctx.db.query("role_invites").collect(),
-    ]);
-
-    const now = Date.now();
-    const legacyProfiles = profiles.filter(
-      (profile) => (profile.role as string | undefined) === "admin"
-    );
-    const legacyInvites = invites.filter(
-      (invite) => (invite.role as string | undefined) === "admin"
-    );
-
-    await Promise.all(
-      legacyProfiles.map((profile) =>
-        ctx.db.patch(profile._id, {
-          role: "staff",
-          updatedAt: now,
-        })
-      )
-    );
-
-    await Promise.all(
-      legacyInvites.map((invite) =>
-        ctx.db.patch(invite._id, {
-          role: "staff",
-          updatedAt: now,
-        })
-      )
-    );
-
-    return {
-      invitesUpdated: legacyInvites.length,
-      profilesUpdated: legacyProfiles.length,
-    };
-  },
-});
-
 export const promoteSelfToSuperAdmin = mutation({
   args: {},
   returns: v.boolean(),
