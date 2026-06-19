@@ -3,6 +3,7 @@ import { components } from "./_generated/api";
 import type { QueryCtx } from "./_generated/server";
 import { query } from "./_generated/server";
 import { authComponent } from "./auth";
+import { normalizeRole } from "./lib/roles";
 
 const ROLE_VALIDATOR = v.union(
   v.literal("user"),
@@ -62,18 +63,6 @@ interface DirectoryPerson {
   storeName?: string;
   storeSlug?: string;
   userType?: PlatformUserType;
-}
-
-function normalizeRole(role?: string | null): PlatformRole {
-  if (role === "admin") {
-    return "staff";
-  }
-
-  if (role === "staff" || role === "super_admin") {
-    return role;
-  }
-
-  return "user";
 }
 
 function normalizeUserType(userType?: string | null): PlatformUserType {

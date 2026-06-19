@@ -2,38 +2,15 @@ import { v } from "convex/values";
 import { components } from "./_generated/api";
 import { mutation, query } from "./_generated/server";
 import { authComponent } from "./auth";
+import {
+  canManageUsers,
+  getRoleLevel,
+  normalizeRole,
+  type PlatformRole,
+} from "./lib/roles";
 import { inviteToRoleSchema, updateProfileSchema } from "./validation";
 
 const WHITESPACE_REGEX = /\s+/;
-const roleHierarchy = {
-  user: 0,
-  staff: 1,
-  super_admin: 2,
-} as const;
-
-type PlatformRole = keyof typeof roleHierarchy;
-
-function getRoleLevel(role?: string): number {
-  const normalizedRole = normalizeRole(role);
-  return roleHierarchy[normalizedRole] ?? 0;
-}
-
-function canManageUsers(role?: string): boolean {
-  const normalizedRole = normalizeRole(role);
-  return normalizedRole === "staff" || normalizedRole === "super_admin";
-}
-
-function normalizeRole(role?: string | null): PlatformRole {
-  if (role === "admin") {
-    return "staff";
-  }
-
-  if (role === "staff" || role === "super_admin") {
-    return role;
-  }
-
-  return "user";
-}
 
 async function mirrorBetterAuthRole(
   // TODO(auth-role-migration): replace this escape hatch after Convex codegen
