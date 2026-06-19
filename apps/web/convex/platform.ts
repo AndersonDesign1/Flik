@@ -191,8 +191,26 @@ async function buildDirectoryPeople(
   return { people, summary };
 }
 
+type AuthUserRecord = {
+  _id: string;
+  email: string;
+  name?: string;
+  createdAt?: number;
+};
+
+async function loadAuthUserMap(ctx: QueryCtx) {
+  const users = await collectAllAuthUsers(
+    ctx,
+    (message) => new ConvexError({ code: "INTERNAL_ERROR", message })
+  );
+  const byId = new Map<string, AuthUserRecord>(
+    users.map((user) => [user._id, user] as const)
+  );
+  return { users, byId };
+}
+
 function buildSellerRows(
-  ctx: QueryCtx,
+  usersById: Map<string, AuthUserRecord>,
   stores: DirectoryStore[],
   products: Array<{
     _id: string;
@@ -208,37 +226,35 @@ function buildSellerRows(
     profiles.map((entry) => [entry.userId, entry] as const)
   );
 
-  return Promise.all(
-    stores.map(async (store) => {
-      const owner = await authComponent.getAnyUserById(ctx, store.ownerId);
-      const ownerProfile = profileByUserId.get(store.ownerId);
-      const ownedProducts = products.filter(
-        (product) => product.userId === store.ownerId
-      );
+  return stores.map((store) => {
+    const owner = usersById.get(store.ownerId);
+    const ownerProfile = profileByUserId.get(store.ownerId);
+    const ownedProducts = products.filter(
+      (product) => product.userId === store.ownerId
+    );
 
-      return {
-        activeProducts: ownedProducts.filter(
-          (product) => product.status === "active"
-        ).length,
-        createdAt: store.createdAt,
-        name: store.name,
-        ownerEmail: owner?.email ?? "Unknown",
-        ownerName: owner?.name ?? owner?.email ?? "Store owner",
-        slug: store.slug,
-        status: store.status,
-        totalProducts: ownedProducts.length,
-        totalSales: ownedProducts.reduce(
-          (total, product) => total + (product.sales ?? 0),
-          0
-        ),
-        userType:
-          normalizeUserType(ownerProfile?.userType) ??
-          (canAccessSellerWorkspace(ownerProfile?.userType)
-            ? "seller"
-            : undefined),
-      };
-    })
-  );
+    return {
+      activeProducts: ownedProducts.filter(
+        (product) => product.status === "active"
+      ).length,
+      createdAt: store.createdAt,
+      name: store.name,
+      ownerEmail: owner?.email ?? "Unknown",
+      ownerName: owner?.name ?? owner?.email ?? "Store owner",
+      slug: store.slug,
+      status: store.status,
+      totalProducts: ownedProducts.length,
+      totalSales: ownedProducts.reduce(
+        (total, product) => total + (product.sales ?? 0),
+        0
+      ),
+      userType:
+        normalizeUserType(ownerProfile?.userType) ??
+        (canAccessSellerWorkspace(ownerProfile?.userType)
+          ? "seller"
+          : undefined),
+    };
+  });
 }
 
 export const getWorkspaceAccess = query({
@@ -336,21 +352,33 @@ export const getSuperAdminOverview = query({
       ctx.db.query("products").collect(),
     ]);
     const directory = await buildDirectoryPeople(ctx, profiles, stores);
-
-    const recentStores = await Promise.all(
-      stores
-        .sort((left, right) => right.createdAt - left.createdAt)
-        .slice(0, 5)
-        .map(async (store) => {
-          const owner = await authComponent.getAnyUserById(ctx, store.ownerId);
-          return {
-            createdAt: store.createdAt,
-            name: store.name,
-            ownerName: owner?.name ?? owner?.email ?? "Store owner",
-            slug: store.slug,
-          };
-        })
+    const usersById = new Map(
+      directory.people.map(
+        (person) =>
+          [
+            person._id,
+            {
+              _id: person._id,
+              email: person.email,
+              name: person.name,
+              createdAt: person.createdAt,
+            },
+          ] as const
+      )
     );
+
+    const recentStores = stores
+      .sort((left, right) => right.createdAt - left.createdAt)
+      .slice(0, 5)
+      .map((store) => {
+        const owner = usersById.get(store.ownerId);
+        return {
+          createdAt: store.createdAt,
+          name: store.name,
+          ownerName: owner?.name ?? owner?.email ?? "Store owner",
+          slug: store.slug,
+        };
+      });
 
     return {
       activeStores: stores.filter((store) => store.status === "active").length,
@@ -436,8 +464,9 @@ export const listSellerPerformance = query({
       ctx.db.query("products").collect(),
       ctx.db.query("profiles").collect(),
     ]);
+    const { byId } = await loadAuthUserMap(ctx);
 
-    return buildSellerRows(ctx, stores, products, profiles);
+    return buildSellerRows(byId, stores, products, profiles);
   },
 });
 
@@ -518,31 +547,43 @@ export const getStaffOverview = query({
       ctx.db.query("products").collect(),
     ]);
     const directory = await buildDirectoryPeople(ctx, profiles, stores);
+    const usersById = new Map(
+      directory.people.map(
+        (person) =>
+          [
+            person._id,
+            {
+              _id: person._id,
+              email: person.email,
+              name: person.name,
+              createdAt: person.createdAt,
+            },
+          ] as const
+      )
+    );
 
     const storeByOwnerId = new Map(
       stores.map((store) => [store.ownerId, store] as const)
     );
-    const recentProducts = await Promise.all(
-      products
-        .sort((left, right) => right.createdAt - left.createdAt)
-        .slice(0, 5)
-        .map(async (product) => {
-          const owner = await authComponent.getAnyUserById(ctx, product.userId);
-          const store = storeByOwnerId.get(product.userId);
-          return {
-            _id: product._id,
-            createdAt: product.createdAt,
-            name: product.name,
-            ownerName: owner?.name ?? owner?.email ?? "Seller",
-            price: product.price,
-            status: product.status,
-            storeName: store?.name ?? undefined,
-            storeSlug: store?.slug ?? undefined,
-          };
-        })
-    );
+    const recentProducts = products
+      .sort((left, right) => right.createdAt - left.createdAt)
+      .slice(0, 5)
+      .map((product) => {
+        const owner = usersById.get(product.userId);
+        const store = storeByOwnerId.get(product.userId);
+        return {
+          _id: product._id,
+          createdAt: product.createdAt,
+          name: product.name,
+          ownerName: owner?.name ?? owner?.email ?? "Seller",
+          price: product.price,
+          status: product.status,
+          storeName: store?.name ?? undefined,
+          storeSlug: store?.slug ?? undefined,
+        };
+      });
 
-    const sellerRows = await buildSellerRows(ctx, stores, products, profiles);
+    const sellerRows = buildSellerRows(usersById, stores, products, profiles);
 
     return {
       activeStores: stores.filter((store) => store.status === "active").length,
@@ -595,27 +636,26 @@ export const listStaffProducts = query({
     const storeByOwnerId = new Map(
       stores.map((store) => [store.ownerId, store] as const)
     );
+    const { byId } = await loadAuthUserMap(ctx);
 
-    return Promise.all(
-      products
-        .sort((left, right) => right.createdAt - left.createdAt)
-        .map(async (product) => {
-          const owner = await authComponent.getAnyUserById(ctx, product.userId);
-          const store = storeByOwnerId.get(product.userId);
+    return products
+      .sort((left, right) => right.createdAt - left.createdAt)
+      .map((product) => {
+        const owner = byId.get(product.userId);
+        const store = storeByOwnerId.get(product.userId);
 
-          return {
-            _id: product._id,
-            createdAt: product.createdAt,
-            name: product.name,
-            ownerEmail: owner?.email ?? "Unknown",
-            ownerName: owner?.name ?? owner?.email ?? "Seller",
-            price: product.price,
-            sales: product.sales ?? 0,
-            status: product.status,
-            storeName: store?.name ?? undefined,
-            storeSlug: store?.slug ?? undefined,
-          };
-        })
-    );
+        return {
+          _id: product._id,
+          createdAt: product.createdAt,
+          name: product.name,
+          ownerEmail: owner?.email ?? "Unknown",
+          ownerName: owner?.name ?? owner?.email ?? "Seller",
+          price: product.price,
+          sales: product.sales ?? 0,
+          status: product.status,
+          storeName: store?.name ?? undefined,
+          storeSlug: store?.slug ?? undefined,
+        };
+      });
   },
 });
